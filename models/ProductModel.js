@@ -1,7 +1,10 @@
 // QUAN TRỌNG: Kiểm tra kỹ tên file trong thư mục models
 // Nếu file của bạn tên là "productModel.js" (chữ p thường) thì sửa dòng dưới thành: require('../../models/productModel');
 // Nếu file của bạn tên là "ProductModel.js" (chữ P hoa) thì giữ nguyên.
-const Product = require('../../models/ProductModel'); 
+const mongoose = require('mongoose');
+
+
+const slugify = require('slugify');
 
 exports.getAddProduct = (req, res) => {
   res.render('admin/product-form', { pageTitle: 'Thêm Sản Phẩm' });
