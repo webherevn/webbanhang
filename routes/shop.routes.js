@@ -11,4 +11,16 @@ router.get('/cart', cartController.getCart);
 router.post('/cart/add', cartController.addToCart);
 router.post('/cart/delete', cartController.removeFromCart);
 
+// ... (các dòng import cũ)
+const checkoutController = require('../controllers/shop/checkoutController'); // <--- Import mới
+
+// ... (các route cũ của cart)
+
+// --- ROUTES THANH TOÁN ---
+router.get('/checkout', checkoutController.getCheckout);
+router.post('/checkout', checkoutController.postCheckout);
+router.get('/checkout/success', checkoutController.getSuccess);
+
+module.exports = router;
+
 module.exports = router;
