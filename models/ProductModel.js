@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
-const slugify = require('slugify');
+const slugify = require('slugify'); // Nhớ chạy: npm install slugify
+
 const productSchema = new mongoose.Schema({
   // Thông tin cơ bản
   name: { type: String, required: true, trim: true },
@@ -11,8 +12,8 @@ const productSchema = new mongoose.Schema({
   basePrice: { type: Number, required: true },
   
   // Hình ảnh
-  thumbnail: { type: String }, // Ảnh đại diện
-  images: [{ type: String }],  // Album ảnh
+  thumbnail: { type: String }, 
+  images: [{ type: String }],
 
   // Biến thể (Màu/Size)
   variants: [{
@@ -27,5 +28,16 @@ const productSchema = new mongoose.Schema({
 
 // Tự động tạo index tìm kiếm
 productSchema.index({ name: 'text' }); 
+
+// --- QUAN TRỌNG: ĐOẠN CODE BẠN ĐANG THIẾU ---
+// "Thần chú" này sẽ chạy TRƯỚC khi lưu vào Database
+productSchema.pre('save', function(next) {
+  // Nếu có tên sản phẩm, hãy tạo slug từ cái tên đó
+  if (this.name) {
+    this.slug = slugify(this.name, { lower: true, strict: true });
+  }
+  next();
+});
+// ----------------------------------------------
 
 module.exports = mongoose.model('Product', productSchema);
