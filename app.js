@@ -21,7 +21,12 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
 // Routes
+// ... các dòng import ở trên
+const shopRoutes = require('./routes/shop.routes'); // <--- THÊM DÒNG NÀY
+
+// ...
 app.use('/admin', adminRoutes);
+app.use('/', shopRoutes); // <--- THÊM DÒNG NÀY (Để xử lý trang chủ)
 
 // Start Server
 const PORT = process.env.PORT || 3000;
