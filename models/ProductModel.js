@@ -1,53 +1,75 @@
-const mongoose = require('mongoose');
-const slugify = require('slugify'); // Đảm bảo đã npm install slugify
+const Product = require('../../models/ProductModel');
 
-const productSchema = new mongoose.Schema({
-  // 1. Thông tin cơ bản
-  name: { type: String, required: true, trim: true },
+exports.getAddProduct = (req, res) => {
+  res.render('admin/product-form', { pageTitle: 'Thêm Sản Phẩm' });
+};
+
+exports.postAddProduct = async (req, res) => {
+  console.log("--- BẮT ĐẦU XỬ LÝ ---");
   
-  // SỬA: Bỏ unique: true tạm thời để tránh lỗi "Duplicate Key" khi test
-  slug: { type: String }, 
-  
-  description: { type: String },
-  
-  // 2. Phân loại & Giá
-  category: { type: String, required: true },
-  basePrice: { type: Number, required: true },
-  
-  // 3. Hình ảnh
-  thumbnail: { type: String }, 
-  images: [{ type: String }],
+  try {
+    // 1. Log dữ liệu nhận được để kiểm tra
+    console.log("Body:", req.body);
+    console.log("Files:", req.files);
 
-  // 4. Biến thể
-  variants: [{
-    color: { type: String },
-    size: { type: String },
-    quantity: { type: Number, default: 0 }
-  }],
+    const { name, basePrice, category, description } = req.body;
 
-  // 5. Trạng thái
-  isActive: { type: Boolean, default: true }
-}, { timestamps: true });
-
-// --- ĐOẠN HOOK TẠO SLUG ---
-productSchema.pre('save', function(next) {
-  // Log ra để xem nó có chạy vào đây không
-  console.log('--- Đang chạy Hook pre-save cho sản phẩm:', this.name);
-
-  // Kiểm tra kỹ: Phải có name và name phải là chuỗi
-  if (this.name && typeof this.name === 'string') {
-    try {
-        // Tạo slug
-        this.slug = slugify(this.name, { lower: true, strict: true });
-        console.log('--- Đã tạo Slug thành công:', this.slug);
-    } catch (e) {
-        console.log('--- Lỗi khi tạo Slug:', e);
-        // Nếu lỗi tạo slug, ta dùng tạm timestamp để không bị crash
-        this.slug = 'san-pham-' + Date.now();
+    // 2. VALIDATE ẢNH (Bắt buộc phải có ảnh)
+    // Nếu không có ảnh, hoặc mảng ảnh rỗng -> Báo lỗi ngay
+    if (!req.files || req.files.length === 0) {
+        return res.status(400).send("Lỗi: Bạn chưa chọn ảnh! (Hoặc quên enctype='multipart/form-data' bên EJS)");
     }
-  }
-  
-  next();
-});
+    const imageLinks = req.files.map(file => file.path);
 
-module.exports = mongoose.model('Product', productSchema);
+    // 3. VALIDATE DỮ LIỆU CƠ BẢN (Chống crash do thiếu dữ liệu)
+    
+    // Nếu thiếu tên -> Báo lỗi
+    if (!name || name.trim() === "") {
+        return res.status(400).send("Lỗi: Tên sản phẩm không được để trống");
+    }
+
+    // Xử lý giá tiền (Chuyển từ String sang Number an toàn)
+    let price = 0;
+    if (basePrice) {
+        price = Number(basePrice.toString().replace(/,/g, '').replace(/\./g, '')); // Xóa dấu phẩy/chấm nếu có
+    }
+    if (isNaN(price)) price = 0; // Nếu không phải số thì về 0
+
+    // Xử lý Category (Nếu quên nhập thì gán mặc định)
+    const finalCategory = category || "Uncategorized";
+
+    // 4. TẠO SẢN PHẨM
+    const product = new Product({
+      name: name,
+      basePrice: price,         // Đã xử lý thành số
+      category: finalCategory,  // Đã xử lý
+      description: description || "",
+      images: imageLinks,       // Link từ Cloudinary
+      thumbnail: imageLinks[0], // Ảnh đầu tiên làm đại diện
+      
+      // Tạm thời để variants rỗng để tránh lỗi cấu trúc phức tạp
+      // Khi nào code chạy ngon thì ta xử lý variants sau
+      variants: [] 
+    });
+
+    // 5. LƯU VÀO DB
+    console.log("Đang lưu vào DB...");
+    await product.save();
+    
+    console.log("✅ LƯU THÀNH CÔNG!");
+    res.redirect('/');
+
+  } catch (err) {
+    // 6. BẮT LỖI MONGOOSE CHI TIẾT
+    console.log("❌ LỖI KHI LƯU DB:");
+    console.log(err);
+
+    // Nếu là lỗi Validation của Mongoose (VD: thiếu trường required)
+    if (err.name === 'ValidationError') {
+        let errorMessages = Object.values(err.errors).map(e => e.message);
+        return res.status(400).send("Lỗi Dữ Liệu: " + errorMessages.join(', '));
+    }
+
+    res.status(500).send("Lỗi Server: " + err.message);
+  }
+};
