@@ -6,7 +6,8 @@ const adminRoutes = require('./routes/admin.routes');
 
 dotenv.config();
 const app = express();
-
+// --- BẮT BUỘC PHẢI CÓ DÒNG NÀY ---
+app.set('trust proxy', 1);
 // Kết nối Database
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('✅ Connected to MongoDB'))
