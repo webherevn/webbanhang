@@ -1,5 +1,5 @@
 PORT=3000
-mongodb+srv://quantriadmin:admin123@cluster0.zeg8jno.mongodb.net/?appName=Cluster0
+mongodb+srv://quantriadmin:admin123@cluster0.zeg8jno.mongodb.net/fashionShop?appName=Cluster0
 # Đăng ký tài khoản Cloudinary (miễn phí) để lấy 3 thông số dưới
 CLOUDINARY_CLOUD_NAME=daydkyzgt
 CLOUDINARY_KEY=912867941354567

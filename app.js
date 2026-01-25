@@ -13,8 +13,10 @@ const shopRoutes = require('./routes/shop.routes');
 dotenv.config();
 const app = express();
 
-// --- QUAN TRỌNG: SỬA LỖI GIỎ HÀNG TRÊN RENDER ---
-// Giúp Express tin tưởng proxy của Render để lưu được Cookie
+// ============================================================
+// 1. CẤU HÌNH QUAN TRỌNG CHO RENDER (PROXY & SSL)
+// ============================================================
+// Bắt buộc có để Express nhận diện đúng giao thức HTTPS từ Render
 app.set('trust proxy', 1); 
 
 // Kết nối Database
@@ -22,52 +24,63 @@ mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('✅ Connected to MongoDB'))
   .catch(err => console.error('❌ DB Connection Error:', err));
 
-// Cấu hình View Engine (EJS)
+// Cấu hình View Engine
 app.set('view engine', 'ejs');
 app.set('views', 'views');
 
-// Middleware xử lý dữ liệu Form và Static files
+// Middleware
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// --- CẤU HÌNH SESSION & COOKIE ---
+// ============================================================
+// 2. CẤU HÌNH KHO LƯU SESSION (MONGODB STORE)
+// ============================================================
 const store = new MongoDBStore({
   uri: process.env.MONGO_URI,
-  collection: 'sessions' // Tên bảng lưu session trong DB
+  collection: 'sessions', // Tên collection sẽ xuất hiện trong DB
+  expires: 1000 * 60 * 60 * 24 * 7 // Tự xóa sau 7 ngày
 });
 
-// Bắt lỗi nếu store không kết nối được
+// Bắt lỗi kết nối Store (Rất quan trọng để debug)
 store.on('error', function(error) {
-  console.log('Session Store Error:', error);
+  console.error('❌ LỖI KẾT NỐI SESSION STORE:', error);
 });
 
+// ============================================================
+// 3. CẤU HÌNH COOKIE PHIÊN LÀM VIỆC (ĐÃ TỐI ƯU CHO RENDER)
+// ============================================================
 app.use(session({
-  secret: 'my secret key fashion shop', // Chuỗi bí mật
+  secret: 'my secret key fashion shop', // Khóa bí mật
   resave: false,
-  saveUninitialized: false,
+  saveUninitialized: false, // Chỉ tạo session khi có dữ liệu (như thêm giỏ hàng)
   store: store,
   cookie: {
-    maxAge: 1000 * 60 * 60 * 24 * 7, // Tồn tại 7 ngày
-    secure: false, // QUAN TRỌNG: Để false thì mới chạy được trên Render (HTTP/HTTPS proxy)
-    httpOnly: true,
-    sameSite: 'lax' // Giúp cookie ổn định hơn
+    maxAge: 1000 * 60 * 60 * 24 * 7, // 7 ngày
+    // --- CẤU HÌNH BẢO MẬT HTTPS ---
+    secure: true,      // Render chạy HTTPS nên bắt buộc True để trình duyệt chấp nhận
+    httpOnly: true,    // Chống hacker đọc cookie bằng JS
+    sameSite: 'none'   // Cho phép cookie hoạt động tốt qua Proxy của Render
   }
 }));
 
-// Middleware toàn cục: Biến giỏ hàng thành biến local để dùng ở mọi file EJS (Navbar)
+// ============================================================
+// 4. MIDDLEWARE TOÀN CỤC (CHO NAVBAR)
+// ============================================================
 app.use((req, res, next) => {
-  // Nếu chưa có giỏ hàng, khởi tạo rỗng
+  // Nếu chưa có giỏ thì tạo object rỗng để tránh lỗi ejs
   if (!req.session.cart) {
     req.session.cart = { items: [], totalQuantity: 0, totalPrice: 0 };
   }
-  // Gán vào locals để hiển thị số lượng trên Navbar
+  // Gán vào locals để hiển thị số lượng trên Navbar ở mọi trang
   res.locals.cart = req.session.cart;
   next();
 });
 
-// --- ĐĂNG KÝ ROUTES ---
-app.use('/admin', adminRoutes); // Các đường dẫn bắt đầu bằng /admin
-app.use('/', shopRoutes);       // Các đường dẫn khách hàng (Trang chủ, Giỏ hàng...)
+// ============================================================
+// 5. ĐĂNG KÝ ROUTES
+// ============================================================
+app.use('/admin', adminRoutes);
+app.use('/', shopRoutes);
 
 // Khởi động Server
 const PORT = process.env.PORT || 3000;
