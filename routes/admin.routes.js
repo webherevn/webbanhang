@@ -3,7 +3,7 @@ const router = express.Router();
 const productController = require('../controllers/admin/productController');
 
 // Import bộ upload vừa cấu hình ở Bước 2
-const upload = require('../configs/cloudinary.config'); 
+const upload = require('../configs/cloudinary.config.js');
 
 // ... các route khác
 
