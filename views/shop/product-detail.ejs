@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= pageTitle %></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .main-img { width: 100%; height: auto; object-fit: cover; border-radius: 8px; }
+        .thumb-img { width: 80px; height: 80px; object-fit: cover; cursor: pointer; border: 1px solid #ddd; margin-right: 5px; }
+        .thumb-img:hover { border: 2px solid #000; }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="/">FASHION SHOP</a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/cart">Giỏ hàng (0)</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <img src="<%= product.images[0] %>" class="main-img mb-3" id="mainImage">
+                
+                <div class="d-flex">
+                    <% product.images.forEach(img => { %>
+                        <img src="<%= img %>" class="thumb-img" onclick="changeImage(this.src)">
+                    <% }) %>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <h2 class="fw-bold"><%= product.name %></h2>
+                <h3 class="text-danger my-3"><%= product.basePrice.toLocaleString('vi-VN') %> đ</h3>
+                
+                <p class="text-muted"><%= product.description %></p>
+
+                <hr>
+
+                <form action="/cart/add" method="POST">
+                    <input type="hidden" name="productId" value="<%= product._id %>">
+                    
+                    <div class="mb-3">
+                        <label class="fw-bold">Chọn Phân Loại:</label>
+                        <select name="variant" class="form-select w-50 mt-2">
+                            <% product.variants.forEach(v => { %>
+                                <option value="<%= v.color %>-<%= v.size %>">
+                                    Màu <%= v.color %> - Size <%= v.size %> (Còn: <%= v.quantity %>)
+                                </option>
+                            <% }) %>
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="fw-bold">Số lượng:</label>
+                        <input type="number" name="quantity" value="1" min="1" class="form-control w-25 mt-2">
+                    </div>
+
+                    <button type="submit" class="btn btn-dark btn-lg w-100">THÊM VÀO GIỎ HÀNG</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function changeImage(src) {
+            document.getElementById('mainImage').src = src;
+        }
+    </script>
+</body>
+</html>

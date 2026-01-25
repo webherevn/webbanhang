@@ -5,5 +5,6 @@ const shopController = require('../controllers/shop/shopController');
 
 // Đường dẫn trang chủ (/)
 router.get('/', shopController.getHomepage);
-
+// THÊM DÒNG NÀY: Trang chi tiết (Dấu :slug nghĩa là tham số động)
+router.get('/products/:slug', shopController.getProductDetail);
 module.exports = router;

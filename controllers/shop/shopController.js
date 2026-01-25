@@ -16,3 +16,26 @@ exports.getHomepage = async (req, res) => {
     res.status(500).send('Lỗi tải trang chủ');
   }
 };
+
+// ... (Code cũ của getHomepage giữ nguyên)
+
+exports.getProductDetail = async (req, res) => {
+  try {
+    // Tìm sản phẩm dựa vào slug trên URL (ví dụ: ao-thun-mua-he)
+    const slug = req.params.slug;
+    const product = await Product.findOne({ slug: slug, isActive: true });
+
+    if (!product) {
+      return res.redirect('/'); // Không thấy thì về trang chủ
+    }
+
+    res.render('shop/product-detail', {
+      pageTitle: product.name,
+      product: product
+    });
+
+  } catch (err) {
+    console.log(err);
+    res.status(500).send('Lỗi tải trang chi tiết');
+  }
+};
