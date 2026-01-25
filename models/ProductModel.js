@@ -1,4 +1,7 @@
-const Product = require('../../models/ProductModel');
+// QUAN TRỌNG: Kiểm tra kỹ tên file trong thư mục models
+// Nếu file của bạn tên là "productModel.js" (chữ p thường) thì sửa dòng dưới thành: require('../../models/productModel');
+// Nếu file của bạn tên là "ProductModel.js" (chữ P hoa) thì giữ nguyên.
+const Product = require('../../models/ProductModel'); 
 
 exports.getAddProduct = (req, res) => {
   res.render('admin/product-form', { pageTitle: 'Thêm Sản Phẩm' });
@@ -10,13 +13,14 @@ exports.postAddProduct = async (req, res) => {
   try {
     // 1. Log dữ liệu nhận được để kiểm tra
     console.log("Body:", req.body);
-    console.log("Files:", req.files);
+    console.log("Files:", req.files ? req.files.length : "0 files");
 
     const { name, basePrice, category, description } = req.body;
 
     // 2. VALIDATE ẢNH (Bắt buộc phải có ảnh)
     // Nếu không có ảnh, hoặc mảng ảnh rỗng -> Báo lỗi ngay
     if (!req.files || req.files.length === 0) {
+        console.log("❌ LỖI: Không có ảnh được upload.");
         return res.status(400).send("Lỗi: Bạn chưa chọn ảnh! (Hoặc quên enctype='multipart/form-data' bên EJS)");
     }
     const imageLinks = req.files.map(file => file.path);
@@ -31,9 +35,11 @@ exports.postAddProduct = async (req, res) => {
     // Xử lý giá tiền (Chuyển từ String sang Number an toàn)
     let price = 0;
     if (basePrice) {
-        price = Number(basePrice.toString().replace(/,/g, '').replace(/\./g, '')); // Xóa dấu phẩy/chấm nếu có
+        // Xóa dấu phẩy hoặc chấm nếu người dùng nhập kiểu 100.000
+        price = Number(basePrice.toString().replace(/[,.]/g, '')); 
     }
-    if (isNaN(price)) price = 0; // Nếu không phải số thì về 0
+    // Nếu chuyển đổi thất bại (NaN) thì gán về 0
+    if (isNaN(price)) price = 0; 
 
     // Xử lý Category (Nếu quên nhập thì gán mặc định)
     const finalCategory = category || "Uncategorized";
@@ -47,13 +53,12 @@ exports.postAddProduct = async (req, res) => {
       images: imageLinks,       // Link từ Cloudinary
       thumbnail: imageLinks[0], // Ảnh đầu tiên làm đại diện
       
-      // Tạm thời để variants rỗng để tránh lỗi cấu trúc phức tạp
-      // Khi nào code chạy ngon thì ta xử lý variants sau
+      // Tạm thời để variants rỗng
       variants: [] 
     });
 
     // 5. LƯU VÀO DB
-    console.log("Đang lưu vào DB...");
+    console.log("⏳ Đang gọi lệnh lưu vào DB...");
     await product.save();
     
     console.log("✅ LƯU THÀNH CÔNG!");
@@ -62,7 +67,7 @@ exports.postAddProduct = async (req, res) => {
   } catch (err) {
     // 6. BẮT LỖI MONGOOSE CHI TIẾT
     console.log("❌ LỖI KHI LƯU DB:");
-    console.log(err);
+    console.error(err); // Dùng console.error để hiện đỏ trong log
 
     // Nếu là lỗi Validation của Mongoose (VD: thiếu trường required)
     if (err.name === 'ValidationError') {
