@@ -3,55 +3,180 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Fashion Shop - Cửa hàng thời trang nam nữ cao cấp, cập nhật xu hướng mới nhất 2026. Giao hàng toàn quốc.">
+    <meta name="keywords" content="thời trang, quần áo nam, quần áo nữ, fashion shop, mua sắm online">
+    
     <title><%= pageTitle %></title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        .product-card img {
-            height: 300px; /* Cố định chiều cao ảnh cho đều */
-            object-fit: cover; /* Cắt ảnh cho vừa khung */
-        }
-        .product-card:hover {
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            transition: 0.3s;
-        }
-    </style>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    
+    <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+
+    <nav class="navbar navbar-expand-lg navbar-light bg-white sticky-top shadow-sm py-3">
         <div class="container">
-            <a class="navbar-brand" href="/">FASHION SHOP</a>
-            <div class="navbar-nav ms-auto">
-                <a class="nav-link" href="/cart">Giỏ hàng (<%= cart.totalQuantity %>)</a>>
-                <a class="nav-link" href="/admin/add-product">Admin</a>
+            <a class="navbar-brand fw-bold fs-3 text-uppercase tracking-wide" href="/">
+                FASHION<span class="text-danger">.</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav mx-auto mb-2 mb-lg-0 fw-semibold">
+                    <li class="nav-item"><a class="nav-link active" href="/">Trang chủ</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Nam</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#">Nữ</a></li>
+                    <li class="nav-item"><a class="nav-link text-danger" href="#">Sale Off</a></li>
+                </ul>
+                <div class="d-flex align-items-center gap-3">
+                    <a href="#" class="text-dark fs-5"><i class="bi bi-search"></i></a>
+                    <a href="/cart" class="text-dark fs-5 position-relative">
+                        <i class="bi bi-bag"></i>
+                        <% if (cart.totalQuantity > 0) { %>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem;">
+                                <%= cart.totalQuantity %>
+                            </span>
+                        <% } %>
+                    </a>
+                </div>
             </div>
         </div>
     </nav>
 
-    <div class="container">
-        <h2 class="text-center mb-4">Sản Phẩm Mới Nhất</h2>
-        
-        <div class="row">
-            <% if (products.length > 0) { %>
-                <% products.forEach(product => { %>
-                    <div class="col-md-3 col-sm-6 mb-4">
-                        <div class="card product-card h-100">
-                            <img src="<%= product.images[0] %>" class="card-img-top" alt="<%= product.name %>">
-                            <div class="card-body d-flex flex-column">
-                                <h5 class="card-title"><%= product.name %></h5>
-                                <p class="card-text text-danger fw-bold">
-                                    <%= product.basePrice.toLocaleString('vi-VN') %> đ
-                                </p>
-                                <a href="/products/<%= product.slug %>" class="btn btn-outline-dark mt-auto">Xem chi tiết</a>
+    <header class="hero-section d-flex align-items-center text-center text-white" style="background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=2070&auto=format&fit=crop'); background-size: cover; background-position: center; height: 80vh;">
+        <div class="container">
+            <h5 class="text-uppercase letter-spacing-2 mb-3 animate-up">Bộ sưu tập Xuân Hè 2026</h5>
+            <h1 class="display-3 fw-bold mb-4 animate-up" style="animation-delay: 0.2s;">PHONG CÁCH CỦA BẠN</h1>
+            <a href="#new-arrivals" class="btn btn-light btn-lg rounded-0 px-5 py-3 fw-bold animate-up" style="animation-delay: 0.4s;">MUA NGAY</a>
+        </div>
+    </header>
+
+    <section class="py-5 bg-light">
+        <div class="container">
+            <div class="row text-center g-4">
+                <div class="col-md-4">
+                    <div class="p-3">
+                        <i class="bi bi-truck fs-1 text-dark mb-3"></i>
+                        <h5 class="fw-bold">Miễn Phí Giao Hàng</h5>
+                        <p class="text-muted small">Cho đơn hàng trên 500k</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-3">
+                        <i class="bi bi-arrow-repeat fs-1 text-dark mb-3"></i>
+                        <h5 class="fw-bold">Đổi Trả Dễ Dàng</h5>
+                        <p class="text-muted small">Trong vòng 30 ngày</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-3">
+                        <i class="bi bi-headset fs-1 text-dark mb-3"></i>
+                        <h5 class="fw-bold">Hỗ Trợ 24/7</h5>
+                        <p class="text-muted small">Hotline: 1900 xxxx</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="new-arrivals" class="py-5">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-end mb-5">
+                <div>
+                    <h2 class="fw-bold text-uppercase">Sản Phẩm Mới</h2>
+                    <div class="bg-danger mt-2" style="width: 60px; height: 3px;"></div>
+                </div>
+                <a href="#" class="text-decoration-none text-dark fw-semibold border-bottom border-dark pb-1">Xem tất cả <i class="bi bi-arrow-right"></i></a>
+            </div>
+
+            <div class="row g-4">
+                <% if (products.length > 0) { %>
+                    <% products.forEach(product => { %>
+                        <div class="col-6 col-md-3">
+                            <div class="product-card h-100 position-relative">
+                                <span class="badge bg-danger position-absolute top-0 start-0 m-3 rounded-0 px-3">New</span>
+                                
+                                <div class="overflow-hidden">
+                                    <a href="/products/<%= product.slug %>">
+                                        <img src="<%= product.images[0] %>" class="img-fluid w-100 product-img" alt="<%= product.name %>" loading="lazy">
+                                    </a>
+                                </div>
+
+                                <div class="card-body pt-3 text-center">
+                                    <p class="text-muted small text-uppercase mb-1"><%= product.category %></p>
+                                    <h5 class="card-title fs-6 fw-bold">
+                                        <a href="/products/<%= product.slug %>" class="text-decoration-none text-dark stretched-link">
+                                            <%= product.name %>
+                                        </a>
+                                    </h5>
+                                    <p class="card-text text-danger fw-bold">
+                                        <%= product.basePrice.toLocaleString('vi-VN') %> đ
+                                    </p>
+                                </div>
                             </div>
                         </div>
+                    <% }) %>
+                <% } else { %>
+                    <div class="col-12 text-center py-5">
+                        <p class="text-muted">Chưa có sản phẩm nào được cập nhật.</p>
                     </div>
-                <% }) %>
-            <% } else { %>
-                <div class="col-12 text-center">
-                    <p>Chưa có sản phẩm nào. Hãy vào Admin thêm nhé!</p>
-                </div>
-            <% } %>
+                <% } %>
+            </div>
         </div>
-    </div>
+    </section>
+
+    <section class="py-5 bg-white border-top">
+        <div class="container text-center" style="max-width: 800px;">
+            <h3 class="fw-bold mb-3">Về FASHION.</h3>
+            <p class="text-muted lh-lg">
+                Chúng tôi tin rằng thời trang không chỉ là vẻ bề ngoài, mà là cách bạn thể hiện cá tính độc bản. 
+                Tại Fashion Shop, mỗi sản phẩm đều được tuyển chọn kỹ lưỡng về chất liệu và kiểu dáng, 
+                mang đến trải nghiệm mua sắm đẳng cấp nhưng vẫn gần gũi. Khám phá ngay bộ sưu tập mới nhất để định hình phong cách của riêng bạn.
+            </p>
+        </div>
+    </section>
+
+    <footer class="bg-dark text-white pt-5 pb-3">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <h4 class="fw-bold mb-4">FASHION.</h4>
+                    <p class="text-secondary small">Địa chỉ: 123 Phố Thời Trang, Hà Nội</p>
+                    <p class="text-secondary small">Email: contact@fashionshop.com</p>
+                    <div class="d-flex gap-3 mt-3">
+                        <a href="#" class="text-white"><i class="bi bi-facebook"></i></a>
+                        <a href="#" class="text-white"><i class="bi bi-instagram"></i></a>
+                        <a href="#" class="text-white"><i class="bi bi-tiktok"></i></a>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <h6 class="text-uppercase fw-bold mb-3">Liên kết</h6>
+                    <ul class="list-unstyled text-secondary small">
+                        <li class="mb-2"><a href="#" class="text-decoration-none text-secondary">Về chúng tôi</a></li>
+                        <li class="mb-2"><a href="#" class="text-decoration-none text-secondary">Chính sách bảo mật</a></li>
+                        <li class="mb-2"><a href="#" class="text-decoration-none text-secondary">Điều khoản dịch vụ</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h6 class="text-uppercase fw-bold mb-3">Đăng ký nhận tin</h6>
+                    <form>
+                        <div class="input-group mb-3">
+                            <input type="email" class="form-control rounded-0 border-0" placeholder="Email của bạn">
+                            <button class="btn btn-primary rounded-0" type="button">Gửi</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <hr class="border-secondary my-4">
+            <div class="text-center text-secondary small">
+                &copy; 2026 Fashion Shop. All rights reserved.
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
