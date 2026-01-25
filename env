@@ -1,6 +1,6 @@
 PORT=3000
-MONGO_URI=mongodb+srv://<username>:<password>@cluster0.xxxxx.mongodb.net/fashion-shop?retryWrites=true&w=majority
+mongodb+srv://quantriadmin:admin123@cluster0.zeg8jno.mongodb.net/?appName=Cluster0
 # Đăng ký tài khoản Cloudinary (miễn phí) để lấy 3 thông số dưới
-CLOUDINARY_CLOUD_NAME=tên_cloud_của_bạn
-CLOUDINARY_KEY=số_key_của_bạn
-CLOUDINARY_SECRET=số_bí_mật_của_bạn
+CLOUDINARY_CLOUD_NAME=daydkyzgt
+CLOUDINARY_KEY=912867941354567
+CLOUDINARY_SECRET=nwoFMxvNiGN5z7F8mPUaQkZKed8
