@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-
+const slugify = require('slugify');
 const productSchema = new mongoose.Schema({
   // Thông tin cơ bản
   name: { type: String, required: true, trim: true },
