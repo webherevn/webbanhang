@@ -1,10 +1,14 @@
-// routes/shop.routes.js
 const express = require('express');
 const router = express.Router();
 const shopController = require('../controllers/shop/shopController');
+const cartController = require('../controllers/shop/cartController'); // <--- Import mới
 
-// Đường dẫn trang chủ (/)
 router.get('/', shopController.getHomepage);
-// THÊM DÒNG NÀY: Trang chi tiết (Dấu :slug nghĩa là tham số động)
 router.get('/products/:slug', shopController.getProductDetail);
+
+// --- ROUTES GIỎ HÀNG ---
+router.get('/cart', cartController.getCart);
+router.post('/cart/add', cartController.addToCart);
+router.post('/cart/delete', cartController.removeFromCart);
+
 module.exports = router;

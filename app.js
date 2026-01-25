@@ -14,6 +14,38 @@ mongoose.connect(process.env.MONGO_URI)
 
 // View Engine
 app.set('view engine', 'ejs');
+
+// ... (Các dòng require ở trên cùng)
+const session = require('express-session');
+const MongoDBStore = require('connect-mongodb-session')(session);
+
+// ... (Sau đoạn app.set view engine)
+
+// Cấu hình kho lưu Session trên MongoDB
+const store = new MongoDBStore({
+  uri: process.env.MONGO_URI,
+  collection: 'sessions'
+});
+
+// Kích hoạt Middleware Session
+app.use(session({
+  secret: 'my secret key fashion shop', // Chuỗi bí mật để mã hóa
+  resave: false,
+  saveUninitialized: false,
+  store: store
+}));
+
+// Middleware để biến session cart thành biến cục bộ cho mọi view (để hiển thị số lượng trên Navbar)
+app.use((req, res, next) => {
+  if (!req.session.cart) {
+    req.session.cart = { items: [], totalQuantity: 0, totalPrice: 0 };
+  }
+  res.locals.cart = req.session.cart;
+  next();
+});
+
+// ... (Đến đoạn app.use routes)
+
 app.set('views', 'views');
 
 // Middleware parsers
