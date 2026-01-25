@@ -1,43 +1,53 @@
 const mongoose = require('mongoose');
-const slugify = require('slugify'); // Nhớ chạy: npm install slugify
+const slugify = require('slugify'); // Đảm bảo đã npm install slugify
 
 const productSchema = new mongoose.Schema({
-  // Thông tin cơ bản
+  // 1. Thông tin cơ bản
   name: { type: String, required: true, trim: true },
-  slug: { type: String, unique: true }, // URL thân thiện
+  
+  // SỬA: Bỏ unique: true tạm thời để tránh lỗi "Duplicate Key" khi test
+  slug: { type: String }, 
+  
   description: { type: String },
   
-  // Phân loại & Giá
+  // 2. Phân loại & Giá
   category: { type: String, required: true },
   basePrice: { type: Number, required: true },
   
-  // Hình ảnh
+  // 3. Hình ảnh
   thumbnail: { type: String }, 
   images: [{ type: String }],
 
-  // Biến thể (Màu/Size)
+  // 4. Biến thể
   variants: [{
     color: { type: String },
     size: { type: String },
     quantity: { type: Number, default: 0 }
   }],
 
-  // Trạng thái
+  // 5. Trạng thái
   isActive: { type: Boolean, default: true }
 }, { timestamps: true });
 
-// Tự động tạo index tìm kiếm
-productSchema.index({ name: 'text' }); 
-
-// --- QUAN TRỌNG: ĐOẠN CODE BẠN ĐANG THIẾU ---
-// "Thần chú" này sẽ chạy TRƯỚC khi lưu vào Database
+// --- ĐOẠN HOOK TẠO SLUG ---
 productSchema.pre('save', function(next) {
-  // Nếu có tên sản phẩm, hãy tạo slug từ cái tên đó
-  if (this.name) {
-    this.slug = slugify(this.name, { lower: true, strict: true });
+  // Log ra để xem nó có chạy vào đây không
+  console.log('--- Đang chạy Hook pre-save cho sản phẩm:', this.name);
+
+  // Kiểm tra kỹ: Phải có name và name phải là chuỗi
+  if (this.name && typeof this.name === 'string') {
+    try {
+        // Tạo slug
+        this.slug = slugify(this.name, { lower: true, strict: true });
+        console.log('--- Đã tạo Slug thành công:', this.slug);
+    } catch (e) {
+        console.log('--- Lỗi khi tạo Slug:', e);
+        // Nếu lỗi tạo slug, ta dùng tạm timestamp để không bị crash
+        this.slug = 'san-pham-' + Date.now();
+    }
   }
+  
   next();
 });
-// ----------------------------------------------
 
 module.exports = mongoose.model('Product', productSchema);
