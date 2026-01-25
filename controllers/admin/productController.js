@@ -1,5 +1,5 @@
 // controllers/admin/productController.js
-const Product = require('../../models/Product'); // Nhớ import Model đã tạo ở bước trước
+const Product = require('../../models/product'); // Nhớ import Model đã tạo ở bước trước
 
 module.exports = {
   // GET: Hiển thị form thêm sản phẩm
