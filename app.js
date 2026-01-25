@@ -1,0 +1,28 @@
+// app.js
+const express = require('express');
+const mongoose = require('mongoose');
+const dotenv = require('dotenv');
+const adminRoutes = require('./routes/admin.routes');
+
+dotenv.config();
+const app = express();
+
+// Kết nối Database
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log('✅ Connected to MongoDB'))
+  .catch(err => console.error('❌ DB Connection Error:', err));
+
+// View Engine
+app.set('view engine', 'ejs');
+app.set('views', 'views');
+
+// Middleware parsers
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static('public'));
+
+// Routes
+app.use('/admin', adminRoutes);
+
+// Start Server
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
