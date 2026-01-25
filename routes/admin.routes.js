@@ -5,7 +5,7 @@ const productController = require('../controllers/admin/productController');
 // Import bộ upload vừa cấu hình ở Bước 2
 // Vì giờ 2 file nằm cạnh nhau, chỉ cần dấu chấm (.)
 // Dùng hai chấm (..) để lùi ra ngoài rồi vào configs
-const upload = require('../routes/cloudinary.config.js');
+const upload = require('../routes/cloudinary.config');
 
 // ... các route khác
 
