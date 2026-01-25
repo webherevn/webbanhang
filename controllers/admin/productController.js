@@ -1,54 +1,40 @@
-// controllers/admin/productController.js
-// SỬA THÀNH NHƯ THẾ NÀY:
-const Product = require('../../models/ProductModel'); // Nhớ import Model đã tạo ở bước trước
+const Product = require('../../models/ProductModel');
 
-module.exports = {
-  // GET: Hiển thị form thêm sản phẩm
-  getAddProduct: (req, res) => {
-    res.render('admin/product-form', { 
-      pageTitle: 'Thêm sản phẩm mới',
-      editing: false 
-    });
-  },
+exports.getAddProduct = (req, res) => {
+  res.render('admin/product-form', { pageTitle: 'Thêm Sản Phẩm' });
+};
 
-  // POST: Xử lý dữ liệu thêm sản phẩm
-  postAddProduct: async (req, res) => {
-    try {
-      const { name, category, basePrice, description, color, size, quantity } = req.body;
-      
-      // Xử lý ảnh: req.files trả về mảng các file đã upload lên Cloudinary
-      // Ảnh đầu tiên làm thumbnail, các ảnh sau cho vào gallery
-      const imageLinks = req.files.map(file => file.path);
-      const thumbnail = imageLinks[0];
-      const images = imageLinks.slice(1);
-
-      // Tạo Slug (URL thân thiện) đơn giản
-      const slug = name.toLowerCase().split(' ').join('-') + '-' + Date.now();
-
-      // Tạo đối tượng Product mới
-      const newProduct = new Product({
-        name,
-        slug,
-        category,
-        basePrice,
-        description,
-        thumbnail,
-        images,
-        // Demo tạo 1 biến thể từ form đơn giản (Sau này sẽ làm form động thêm nhiều biến thể)
-        variants: [{
-          color: color,
-          size: size,
-          quantity: quantity
-        }]
-      });
-
-      await newProduct.save();
-      console.log('Đã tạo sản phẩm:', newProduct.name);
-      res.redirect('/admin/products'); // Chuyển hướng về trang danh sách
-
-    } catch (err) {
-      console.error(err);
-      res.status(500).send('Lỗi Server khi tạo sản phẩm');
+exports.postAddProduct = async (req, res) => {
+  try {
+    const { name, basePrice, category, description, variants } = req.body;
+    
+    // --- XỬ LÝ ẢNH ---
+    // Kiểm tra xem có file nào được up lên không
+    if (!req.files || req.files.length === 0) {
+        // Nếu không có ảnh thì có thể báo lỗi hoặc để mảng rỗng
+        return res.status(400).send('Vui lòng chọn ít nhất 1 ảnh!');
     }
+
+    // Lấy danh sách link ảnh từ Cloudinary trả về
+    const imageLinks = req.files.map(file => file.path); 
+    // (Lưu ý: 'file.path' chính là đường dẫn http://res.cloudinary... đã upload xong)
+
+    const product = new Product({
+      name: name,
+      basePrice: basePrice,
+      category: category,
+      description: description,
+      images: imageLinks, // Lưu mảng link ảnh vào DB
+      thumbnail: imageLinks[0] // Lấy ảnh đầu tiên làm đại diện
+      // ... xử lý variants nếu cần
+    });
+
+    await product.save();
+    console.log('✅ Đã lưu sản phẩm và ảnh thành công!');
+    res.redirect('/');
+
+  } catch (err) {
+    console.log('❌ Lỗi thêm sản phẩm:', err);
+    res.status(500).send('Lỗi Server');
   }
 };
