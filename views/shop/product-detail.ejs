@@ -148,7 +148,7 @@
                     </ul>
                 </div>
 
-                <form action="/cart" method="POST">
+                <form action="/cart/add" method="POST">
                     <input type="hidden" name="productId" value="<%= product._id %>">
 
                     <% if (product.variants && product.variants.length > 0) { %>

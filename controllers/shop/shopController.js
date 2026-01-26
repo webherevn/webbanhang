@@ -59,58 +59,42 @@ exports.getCategoryProducts = async (req, res) => {
 // ============================================================
 exports.getProductDetail = async (req, res) => {
     try {
-        const slug = req.params.slug;
-        
-        // 1. In ra Slug nhận được
-        console.log("👉 1. Slug từ URL:", slug);
+        const slug = req.params.slug; // Lấy slug từ URL
+        console.log("👉 Đang xem sản phẩm:", slug);
 
-        // 2. Tìm trong DB (Lưu ý: Tôi đã bỏ isActive: true để test)
+        // 1. Tìm sản phẩm theo Slug
         const product = await Product.findOne({ slug: slug });
 
-        // 3. Kiểm tra kết quả
-        console.log("👉 2. Kết quả tìm kiếm:", product);
-
+        // 2. Nếu không có -> Trang 404
         if (!product) {
-            // Nếu không thấy -> In ra màn hình lý do
-            return res.send(`
-                <h1 style="color: red">LỖI: KHÔNG TÌM THẤY SẢN PHẨM TRONG DB</h1>
-                <p>Slug tìm kiếm: <b>${slug}</b></p>
-                <p>Hãy kiểm tra lại trong Admin xem Slug của sản phẩm này có khớp không?</p>
-            `);
+            console.log("❌ Không tìm thấy sản phẩm trong DB");
+            return res.status(404).render('404', { 
+                pageTitle: 'Không tìm thấy sản phẩm', 
+                path: '/404' 
+            });
         }
 
-        // 4. Nếu tìm thấy -> Thử hiển thị JSON sản phẩm (Chưa render View vội)
-        return res.send(`
-            <h1 style="color: green">TÌM THẤY SẢN PHẨM!</h1>
-            <p>Tên: ${product.name}</p>
-            <p>Giá: ${product.basePrice}</p>
-            <p>Ảnh: ${product.thumbnail}</p>
-            <hr>
-            <h3>Nếu bạn nhìn thấy dòng này nghĩa là:</h3>
-            <ul>
-                <li>Controller hoạt động TỐT.</li>
-                <li>Database hoạt động TỐT.</li>
-                <li>Lỗi 404 trước đó là do file <b>views/shop/product-detail.ejs</b> bị sai tên hoặc lỗi code bên trong.</li>
-            </ul>
-        `);
-
-        // (Tạm thời khóa đoạn render lại để test DB trước)
-        /*
+        // 3. Tìm các sản phẩm liên quan (Cùng danh mục, trừ chính nó ra)
         const relatedProducts = await Product.find({ 
             category: product.category, 
             _id: { $ne: product._id } 
         }).limit(4);
 
+        // 4. Render View (Quan trọng: Đảm bảo file views/shop/product-detail.ejs tồn tại)
         res.render('shop/product-detail', {
             pageTitle: product.name,
             path: '/products',
             product: product,
             relatedProducts: relatedProducts
         });
-        */
 
     } catch (err) {
-        console.error("❌ Lỗi Code:", err);
-        res.send(`<h1>LỖI SERVER (CATCH):</h1><pre>${err.stack}</pre>`);
+        console.error("❌ LỖI CHẾT NGƯỜI:", err); 
+        // Thay vì redirect hay render 404, hãy in lỗi ra màn hình:
+        res.status(500).send(`
+            <h1>LỖI SERVER CHI TIẾT:</h1>
+            <h3>${err.message}</h3>
+            <pre>${err.stack}</pre>
+        `);
     }
 };
