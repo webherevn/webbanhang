@@ -107,3 +107,33 @@ exports.postDeleteProduct = async (req, res) => {
         res.redirect('/admin/products');
     } catch (err) { res.redirect('/admin/products'); }
 };
+
+// Xử lý Thêm chuyên mục
+exports.postAddBlogCategory = async (req, res) => {
+    try {
+        const { name, description } = req.body;
+        const slug = slugify(name, { lower: true, strict: true });
+        let image = "";
+        if (req.file) image = req.file.path; // Lấy đường dẫn ảnh từ Cloudinary/Multer
+
+        await BlogCategory.create({ name, slug, description, image });
+        res.redirect('/admin/blog-categories');
+    } catch (err) { res.redirect('/admin/blog-categories'); }
+};
+
+// Xử lý Lưu sửa đổi
+exports.postEditBlogCategory = async (req, res) => {
+    try {
+        const { categoryId, name, description } = req.body;
+        const category = await BlogCategory.findById(categoryId);
+        
+        category.name = name;
+        category.description = description;
+        category.slug = slugify(name, { lower: true, strict: true });
+        
+        if (req.file) category.image = req.file.path; // Cập nhật ảnh mới nếu có
+
+        await category.save();
+        res.redirect('/admin/blog-categories');
+    } catch (err) { res.redirect('/admin/blog-categories'); }
+};

@@ -1,9 +1,47 @@
 <%- include('../partials/head.ejs') %>
+<script src="https://cdn.ckeditor.com/4.25.0-lts/standard/ckeditor.js"></script>
+
 <style>
-    body { background-color: #f0f0f1; margin: 0; }
+    body { background-color: #f0f0f1; margin: 0; padding: 0; }
     .admin-wrapper { display: flex; min-height: 100vh; }
-    .admin-sidebar-container { width: 240px; position: fixed; top: 0; left: 0; bottom: 0; background-color: #23282d; }
+    .admin-sidebar-container { 
+        width: 240px; 
+        position: fixed; 
+        top: 0; left: 0; bottom: 0; 
+        background-color: #23282d; 
+        z-index: 1000;
+    }
     .admin-content { flex: 1; margin-left: 240px; padding: 30px; }
+    
+    /* WordPress Style Card */
+    .wp-card { 
+        background: #fff; 
+        border: 1px solid #c3c4c7; 
+        box-shadow: 0 1px 1px rgba(0,0,0,.04); 
+        padding: 25px; 
+        border-radius: 2px;
+    }
+
+    .img-preview-box {
+        width: 100%;
+        max-width: 300px;
+        height: 180px;
+        background: #f0f0f1;
+        border: 1px dashed #c3c4c7;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 10px;
+        overflow: hidden;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    .img-preview-box img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .placeholder-text { color: #8c8f94; font-size: 13px; text-align: center; }
 </style>
 </head>
 <body>
@@ -11,24 +49,106 @@
         <div class="admin-sidebar-container">
             <%- include('./partials/sidebar.ejs') %>
         </div>
+
         <div class="admin-content">
-            <h2 class="fw-bold h4 mb-4">Chỉnh sửa chuyên mục</h2>
-            <div class="card shadow-sm border-0 col-md-6">
-                <div class="card-body p-4">
-                    <form action="/admin/edit-blog-category" method="POST">
-                        <input type="hidden" name="categoryId" value="<%= category._id %>">
-                        <div class="mb-3">
-                            <label class="form-label fw-bold small">Tên chuyên mục</label>
-                            <input type="text" name="name" class="form-control" value="<%= category.name %>" required>
-                        </div>
-                        <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-primary btn-sm px-4">Cập nhật</button>
-                            <a href="/admin/blog-categories" class="btn btn-outline-secondary btn-sm">Quay lại</a>
-                        </div>
-                    </form>
+            <nav aria-label="breadcrumb" class="mb-3">
+                <ol class="breadcrumb small">
+                    <li class="breadcrumb-item"><a href="/admin/blog-categories" class="text-decoration-none">Chuyên mục Blog</a></li>
+                    <li class="breadcrumb-item active">Chỉnh sửa</li>
+                </ol>
+            </nav>
+
+            <h2 class="fw-bold h4 mb-4 text-dark">Chỉnh sửa chuyên mục bài viết</h2>
+
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="wp-card shadow-sm">
+                        <form action="/admin/edit-blog-category" method="POST" enctype="multipart/form-data">
+                            <input type="hidden" name="categoryId" value="<%= category._id %>">
+
+                            <div class="mb-4">
+                                <label class="form-label fw-bold small text-uppercase">Tên chuyên mục</label>
+                                <input type="text" name="name" class="form-control" value="<%= category.name %>" required>
+                                <div class="form-text small">Tên này sẽ xuất hiện trên giao diện trang tin tức.</div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label fw-bold small text-uppercase">Mô tả</label>
+                                <textarea name="description" id="blogCatEditDesc"><%= category.description %></textarea>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label fw-bold small text-uppercase">Ảnh đại diện chuyên mục</label>
+                                
+                                <div class="img-preview-box shadow-sm" onclick="document.getElementById('fileInput').click()">
+                                    <% if (category.image) { %>
+                                        <img id="previewImg" src="<%= category.image %>">
+                                        <span id="placeholder" class="placeholder-text" style="display: none;">
+                                            <i class="fas fa-cloud-upload-alt fa-2x mb-2 d-block"></i>Thay đổi ảnh
+                                        </span>
+                                    <% } else { %>
+                                        <img id="previewImg" src="" style="display: none;">
+                                        <span id="placeholder" class="placeholder-text">
+                                            <i class="fas fa-image fa-2x mb-2 d-block"></i>Bấm để chọn ảnh
+                                        </span>
+                                    <% } %>
+                                </div>
+                                
+                                <input type="file" name="image" id="fileInput" class="form-control form-control-sm d-none" accept="image/*" onchange="previewFile(this)">
+                                <small class="text-muted italic">Mẹo: Nên chọn ảnh tỉ lệ 16:9 hoặc 4:3 để hiển thị đẹp nhất.</small>
+                            </div>
+
+                            <hr class="my-4 opacity-25">
+
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-primary btn-sm px-4 fw-bold shadow-sm">Cập nhật chuyên mục</button>
+                                <a href="/admin/blog-categories" class="btn btn-outline-secondary btn-sm px-4">Hủy bỏ</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="wp-card bg-light border-dashed">
+                        <h6 class="fw-bold small mb-3 text-uppercase">Thông tin hệ thống</h6>
+                        <ul class="list-unstyled mb-0 small text-muted">
+                            <li class="mb-2"><i class="fas fa-link me-2"></i> Slug hiện tại: <code class="text-primary"><%= category.slug %></code></li>
+                            <li class="mb-2"><i class="fas fa-calendar-alt me-2"></i> Ngày tạo: <%= category.createdAt ? category.createdAt.toLocaleDateString('vi-VN') : '---' %></li>
+                            <li><i class="fas fa-database me-2"></i> ID: <span class="user-select-all"><%= category._id %></span></li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <script>
+        // 1. Kích hoạt CKEditor cho mô tả
+        CKEDITOR.replace('blogCatEditDesc', {
+            height: 200,
+            toolbar: [
+                ['Bold', 'Italic', 'Underline', 'Strike', '-', 'NumberedList', 'BulletedList'],
+                ['Link', 'Unlink', '-', 'Format', 'TextColor', 'BGColor'],
+                ['Maximize']
+            ]
+        });
+
+        // 2. Hàm xem trước ảnh khi chọn file mới
+        function previewFile(input) {
+            const preview = document.getElementById('previewImg');
+            const placeholder = document.getElementById('placeholder');
+            
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                    placeholder.style.display = 'none';
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

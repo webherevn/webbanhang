@@ -78,6 +78,9 @@ router.post('/add-blog-category', postController.postAddBlogCategory);
 router.post('/delete-blog-category', postController.postDeleteBlogCategory);
 router.get('/edit-blog-category/:categoryId', postController.getEditBlogCategory);
 router.post('/edit-blog-category', postController.postEditBlogCategory);
+// Tìm đến phần Blog Categories trong file routes của bạn
+router.post('/add-blog-category', upload.single('image'), postController.postAddBlogCategory);
+router.post('/edit-blog-category', upload.single('image'), postController.postEditBlogCategory);
 
 
 // 2. Quản lý Bài viết

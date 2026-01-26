@@ -1,67 +1,43 @@
 <%- include('../partials/head.ejs') %>
+<script src="https://cdn.ckeditor.com/4.25.0-lts/standard/ckeditor.js"></script>
 <style>
-    body { background-color: #f0f0f1; margin: 0; padding: 0; }
+    body { background-color: #f0f0f1; margin: 0; }
     .admin-wrapper { display: flex; min-height: 100vh; }
-    
-    .admin-sidebar-container {
-        width: 240px; 
-        position: fixed;
-        top: 0; left: 0; bottom: 0;
-        background-color: #23282d;
-        z-index: 1000;
-    }
-
-    .admin-content {
-        flex: 1;
-        margin-left: 240px; 
-        padding: 30px;
-    }
-
+    .admin-sidebar-container { width: 240px; position: fixed; top: 0; left: 0; bottom: 0; background-color: #23282d; z-index: 1000; }
+    .admin-content { flex: 1; margin-left: 240px; padding: 30px; }
     .wp-card { background: #fff; border: 1px solid #c3c4c7; box-shadow: 0 1px 1px rgba(0,0,0,.04); padding: 20px; }
-    
-    /* CSS QUAN TRỌNG ĐỂ HIỆN SỬA/XÓA KHI HOVER */
-    .row-actions { 
-        visibility: hidden; 
-        font-size: 13px; 
-        margin-top: 4px;
-    }
-    
-    tr:hover .row-actions { 
-        visibility: visible !important; 
-    }
-
-    .category-name { 
-        font-weight: 600; 
-        color: #2271b1; 
-        text-decoration: none; 
-        font-size: 15px;
-    }
-    
-    .table-head-wp { 
-        background-color: #f0f0f1; 
-        border-bottom: 2px solid #c3c4c7; 
-        font-size: 14px; 
-    }
+    .row-actions { visibility: hidden; font-size: 13px; margin-top: 4px; }
+    tr:hover .row-actions { visibility: visible !important; }
+    .img-preview { width: 100%; height: 120px; background: #f0f0f1; border: 1px dashed #c3c4c7; display: flex; align-items: center; justify-content: center; overflow: hidden; cursor: pointer; }
+    .img-preview img { width: 100%; height: 100%; object-fit: cover; display: none; }
 </style>
 </head>
 <body>
-
     <div class="admin-wrapper">
-        <div class="admin-sidebar-container">
-            <%- include('./partials/sidebar.ejs') %>
-        </div>
+        <div class="admin-sidebar-container"><%- include('./partials/sidebar.ejs') %></div>
 
         <div class="admin-content">
-            <h2 class="fw-bold h4 mb-4 border-bottom pb-3 text-dark">Chuyên mục bài viết</h2>
-            
+            <h2 class="fw-bold h4 mb-4 border-bottom pb-3">Chuyên mục bài viết</h2>
             <div class="row">
                 <div class="col-md-4">
                     <div class="wp-card shadow-sm">
-                        <h6 class="fw-bold mb-3">Thêm chuyên mục mới</h6>
-                        <form action="/admin/add-blog-category" method="POST">
+                        <h6 class="fw-bold mb-3 text-uppercase small">Thêm chuyên mục mới</h6>
+                        <form action="/admin/add-blog-category" method="POST" enctype="multipart/form-data">
                             <div class="mb-3">
-                                <label class="form-label small fw-bold">Tên chuyên mục</label>
-                                <input type="text" name="name" class="form-control form-control-sm" placeholder="VD: Khuyến mãi" required>
+                                <label class="form-label small fw-bold">Tên</label>
+                                <input type="text" name="name" class="form-control form-control-sm" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold">Mô tả</label>
+                                <textarea name="description" id="blogCatDesc"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold">Ảnh đại diện</label>
+                                <div class="img-preview mb-2" onclick="document.getElementById('fileInput').click()">
+                                    <span id="placeholder"><i class="fas fa-image me-1"></i> Chọn ảnh</span>
+                                    <img id="previewImg" src="">
+                                </div>
+                                <input type="file" name="image" id="fileInput" class="d-none" onchange="preview(this)">
                             </div>
                             <button type="submit" class="btn btn-primary btn-sm w-100 fw-bold">Thêm chuyên mục</button>
                         </form>
@@ -69,44 +45,37 @@
                 </div>
 
                 <div class="col-md-8">
-                    <div class="wp-card p-0 overflow-hidden shadow-sm">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="table-head-wp">
+                    <div class="wp-card p-0 shadow-sm overflow-hidden">
+                        <table class="table table-hover align-middle mb-0 text-dark">
+                            <thead class="table-light">
                                 <tr>
-                                    <th class="ps-3" width="50% text-dark">Tên chuyên mục</th>
-                                    <th class="text-dark">Slug</th>
+                                    <th class="ps-3" width="60">Ảnh</th>
+                                    <th>Tên</th>
+                                    <th>Mô tả</th>
+                                    <th>Slug</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <% if (categories && categories.length > 0) { %>
-                                    <% categories.forEach(cat => { %>
-                                        <tr>
-                                            <td class="ps-3">
-                                                <a href="/admin/edit-blog-category/<%= cat._id %>" class="category-name">
-                                                    <%= cat.name %>
-                                                </a>
-                                                
-                                                <div class="row-actions">
-                                                    <a href="/admin/edit-blog-category/<%= cat._id %>" class="text-primary text-decoration-none">Sửa</a>
-                                                    <span class="text-muted mx-1">|</span>
-                                                    
-                                                    <form action="/admin/delete-blog-category" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa chuyên mục này?');">
-                                                        <input type="hidden" name="categoryId" value="<%= cat._id %>">
-                                                        <button type="submit" class="btn btn-link p-0 text-danger text-decoration-none border-0 bg-transparent" style="font-size: 13px;">Xóa</button>
-                                                    </form>
-                                                    
-                                                    <span class="text-muted mx-1">|</span>
-                                                    <a href="/blog/category/<%= cat.slug %>" target="_blank" class="text-success text-decoration-none">Xem</a>
-                                                </div>
-                                            </td>
-                                            <td class="text-muted small"><%= cat.slug %></td>
-                                        </tr>
-                                    <% }) %>
-                                <% } else { %>
+                                <% categories.forEach(cat => { %>
                                     <tr>
-                                        <td colspan="2" class="text-center py-4 text-muted small">Chưa có chuyên mục nào.</td>
+                                        <td class="ps-3">
+                                            <img src="<%= cat.image || 'https://via.placeholder.com/40' %>" style="width: 40px; height: 40px; object-fit: cover; border: 1px solid #ddd;">
+                                        </td>
+                                        <td>
+                                            <a href="/admin/edit-blog-category/<%= cat._id %>" class="fw-bold text-decoration-none text-primary"><%= cat.name %></a>
+                                            <div class="row-actions">
+                                                <a href="/admin/edit-blog-category/<%= cat._id %>" class="text-primary">Sửa</a> | 
+                                                <form action="/admin/delete-blog-category" method="POST" class="d-inline" onsubmit="return confirm('Xóa?')">
+                                                    <input type="hidden" name="categoryId" value="<%= cat._id %>">
+                                                    <button class="btn btn-link p-0 text-danger border-0 bg-transparent small">Xóa</button>
+                                                </form> | 
+                                                <a href="/blog/category/<%= cat.slug %>" target="_blank" class="text-success text-decoration-none">Xem</a>
+                                            </div>
+                                        </td>
+                                        <td class="small text-muted"><%- cat.description ? cat.description.substring(0, 50) + '...' : '—' %></td>
+                                        <td class="small text-muted"><%= cat.slug %></td>
                                     </tr>
-                                <% } %>
+                                <% }) %>
                             </tbody>
                         </table>
                     </div>
@@ -115,6 +84,19 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        CKEDITOR.replace('blogCatDesc', { height: 120, toolbar: [ ['Bold', 'Italic', 'Underline', '-', 'NumberedList', 'BulletedList', '-', 'Link'] ] });
+        function preview(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('previewImg').src = e.target.result;
+                    document.getElementById('previewImg').style.display = 'block';
+                    document.getElementById('placeholder').style.display = 'none';
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
 </body>
 </html>
