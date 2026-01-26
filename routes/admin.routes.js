@@ -74,6 +74,11 @@ router.post('/edit-category', upload.single('image'), categoryController.postEdi
 // 1. Quản lý Chuyên mục
 router.get('/blog-categories', postController.getBlogCategories);
 router.post('/add-blog-category', postController.postAddBlogCategory);
+// Thêm các route này vào phần Quản lý Blog
+router.post('/delete-blog-category', postController.postDeleteBlogCategory);
+router.get('/edit-blog-category/:categoryId', postController.getEditBlogCategory);
+router.post('/edit-blog-category', postController.postEditBlogCategory);
+
 
 // 2. Quản lý Bài viết
 router.get('/posts', postController.getPosts); // Danh sách

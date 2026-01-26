@@ -32,7 +32,20 @@
                             <thead><tr><th>Tên</th><th>Slug</th></tr></thead>
                             <tbody>
                                 <% categories.forEach(cat => { %>
-                                    <tr><td><%= cat.name %></td><td><%= cat.slug %></td></tr>
+                                    <tr>
+                                        <td class="ps-3 fw-bold text-primary">
+                                            <a href="/admin/edit-blog-category/<%= cat._id %>" class="text-decoration-none"><%= cat.name %></a>
+                                            <div class="row-actions mt-1 small" style="visibility: hidden;">
+                                                <a href="/admin/edit-blog-category/<%= cat._id %>" class="text-primary">Sửa</a> | 
+                                                <form action="/admin/delete-blog-category" method="POST" class="d-inline" onsubmit="return confirm('Xóa chuyên mục này?')">
+                                                    <input type="hidden" name="categoryId" value="<%= cat._id %>">
+                                                    <button class="btn btn-link p-0 text-danger border-0 bg-transparent small" style="font-size: 13px;">Xóa</button>
+                                                </form> | 
+                                                <a href="/blog/category/<%= cat.slug %>" target="_blank" class="text-success">Xem</a>
+                                            </div>
+                                        </td>
+                                        <td class="text-muted small"><%= cat.slug %></td>
+                                    </tr>
                                 <% }) %>
                             </tbody>
                         </table>

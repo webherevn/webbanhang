@@ -1,44 +1,68 @@
 <%- include('../partials/head.ejs') %>
 <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
-<script>tinymce.init({ selector: '#editor', height: 400 });</script>
+<script>
+  tinymce.init({
+    selector: '#content-editor',
+    height: 500,
+    plugins: 'lists link image table code wordcount',
+    toolbar: 'undo redo | blocks | bold italic | alignleft aligncenter alignright | bullist numlist | link image | code'
+  });
+</script>
+
+<style>
+    body { background-color: #f0f0f1; margin: 0; }
+    .admin-wrapper { display: flex; min-height: 100vh; }
+    .admin-sidebar-container { width: 240px; position: fixed; top: 0; left: 0; bottom: 0; background-color: #23282d; z-index: 1000; }
+    .admin-content { flex: 1; margin-left: 240px; padding: 30px; }
+    .wp-card { background: #fff; border: 1px solid #c3c4c7; box-shadow: 0 1px 1px rgba(0,0,0,.04); padding: 20px; border-radius: 2px; }
+</style>
 </head>
 <body>
-    <%- include('../partials/navigation.ejs') %>
-    <div class="container py-5">
-        <h2>Viết bài mới</h2>
-        <form action="/admin/add-post" method="POST" enctype="multipart/form-data">
-            <div class="row">
-                <div class="col-md-8">
-                    <div class="mb-3">
-                        <label class="fw-bold">Tiêu đề</label>
-                        <input type="text" name="title" class="form-control" required>
+    <div class="admin-wrapper">
+        <div class="admin-sidebar-container">
+            <%- include('./partials/sidebar.ejs') %>
+        </div>
+
+        <div class="admin-content">
+            <h2 class="fw-bold mb-4 h4">Viết bài mới</h2>
+            
+            <form action="/admin/add-post" method="POST" enctype="multipart/form-data">
+                <div class="row">
+                    <div class="col-md-9">
+                        <div class="mb-4">
+                            <input type="text" name="title" class="form-control form-control-lg shadow-sm" placeholder="Nhập tiêu đề tại đây" required>
+                        </div>
+                        <div class="wp-card p-0 overflow-hidden">
+                            <textarea id="content-editor" name="content"></textarea>
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label class="fw-bold">Nội dung</label>
-                        <textarea id="editor" name="content"></textarea>
-                    </div>
-                    <div class="mb-3">
-                        <label class="fw-bold">Mô tả ngắn</label>
-                        <textarea name="summary" class="form-control" rows="3"></textarea>
+                    
+                    <div class="col-md-3">
+                        <div class="wp-card mb-3">
+                            <h6 class="fw-bold border-bottom pb-2 mb-3">Đăng bài</h6>
+                            <div class="mb-3 small text-muted">
+                                <i class="fas fa-map-marker-alt me-1"></i> Trạng thái: <b>Công khai</b>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-sm w-100 fw-bold">Đăng bài viết</button>
+                        </div>
+
+                        <div class="wp-card mb-3">
+                            <h6 class="fw-bold border-bottom pb-2 mb-3">Chuyên mục</h6>
+                            <select name="categoryId" class="form-select form-select-sm" required>
+                                <% categories.forEach(cat => { %>
+                                    <option value="<%= cat._id %>"><%= cat.name %></option>
+                                <% }) %>
+                            </select>
+                        </div>
+
+                        <div class="wp-card">
+                            <h6 class="fw-bold border-bottom pb-2 mb-3">Ảnh đại diện</h6>
+                            <input type="file" name="thumbnail" class="form-control form-control-sm">
+                        </div>
                     </div>
                 </div>
-                <div class="col-md-4">
-                    <div class="mb-3">
-                        <label class="fw-bold">Chuyên mục</label>
-                        <select name="categoryId" class="form-select">
-                            <% categories.forEach(cat => { %>
-                                <option value="<%= cat._id %>"><%= cat.name %></option>
-                            <% }) %>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label class="fw-bold">Ảnh đại diện</label>
-                        <input type="file" name="thumbnail" class="form-control">
-                    </div>
-                    <button type="submit" class="btn btn-primary w-100">Đăng bài</button>
-                </div>
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
 </body>
 </html>
