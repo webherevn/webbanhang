@@ -1,5 +1,38 @@
 <%- include('../partials/head.ejs') %>
-<script src="https://cdn.ckeditor.com/4.25.0-lts/standard/ckeditor.js"></script>
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+
+<link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.js"></script>
+
+<style>
+    /* Chỉnh cho khung soạn thảo chuyên nghiệp hơn */
+    .note-editor { background-color: #fff; border: 1px solid #ccd0d4 !important; }
+    .note-editable { min-height: 400px; font-family: sans-serif; }
+</style>
+
+<script>
+    $(document).ready(function() {
+        $('#content-editor').summernote({
+            placeholder: 'Nhập nội dung bài viết chi tiết tại đây...',
+            tabsize: 2,
+            height: 500,
+            lang: 'vi-VN', // Nếu bạn muốn dùng tiếng Việt
+            toolbar: [
+                // Các nhóm tính năng hiện lên thanh công cụ
+                ['style', ['style']],
+                ['font', ['bold', 'underline', 'clear', 'italic', 'strikethrough', 'superscript', 'subscript']],
+                ['fontname', ['fontname']],
+                ['fontsize', ['fontsize']],
+                ['color', ['color']],
+                ['para', ['ul', 'ol', 'paragraph']],
+                ['table', ['table']],
+                ['insert', ['link', 'picture', 'video', 'hr']],
+                ['view', ['fullscreen', 'codeview', 'help']]
+            ],
+            fontSizes: ['8', '9', '10', '11', '12', '14', '18', '24', '36', '48' , '64', '82', '150']
+        });
+    });
+</script>
 <style>
     body { background-color: #f0f0f1; margin: 0; }
     .admin-wrapper { display: flex; min-height: 100vh; }
