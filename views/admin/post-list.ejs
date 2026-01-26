@@ -55,8 +55,10 @@
 
         <div class="admin-content">
             <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
-                <h2 class="fw-bold h4 text-dark">Bài viết</h2>
-                <a href="/admin/add-post" class="btn btn-primary btn-sm px-3 fw-bold shadow-sm">Viết bài mới</a>
+                <div class="d-flex align-items-center gap-3">
+                    <h2 class="fw-bold h4 m-0 text-dark">Bài viết</h2>
+                    <a href="/admin/add-post" class="btn btn-outline-primary btn-sm fw-bold">Viết bài mới</a>
+                </div>
             </div>
 
             <div class="wp-card shadow-sm overflow-hidden">
@@ -71,12 +73,12 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <% if (posts.length > 0) { %>
+                        <% if (posts && posts.length > 0) { %>
                             <% posts.forEach(p => { %>
                                 <tr>
                                     <td class="ps-3">
                                         <img src="<%= p.thumbnail || 'https://via.placeholder.com/50' %>" 
-                                             style="width: 50px; height: 50px; object-fit: cover; border: 1px solid #ddd; border-radius: 2px;">
+                                             style="width: 55px; height: 55px; object-fit: cover; border: 1px solid #ddd; border-radius: 2px;">
                                     </td>
 
                                     <td>
@@ -95,7 +97,7 @@
                                             
                                             <span class="text-muted mx-1">|</span>
                                             
-                                            <a href="/blog/post/<%= p.slug %>" target="_blank" class="text-success text-decoration-none">Xem</a>
+                                            <a href="/blog/post/<%= p.slug %>" target="_blank" class="text-success text-decoration-none fw-bold">Xem</a>
                                         </div>
                                     </td>
 
@@ -116,7 +118,10 @@
                             <% }) %>
                         <% } else { %>
                             <tr>
-                                <td colspan="5" class="text-center py-5 text-muted">Chưa có bài viết nào được tìm thấy.</td>
+                                <td colspan="5" class="text-center py-5 text-muted">
+                                    <i class="fas fa-file-alt fa-3x mb-3 opacity-25"></i>
+                                    <p>Chưa có bài viết nào. Hãy bắt đầu viết bài đầu tiên!</p>
+                                </td>
                             </tr>
                         <% } %>
                     </tbody>
