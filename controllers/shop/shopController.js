@@ -76,3 +76,38 @@ exports.getCategoryProducts = async (req, res) => {
         res.redirect('/');
     }
 };
+
+exports.getProductDetail = async (req, res) => {
+    try {
+        const slug = req.params.slug;
+
+        // 1. Tìm sản phẩm theo Slug
+        const product = await Product.findOne({ slug: slug });
+
+        // 2. Nếu không có -> Trang 404
+        if (!product) {
+            return res.status(404).render('404', { 
+                pageTitle: 'Không tìm thấy sản phẩm', 
+                path: '/404' 
+            });
+        }
+
+        // 3. Tìm các sản phẩm liên quan (Cùng danh mục) - Optional
+        const relatedProducts = await Product.find({ 
+            category: product.category, 
+            _id: { $ne: product._id } // Trừ sản phẩm đang xem ra
+        }).limit(4);
+
+        // 4. Render View
+        res.render('shop/product-detail', {
+            pageTitle: product.name,
+            path: '/products',
+            product: product,
+            relatedProducts: relatedProducts
+        });
+
+    } catch (err) {
+        console.log("❌ Lỗi xem chi tiết:", err);
+        res.redirect('/');
+    }
+};
