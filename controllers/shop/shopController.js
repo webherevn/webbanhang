@@ -9,7 +9,8 @@ exports.getHomepage = async (req, res) => {
   try {
     // Lấy tất cả sản phẩm, sắp xếp mới nhất lên đầu
     // isActive: true -> Chỉ lấy sản phẩm đang hoạt động
-    const products = await Product.find({ isActive: true }).sort({ createdAt: -1 });
+    // Lấy tất cả, không cần lọc active nữa
+const products = await Product.find().sort({ createdAt: -1 });
     
     res.render('shop/home', { 
       pageTitle: 'Trang chủ - Fashion Shop',
