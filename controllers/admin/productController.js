@@ -129,3 +129,89 @@ exports.postDeleteProduct = async (req, res) => {
     res.redirect('/admin/products');
   }
 };
+
+// ============================================================
+// 5. HIỂN THỊ FORM SỬA SẢN PHẨM (GET)
+// ============================================================
+exports.getEditProduct = async (req, res) => {
+    try {
+        const prodId = req.params.productId;
+        
+        // 1. Tìm sản phẩm cần sửa
+        const product = await Product.findById(prodId);
+        
+        // 2. Lấy danh mục để hiện ra Sidebar
+        const categories = await Category.find();
+
+        if (!product) {
+            return res.redirect('/admin/products');
+        }
+
+        // 3. Render giao diện (Dùng chung form với trang Add hoặc file riêng)
+        // Ở đây tôi giả định bạn dùng file 'admin/product-edit' cho an toàn
+        res.render('admin/product-form', { 
+            pageTitle: 'Chỉnh sửa sản phẩm',
+            path: '/admin/edit-product',
+            editing: true,      // Cờ báo hiệu đang ở chế độ Sửa
+            product: product,   // Truyền dữ liệu cũ sang để điền vào ô input
+            categories: categories
+        });
+
+    } catch (err) {
+        console.log("❌ Lỗi tải trang sửa:", err);
+        res.redirect('/admin/products');
+    }
+};
+
+// ============================================================
+// 6. XỬ LÝ LƯU THAY ĐỔI (POST)
+// ============================================================
+exports.postEditProduct = async (req, res) => {
+    try {
+        const { productId, name, basePrice, salePrice, category, description } = req.body;
+
+        // 1. Tìm sản phẩm cũ
+        const product = await Product.findById(productId);
+        if (!product) {
+            return res.redirect('/admin/products');
+        }
+
+        // 2. Cập nhật thông tin cơ bản
+        product.name = name;
+        product.category = category;
+        product.description = description;
+
+        // Xử lý giá (Xóa dấu phẩy)
+        if (basePrice) product.basePrice = Number(basePrice.toString().replace(/[,.]/g, ''));
+        if (salePrice) product.salePrice = Number(salePrice.toString().replace(/[,.]/g, ''));
+
+        // Cập nhật Slug nếu tên thay đổi
+        if (name) {
+             product.slug = slugify(name, { lower: true, strict: true }) + "-" + Date.now();
+        }
+
+        // 3. XỬ LÝ ẢNH (Logic: Chỉ thay nếu có ảnh mới up lên)
+        
+        // A. Nếu có Upload Thumbnail mới -> Thay thế ảnh cũ
+        if (req.files && req.files['thumbnail']) {
+            product.thumbnail = req.files['thumbnail'][0].path;
+        }
+
+        // B. Nếu có Upload Gallery mới -> Có thể chọn: Ghi đè hoặc Thêm vào?
+        // Ở đây mình chọn cách: THÊM VÀO (push) danh sách ảnh cũ
+        if (req.files && req.files['gallery']) {
+            const newImages = req.files['gallery'].map(f => f.path);
+            product.images.push(...newImages); // Nối mảng mới vào mảng cũ
+        }
+
+        // 4. Lưu lại
+        await product.save();
+        
+        console.log(`✅ Đã cập nhật sản phẩm: ${name}`);
+        res.redirect('/admin/products');
+
+    } catch (err) {
+        console.log("❌ Lỗi cập nhật sản phẩm:", err);
+        res.redirect('/admin/products');
+    }
+};
