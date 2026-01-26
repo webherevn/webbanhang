@@ -1,54 +1,50 @@
+// controllers/admin/postController.js
 const Post = require('../../models/PostModel');
 const BlogCategory = require('../../models/BlogCategoryModel');
 const slugify = require('slugify');
 
-// --- 1. QUẢN LÝ CHUYÊN MỤC ---
+// ==========================================
+// 1. QUẢN LÝ CHUYÊN MỤC
+// ==========================================
 exports.getBlogCategories = async (req, res) => {
     try {
         const categories = await BlogCategory.find();
         res.render('admin/blog-category-list', { 
-            pageTitle: 'Quản lý chuyên mục tin tức', 
+            pageTitle: 'Quản lý Chuyên mục', 
             path: '/admin/blog-categories',
             categories: categories 
         });
-    } catch (err) {
-        console.log(err);
-        res.redirect('/admin');
-    }
+    } catch (err) { console.log(err); res.redirect('/admin'); }
 };
 
 exports.postAddBlogCategory = async (req, res) => {
     try {
         const { name } = req.body;
-        // Tạo slug đơn giản cho chuyên mục
-        const slug = slugify(name, { lower: true, strict: true });
+        // Tạo slug, nếu lỗi thì để trống
+        const slug = name ? slugify(name, { lower: true, strict: true }) : '';
         
         await BlogCategory.create({ name, slug });
         res.redirect('/admin/blog-categories');
-    } catch (err) { 
-        console.log(err); 
-        res.redirect('/admin/blog-categories'); 
-    }
+    } catch (err) { console.log(err); res.redirect('/admin/blog-categories'); }
 };
 
-// --- 2. QUẢN LÝ BÀI VIẾT ---
+// ==========================================
+// 2. QUẢN LÝ BÀI VIẾT
+// ==========================================
 
-// A. Hiển thị danh sách bài viết
+// A. Danh sách bài viết
 exports.getPosts = async (req, res) => {
     try {
         const posts = await Post.find().populate('category').sort({ createdAt: -1 });
         res.render('admin/post-list', { 
-            pageTitle: 'Danh sách bài viết', 
+            pageTitle: 'Quản lý Bài viết', 
             path: '/admin/posts',
             posts: posts 
         });
-    } catch (err) {
-        console.log(err);
-        res.redirect('/admin');
-    }
+    } catch (err) { console.log(err); res.redirect('/admin'); }
 };
 
-// B. Hiển thị Form viết bài mới
+// B. Form Thêm bài viết
 exports.getAddPost = async (req, res) => {
     try {
         const categories = await BlogCategory.find();
@@ -56,29 +52,26 @@ exports.getAddPost = async (req, res) => {
             pageTitle: 'Viết bài mới', 
             path: '/admin/add-post',
             categories: categories,
-            editing: false // Đánh dấu là đang thêm mới
+            editing: false
         });
-    } catch (err) {
-        console.log(err);
-        res.redirect('/admin/posts');
-    }
+    } catch (err) { console.log(err); res.redirect('/admin/posts'); }
 };
 
-// C. Xử lý lưu bài viết (Có Logic Slug thông minh)
+// C. Xử lý Thêm bài viết (Khớp với upload.fields bên Route)
 exports.postAddPost = async (req, res) => {
     try {
         const { title, content, summary, categoryId } = req.body;
         
-        // Xử lý ảnh (Thumbnail)
-        // Lưu ý: Bên Route mình sẽ dùng upload.single('thumbnail')
-        const thumbnail = req.file ? req.file.path : 'https://via.placeholder.com/300';
+        // Xử lý ảnh (Do bên route dùng upload.fields nên phải dùng req.files)
+        let thumbnail = 'https://via.placeholder.com/300';
+        if (req.files && req.files['thumbnail']) {
+            thumbnail = req.files['thumbnail'][0].path;
+        }
 
-        // --- TẠO SLUG CHUẨN SEO (KHÔNG TRÙNG) ---
+        // Tạo Slug không trùng
         let postSlug = slugify(title, { lower: true, strict: true });
         let originalSlug = postSlug;
         let count = 1;
-
-        // Vòng lặp kiểm tra trùng lặp
         while (await Post.findOne({ slug: postSlug })) {
             postSlug = `${originalSlug}-${count}`;
             count++;
@@ -93,11 +86,21 @@ exports.postAddPost = async (req, res) => {
             category: categoryId
         });
 
-        console.log(`✅ Đã đăng bài: ${title}`);
+        console.log(`✅ Đã thêm bài viết: ${title}`);
         res.redirect('/admin/posts');
 
     } catch (err) {
-        console.log("❌ Lỗi đăng bài:", err);
+        console.log("❌ Lỗi thêm bài:", err);
         res.redirect('/admin/posts');
     }
+};
+
+// D. Xóa bài viết
+exports.postDeletePost = async (req, res) => {
+    try {
+        const postId = req.body.postId;
+        await Post.findByIdAndDelete(postId);
+        console.log(`🗑️ Đã xóa bài viết ID: ${postId}`);
+        res.redirect('/admin/posts');
+    } catch (err) { console.log(err); res.redirect('/admin/posts'); }
 };
