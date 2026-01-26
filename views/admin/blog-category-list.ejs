@@ -1,52 +1,112 @@
 <%- include('../partials/head.ejs') %>
 <style>
-    body { margin: 0; background-color: #f0f2f5; }
+    body { background-color: #f0f0f1; margin: 0; padding: 0; }
     .admin-wrapper { display: flex; min-height: 100vh; }
-    .admin-sidebar-container { width: 200px; position: fixed; top: 0; left: 0; bottom: 0; background-color: #23282d; z-index: 1000; }
-    .admin-content { flex: 1; margin-left: 200px; padding: 30px; }
+    
+    .admin-sidebar-container {
+        width: 240px; 
+        position: fixed;
+        top: 0; left: 0; bottom: 0;
+        background-color: #23282d;
+        z-index: 1000;
+    }
+
+    .admin-content {
+        flex: 1;
+        margin-left: 240px; 
+        padding: 30px;
+    }
+
+    .wp-card { background: #fff; border: 1px solid #c3c4c7; box-shadow: 0 1px 1px rgba(0,0,0,.04); padding: 20px; }
+    
+    /* CSS QUAN TRỌNG ĐỂ HIỆN SỬA/XÓA KHI HOVER */
+    .row-actions { 
+        visibility: hidden; 
+        font-size: 13px; 
+        margin-top: 4px;
+    }
+    
+    tr:hover .row-actions { 
+        visibility: visible !important; 
+    }
+
+    .category-name { 
+        font-weight: 600; 
+        color: #2271b1; 
+        text-decoration: none; 
+        font-size: 15px;
+    }
+    
+    .table-head-wp { 
+        background-color: #f0f0f1; 
+        border-bottom: 2px solid #c3c4c7; 
+        font-size: 14px; 
+    }
 </style>
 </head>
 <body>
+
     <div class="admin-wrapper">
         <div class="admin-sidebar-container">
             <%- include('./partials/sidebar.ejs') %>
         </div>
 
         <div class="admin-content">
-            <h2 class="fw-bold h4 mb-4 border-bottom pb-3">Chuyên mục Blog</h2>
+            <h2 class="fw-bold h4 mb-4 border-bottom pb-3 text-dark">Chuyên mục bài viết</h2>
+            
             <div class="row">
                 <div class="col-md-4">
-                    <div class="card shadow-sm">
-                        <div class="card-body">
-                            <h6 class="fw-bold mb-3">Thêm chuyên mục</h6>
-                            <form action="/admin/add-blog-category" method="POST">
-                                <input type="text" name="name" class="form-control mb-3" placeholder="Tên chuyên mục" required>
-                                <button class="btn btn-primary btn-sm w-100">Lưu chuyên mục</button>
-                            </form>
-                        </div>
+                    <div class="wp-card shadow-sm">
+                        <h6 class="fw-bold mb-3">Thêm chuyên mục mới</h6>
+                        <form action="/admin/add-blog-category" method="POST">
+                            <div class="mb-3">
+                                <label class="form-label small fw-bold">Tên chuyên mục</label>
+                                <input type="text" name="name" class="form-control form-control-sm" placeholder="VD: Khuyến mãi" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-sm w-100 fw-bold">Thêm chuyên mục</button>
+                        </form>
                     </div>
                 </div>
+
                 <div class="col-md-8">
-                    <div class="card shadow-sm p-3">
-                        <table class="table table-hover">
-                            <thead><tr><th>Tên</th><th>Slug</th></tr></thead>
+                    <div class="wp-card p-0 overflow-hidden shadow-sm">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-head-wp">
+                                <tr>
+                                    <th class="ps-3" width="50% text-dark">Tên chuyên mục</th>
+                                    <th class="text-dark">Slug</th>
+                                </tr>
+                            </thead>
                             <tbody>
-                                <% categories.forEach(cat => { %>
+                                <% if (categories && categories.length > 0) { %>
+                                    <% categories.forEach(cat => { %>
+                                        <tr>
+                                            <td class="ps-3">
+                                                <a href="/admin/edit-blog-category/<%= cat._id %>" class="category-name">
+                                                    <%= cat.name %>
+                                                </a>
+                                                
+                                                <div class="row-actions">
+                                                    <a href="/admin/edit-blog-category/<%= cat._id %>" class="text-primary text-decoration-none">Sửa</a>
+                                                    <span class="text-muted mx-1">|</span>
+                                                    
+                                                    <form action="/admin/delete-blog-category" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa chuyên mục này?');">
+                                                        <input type="hidden" name="categoryId" value="<%= cat._id %>">
+                                                        <button type="submit" class="btn btn-link p-0 text-danger text-decoration-none border-0 bg-transparent" style="font-size: 13px;">Xóa</button>
+                                                    </form>
+                                                    
+                                                    <span class="text-muted mx-1">|</span>
+                                                    <a href="/blog/category/<%= cat.slug %>" target="_blank" class="text-success text-decoration-none">Xem</a>
+                                                </div>
+                                            </td>
+                                            <td class="text-muted small"><%= cat.slug %></td>
+                                        </tr>
+                                    <% }) %>
+                                <% } else { %>
                                     <tr>
-                                        <td class="ps-3 fw-bold text-primary">
-                                            <a href="/admin/edit-blog-category/<%= cat._id %>" class="text-decoration-none"><%= cat.name %></a>
-                                            <div class="row-actions mt-1 small" style="visibility: hidden;">
-                                                <a href="/admin/edit-blog-category/<%= cat._id %>" class="text-primary">Sửa</a> | 
-                                                <form action="/admin/delete-blog-category" method="POST" class="d-inline" onsubmit="return confirm('Xóa chuyên mục này?')">
-                                                    <input type="hidden" name="categoryId" value="<%= cat._id %>">
-                                                    <button class="btn btn-link p-0 text-danger border-0 bg-transparent small" style="font-size: 13px;">Xóa</button>
-                                                </form> | 
-                                                <a href="/blog/category/<%= cat.slug %>" target="_blank" class="text-success">Xem</a>
-                                            </div>
-                                        </td>
-                                        <td class="text-muted small"><%= cat.slug %></td>
+                                        <td colspan="2" class="text-center py-4 text-muted small">Chưa có chuyên mục nào.</td>
                                     </tr>
-                                <% }) %>
+                                <% } %>
                             </tbody>
                         </table>
                     </div>
@@ -54,5 +114,7 @@
             </div>
         </div>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
