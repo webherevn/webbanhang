@@ -11,6 +11,8 @@ const checkoutController = require('../controllers/shop/checkoutController');
 // ============================================================
 // Trang chủ
 router.get('/', shopController.getHomepage); 
+// 1. Trang danh sách tất cả sản phẩm (Thêm dòng này vào)
+router.get('/products', shopController.getProducts);
 
 // Xem chi tiết sản phẩm (QUAN TRỌNG: Chỉ khai báo 1 lần duy nhất ở đây)
 router.get('/products/:slug', shopController.getProductDetail);

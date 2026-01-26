@@ -98,3 +98,23 @@ exports.getProductDetail = async (req, res) => {
         `);
     }
 };
+
+// controllers/shop/shopController.js
+
+// ... Các hàm cũ giữ nguyên ...
+
+exports.getProducts = async (req, res) => {
+    try {
+        // Lấy tất cả sản phẩm, sắp xếp mới nhất lên đầu
+        const products = await Product.find().sort({ createdAt: -1 });
+
+        res.render('shop/product-list', {
+            pageTitle: 'Tất cả sản phẩm',
+            path: '/products', // Dùng để active menu nếu cần
+            products: products
+        });
+    } catch (err) {
+        console.log("❌ Lỗi lấy danh sách sản phẩm:", err);
+        res.redirect('/');
+    }
+};
