@@ -19,30 +19,33 @@ router.get('/products/:slug', shopController.getProductDetail);
 router.get('/category/:slug', shopController.getCategoryProducts);
 
 
-// ============================================================
-// 2. GIỎ HÀNG (CART)
-// ============================================================
-// Xem giỏ hàng
+// --- 2. GIỎ HÀNG ---
+
 router.get('/cart', cartController.getCart);
 
-// Thêm vào giỏ (Form bên View phải để action="/cart/add")
-router.post('/cart/add', cartController.addToCart); 
 
-// Xóa sản phẩm khỏi giỏ
+
+// Quan trọng: Route này là '/cart/add', nên bên HTML form phải sửa action thành '/cart/add'
+
+router.post('/cart/add', cartController.addToCart);
+
+
+
+// Route xóa sản phẩm
+
 router.post('/cart/delete', cartController.removeFromCart);
 
 
-// ============================================================
-// 3. THANH TOÁN (CHECKOUT)
-// ============================================================
-// Trang điền thông tin thanh toán
+
+// --- 3. THANH TOÁN (CHECKOUT) ---
+
 router.get('/checkout', checkoutController.getCheckout);
 
-// Xử lý đặt hàng
 router.post('/checkout', checkoutController.postCheckout);
 
-// Trang thông báo đặt hàng thành công
 router.get('/checkout/success', checkoutController.getSuccess);
+
+
 
 
 module.exports = router;
