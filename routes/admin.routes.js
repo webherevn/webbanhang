@@ -1,18 +1,23 @@
 const express = require('express');
 const router = express.Router();
-const productController = require('../controllers/admin/productController');
 
-// Import bộ upload vừa cấu hình ở Bước 2
-// Vì giờ 2 file nằm cạnh nhau, chỉ cần dấu chấm (.)
-// Dùng hai chấm (..) để lùi ra ngoài rồi vào configs
-const upload = require('../routes/cloudinary.config');
+// Import 2 Controller
+const adminController = require('../controllers/admin/adminController'); // File mới tạo
+const productController = require('../controllers/admin/productController'); // File có sẵn
 
-// ... các route khác
+// --- 1. DASHBOARD (TRANG CHỦ ADMIN) ---
+// Đường dẫn: /admin
+router.get('/', adminController.getDashboard);
 
+// --- 2. QUẢN LÝ SẢN PHẨM ---
+// Đường dẫn: /admin/products (Xem danh sách)
+router.get('/products', productController.getProducts);
+
+// Đường dẫn: /admin/add-product (Thêm mới)
 router.get('/add-product', productController.getAddProduct);
+router.post('/add-product', productController.postAddProduct);
 
-// --- SỬA DÒNG NÀY ---
-// Thêm middleware upload.array('images', 5) để cho phép up tối đa 5 ảnh
-router.post('/add-product', upload.array('images', 5), productController.postAddProduct);
+// Đường dẫn: /admin/delete-product (Xóa)
+router.post('/delete-product', productController.postDeleteProduct);
 
 module.exports = router;
