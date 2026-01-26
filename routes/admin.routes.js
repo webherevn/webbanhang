@@ -42,5 +42,7 @@ router.post('/delete-product', productController.postDeleteProduct);
 // ============================================================
 router.get('/categories', categoryController.getCategories);
 router.post('/categories', categoryController.postAddCategory);
+router.post('/delete-category', categoryController.postDeleteCategory); // Xóa
+
 
 module.exports = router;
