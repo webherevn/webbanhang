@@ -83,26 +83,33 @@ exports.getEditCategory = async (req, res) => {
     }
 };
 
-// 5. XỬ LÝ LƯU SỬA ĐỔI
+// 5. XỬ LÝ LƯU SỬA ĐỔI (CẬP NHẬT ẢNH)
 exports.postEditCategory = async (req, res) => {
     try {
         const { categoryId, name, description } = req.body;
 
-        // Tìm danh mục theo ID
+        // 1. Tìm danh mục đang sửa
         const category = await Category.findById(categoryId);
         if (!category) {
             return res.redirect('/admin/categories');
         }
 
-        // Cập nhật thông tin
+        // 2. Cập nhật thông tin cơ bản
         category.name = name;
         category.description = description;
-        
-        // Cập nhật Slug mới nếu tên thay đổi
+
+        // 3. Cập nhật Slug nếu tên đổi
         if (name) {
             category.slug = slugify(name, { lower: true, strict: true });
         }
 
+        // 4. KIỂM TRA ẢNH MỚI (QUAN TRỌNG)
+        // Nếu có file gửi lên -> Thay thế ảnh cũ
+        if (req.file) {
+            category.image = req.file.path;
+        }
+
+        // 5. Lưu lại
         await category.save();
 
         console.log(`✅ Đã cập nhật danh mục: ${name}`);

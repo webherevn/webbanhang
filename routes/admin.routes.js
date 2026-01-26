@@ -47,6 +47,8 @@ router.post('/delete-category', categoryController.postDeleteCategory); // Xóa
 
 // --- SỬA DANH MỤC ---
 router.get('/edit-category/:categoryId', categoryController.getEditCategory);
+// THÊM upload.single('image') VÀO GIỮA
+router.post('/edit-category', upload.single('image'), categoryController.postEditCategory);
 router.post('/edit-category', categoryController.postEditCategory);
 
 
