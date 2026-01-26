@@ -101,7 +101,10 @@
                                 
                                 <div class="overflow-hidden">
                                     <a href="/products/<%= product.slug %>">
-                                        <img src="<%= product.images[0] %>" class="img-fluid w-100 product-img" alt="<%= product.name %>" loading="lazy">
+                                        <img src="<%= product.thumbnail || product.images[0] %>" 
+                                            class="img-fluid w-100 product-img" 
+                                            alt="<%= product.name %>" 
+                                            loading="lazy">
                                     </a>
                                 </div>
 
