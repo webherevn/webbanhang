@@ -47,9 +47,14 @@ app.use(session({
   // --- CẤU HÌNH STORE MỚI (KHẮC PHỤC LỖI BSON) ---
   store: MongoStore.create({
     mongoUrl: process.env.MONGO_URI,
-    collectionName: 'sessions', // Tên bảng lưu session
-    ttl: 14 * 24 * 60 * 60, // Tự xóa sau 14 ngày (tính bằng giây)
-    autoRemove: 'native' // Tự động xóa session hết hạn
+    
+    // --- SỬA DÒNG NÀY ---
+    // Đổi tên từ 'sessions' thành 'sessions_new' (hoặc tên gì tùy bạn)
+    // Để nó tạo bảng mới, tránh xung đột với dữ liệu rác cũ
+    collectionName: 'sessions_new', 
+    
+    ttl: 14 * 24 * 60 * 60, 
+    autoRemove: 'native'
   }),
   
   // Cấu hình Cookie
