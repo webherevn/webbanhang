@@ -69,7 +69,7 @@
                                                     <input type="hidden" name="categoryId" value="<%= cat._id %>">
                                                     <button class="btn btn-link p-0 text-danger border-0 bg-transparent small">Xóa</button>
                                                 </form> | 
-                                                <a href="/blog/category/<%= cat.slug %>" target="_blank" class="text-success text-decoration-none">Xem</a>
+                                               <a href="/blog/<%= cat.slug %>" target="_blank" class="text-success text-decoration-none">Xem</a>
                                             </div>
                                         </td>
                                         <td class="small text-muted"><%- cat.description ? cat.description.substring(0, 50) + '...' : '—' %></td>

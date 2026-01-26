@@ -24,22 +24,22 @@ exports.getIndex = async (req, res) => {
 // 2. MỚI: Xem tin tức theo Chuyên mục (Chuẩn SEO)
 exports.getPostsByCategory = async (req, res) => {
     try {
-        const slug = req.params.slug;
+        const slug = req.params.slug; // Lấy slug từ URL: /blog/tin-tuc
 
-        // 1. Tìm chuyên mục theo slug
+        // 1. Tìm chuyên mục trong DB dựa trên slug
         const category = await BlogCategory.findOne({ slug: slug });
         
         if (!category) {
-            return res.redirect('/blog'); // Không thấy chuyên mục thì về trang chung
+            // Nếu không tìm thấy chuyên mục nào trùng slug, quay về trang blog chính
+            return res.redirect('/blog');
         }
 
-        // 2. Tìm bài viết thuộc chuyên mục đó
+        // 2. Lấy các bài viết thuộc chuyên mục này
         const posts = await Post.find({ 
             category: category._id, 
             isActive: true 
         }).sort({ createdAt: -1 }).populate('category');
 
-        // 3. Lấy lại danh sách tất cả chuyên mục cho sidebar
         const categories = await BlogCategory.find();
 
         res.render('shop/blog-list', {
@@ -47,10 +47,9 @@ exports.getPostsByCategory = async (req, res) => {
             path: '/blog',
             posts: posts,
             categories: categories,
-            currentCategory: category // Gửi dữ liệu chuyên mục hiện tại để hiển thị tên/mô tả bài viết
+            currentCategory: category
         });
     } catch (err) {
-        console.log("❌ Lỗi lọc chuyên mục:", err);
         res.redirect('/blog');
     }
 };
