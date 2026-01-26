@@ -81,5 +81,23 @@ app.use((req, res, next) => {
     res.status(404).render('404', { pageTitle: 'Page Not Found', path: '/404' });
 });
 
+
+const Setting = require('./models/SettingModel');
+
+// Middleware lấy Script từ DB và truyền vào tất cả các file EJS
+app.use(async (req, res, next) => {
+    try {
+        let settings = await Setting.findOne({ key: 'global_settings' });
+        if (!settings) {
+            settings = await Setting.create({ key: 'global_settings' });
+        }
+        // Gán vào res.locals để dùng được ở mọi file .ejs mà không cần truyền thủ công
+        res.locals.globalScripts = settings; 
+        next();
+    } catch (err) {
+        next(err);
+    }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));

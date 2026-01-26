@@ -1,0 +1,40 @@
+<%- include('../partials/head.ejs') %>
+<style>
+    .code-editor { font-family: 'Courier New', Courier, monospace; background: #272822; color: #f8f8f2; }
+    .admin-content { margin-left: 240px; padding: 30px; background: #f0f0f1; min-height: 100vh; }
+    .wp-card { background: #fff; border: 1px solid #c3c4c7; padding: 20px; margin-bottom: 20px; }
+    label { font-weight: bold; display: block; margin-bottom: 10px; color: #1d2327; }
+</style>
+</head>
+<body>
+    <div class="admin-wrapper">
+        <div class="admin-sidebar-container"><%- include('./partials/sidebar.ejs') %></div>
+
+        <div class="admin-content">
+            <h2 class="fw-bold h4 mb-4">WPCode Editor - Chèn Script</h2>
+            
+            <form action="/admin/settings/scripts" method="POST">
+                <div class="wp-card shadow-sm">
+                    <label>Header Scripts (Trước thẻ &lt;/head&gt;)</label>
+                    <p class="small text-muted">Dùng cho: Google Search Console, Analytics, Facebook Pixel, CSS tùy chỉnh.</p>
+                    <textarea name="headerScripts" class="form-control code-editor" rows="8"><%= settings.headerScripts %></textarea>
+                </div>
+
+                <div class="wp-card shadow-sm">
+                    <label>Body Scripts (Sau thẻ &lt;body&gt;)</label>
+                    <p class="small text-muted">Dùng cho: Các mã tracking yêu cầu đặt ngay sau body.</p>
+                    <textarea name="bodyScripts" class="form-control code-editor" rows="8"><%= settings.bodyScripts %></textarea>
+                </div>
+
+                <div class="wp-card shadow-sm">
+                    <label>Footer Scripts (Trước thẻ &lt;/body&gt;)</label>
+                    <p class="small text-muted">Dùng cho: Live chat, mã Javascript nặng, liên kết ngoài.</p>
+                    <textarea name="footerScripts" class="form-control code-editor" rows="8"><%= settings.footerScripts %></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary fw-bold px-5">Lưu thay đổi</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

@@ -71,4 +71,8 @@ router.post('/edit-post', upload.fields([{ name: 'thumbnail', maxCount: 1 }]), p
 // Upload ảnh cho bài viết (Dùng fields vì thường có thumbnail)
 router.post('/add-post', upload.fields([{ name: 'thumbnail', maxCount: 1 }]), postController.postAddPost);
 
+
+router.get('/settings', adminController.getScripts);
+router.post('/settings/scripts', adminController.postScripts);
+
 module.exports = router;
