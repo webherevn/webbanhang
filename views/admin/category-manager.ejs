@@ -125,10 +125,14 @@
                                                     <div class="row-actions mt-1">
                                                         <a href="/admin/edit-category/<%= cat._id %>" class="text-primary text-decoration-none">Sửa</a>
                                                         <span class="text-muted mx-1">|</span>
+                                                        
                                                         <form action="/admin/delete-category" method="POST" class="d-inline" onsubmit="return confirm('Xóa danh mục này?');">
                                                             <input type="hidden" name="categoryId" value="<%= cat._id %>">
-                                                            <button type="submit" class="btn btn-link p-0 text-danger text-decoration-none border-0 bg-transparent" style="font-size: 13px;">Xóa vĩnh viễn</button>
+                                                            <button type="submit" class="btn btn-link p-0 text-danger text-decoration-none border-0 bg-transparent" style="font-size: 13px;">Xóa</button>
                                                         </form>
+
+                                                        <span class="text-muted mx-1">|</span>
+                                                        <a href="/category/<%= cat.slug %>" target="_blank" class="text-success text-decoration-none">Xem</a>
                                                     </div>
                                                 </td>
 
