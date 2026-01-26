@@ -1,160 +1,132 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><%= (typeof editing !== 'undefined' && editing) ? 'Sửa Sản Phẩm' : 'Thêm Sản Phẩm' %> - CMS</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<%- include('../partials/head.ejs') %>
+<script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
+
+<style>
+    /* KHUNG CHUẨN WORDPRESS CMS */
+    body { background-color: #f0f0f1; margin: 0; padding: 0; overflow-x: hidden; }
     
-    <style>
-        body { background-color: #f0f0f1; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif; }
-        .wp-box { background: #fff; border: 1px solid #dcdcde; margin-bottom: 20px; box-shadow: 0 1px 1px rgba(0,0,0,.04); }
-        .wp-box-header { padding: 10px 15px; border-bottom: 1px solid #dcdcde; font-weight: 600; font-size: 14px; }
-        .wp-box-body { padding: 15px; }
-        .img-preview { width: 100%; height: 200px; object-fit: cover; background: #f0f0f1; border: 1px dashed #ccc; display: flex; align-items: center; justify-content: center; color: #777; margin-bottom: 10px; }
-        .tox-tinymce { border: 1px solid #dcdcde !important; border-radius: 0 !important; }
-    </style>
+    .admin-wrapper { display: flex; min-height: 100vh; }
+    
+    /* Sidebar cố định bên trái */
+    .admin-sidebar-container {
+        width: 240px; 
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        background-color: #23282d;
+        z-index: 1000;
+    }
 
-    <script src="https://cdn.tiny.cloud/1/30a0eu1k962nxwgtruahq4cwpgbfquvd5hq3kmdzfnmbgvnj/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+    /* Content đẩy sang phải đúng 240px */
+    .admin-content {
+        flex: 1;
+        margin-left: 240px; 
+        padding: 20px 30px;
+        min-width: 0; /* Fix lỗi tràn flexbox */
+    }
 
-    <script>
-      tinymce.init({
-        selector: '#descriptionEditor',
-        plugins: 'preview importcss searchreplace autolink autosave save directionality code visualblocks visualchars fullscreen image link media template codesample table charmap pagebreak nonbreaking anchor insertdatetime advlist lists wordcount help charmap quickbars emoticons',
-        menubar: 'file edit view insert format tools table help',
-        toolbar: 'undo redo | bold italic underline | alignleft aligncenter alignright | bullist numlist | link image',
-        height: 500
-      });
-    </script>
+    .wp-card { background: #fff; border: 1px solid #c3c4c7; box-shadow: 0 1px 1px rgba(0,0,0,.04); padding: 20px; margin-bottom: 20px; }
+    .postbox-header { border-bottom: 1px solid #c3c4c7; padding: 10px 0; margin-bottom: 15px; font-weight: 600; }
+    
+    /* Responsive cho màn hình nhỏ */
+    @media (max-width: 992px) {
+        .admin-sidebar-container { display: none; }
+        .admin-content { margin-left: 0; }
+    }
+</style>
 </head>
-
 <body>
-    <% const isEditing = (typeof editing !== 'undefined' && editing); %>
 
-    <div class="d-flex">
-        <%- include('partials/sidebar.ejs') %>
+    <div class="admin-wrapper">
+        <div class="admin-sidebar-container">
+            <%- include('./partials/sidebar.ejs') %>
+        </div>
 
-        <div class="flex-grow-1 p-4" style="height: 100vh; overflow-y: auto;">
-            <h2 class="mb-4 fw-bold"><%= isEditing ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm mới' %></h2>
+        <div class="admin-content">
+            <div class="container-fluid">
+                <h2 class="fw-bold mb-4 h4"><%= editing ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm mới' %></h2>
 
-            <form action="/admin/<%= isEditing ? 'edit-product' : 'add-product' %>" method="POST" enctype="multipart/form-data">
-                
-                <% if (isEditing) { %>
-                    <input type="hidden" name="productId" value="<%= product._id %>">
-                <% } %>
+                <form action="/admin/<%= editing ? 'edit-product' : 'add-product' %>" method="POST" enctype="multipart/form-data">
+                    <div class="row">
+                        <div class="col-md-9">
+                            <div class="mb-4">
+                                <label class="fw-bold small mb-1">Tên sản phẩm</label>
+                                <input type="text" name="name" class="form-control form-control-lg shadow-sm" 
+                                       value="<%= editing ? product.name : '' %>" placeholder="Nhập tên sản phẩm..." required>
+                            </div>
 
-                <div class="row">
-                    <div class="col-md-9">
-                        <div class="mb-3">
-                            <input type="text" name="name" 
-                                   value="<%= isEditing ? product.name : '' %>"
-                                   class="form-control form-control-lg fs-4 fw-bold" 
-                                   placeholder="Nhập tên sản phẩm tại đây..." required style="padding: 10px;">
-                        </div>
+                            <div class="wp-card">
+                                <div class="postbox-header text-uppercase small">Mô tả sản phẩm</div>
+                                <textarea name="description" id="prodDesc"><%= editing ? product.description : '' %></textarea>
+                            </div>
 
-                        <div class="mb-4">
-                            <textarea id="descriptionEditor" name="description"><%= isEditing ? product.description : '' %></textarea>
-                        </div>
-
-                        <div class="wp-box">
-                            <div class="wp-box-header"><span><i class="fas fa-tag me-1"></i> Dữ liệu sản phẩm</span></div>
-                            <div class="wp-box-body">
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <label class="form-label fw-bold small text-uppercase">Giá bán thường (₫)</label>
-                                        <input type="text" name="basePrice" 
-                                               value="<%= isEditing ? product.basePrice : '' %>"
-                                               class="form-control" placeholder="Ví dụ: 250,000" required>
+                            <div class="wp-card">
+                                <div class="postbox-header text-uppercase small">Dữ liệu sản phẩm</div>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label small fw-bold">Giá gốc (₫)</label>
+                                        <input type="number" name="basePrice" class="form-control" value="<%= editing ? product.basePrice : '' %>" required>
                                     </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label class="form-label fw-bold small text-uppercase">Giá khuyến mãi (₫)</label>
-                                        <input type="text" name="salePrice" 
-                                               value="<%= (isEditing && product.salePrice > 0) ? product.salePrice : '' %>"
-                                               class="form-control" placeholder="Để trống nếu không giảm">
+                                    <div class="col-md-6">
+                                        <label class="form-label small fw-bold">Giá khuyến mãi (₫)</label>
+                                        <input type="number" name="salePrice" class="form-control" value="<%= editing ? product.salePrice : '' %>">
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="col-md-3">
-                        <div class="wp-box">
-                            <div class="wp-box-header">Đăng bài</div>
-                            <div class="wp-box-body">
-                                <button type="submit" class="btn btn-primary w-100 mb-2 fw-bold">
-                                    <%= isEditing ? 'Cập nhật' : 'Đăng sản phẩm' %>
+                        <div class="col-md-3">
+                            <div class="wp-card">
+                                <div class="postbox-header text-uppercase small">Hành động</div>
+                                <div class="mb-3 small">
+                                    <i class="fas fa-eye me-1 text-muted"></i> Trạng thái: <b>Công khai</b>
+                                </div>
+                                <% if (editing) { %>
+                                    <input type="hidden" name="productId" value="<%= product._id %>">
+                                <% } %>
+                                <button type="submit" class="btn btn-primary w-100 fw-bold">
+                                    <%= editing ? 'Cập nhật sản phẩm' : 'Đăng sản phẩm' %>
                                 </button>
-                                <a href="/admin/products" class="btn btn-outline-secondary w-100 btn-sm">Hủy bỏ</a>
+                            </div>
+
+                            <div class="wp-card">
+                                <div class="postbox-header text-uppercase small">Danh mục</div>
+                                <select name="category" class="form-select form-select-sm" required>
+                                    <% categories.forEach(cat => { %>
+                                        <option value="<%= cat._id %>" 
+                                            <%= (editing && product.category && product.category.toString() === cat._id.toString()) ? 'selected' : '' %>>
+                                            <%= cat.name %>
+                                        </option>
+                                    <% }) %>
+                                </select>
+                            </div>
+
+                            <div class="wp-card text-center">
+                                <div class="postbox-header text-uppercase small">Ảnh sản phẩm</div>
+                                <% if (editing && product.thumbnail) { %>
+                                    <img src="<%= product.thumbnail %>" class="img-fluid mb-2 border rounded" style="max-height: 150px;">
+                                <% } %>
+                                <input type="file" name="thumbnail" class="form-control form-control-sm">
+                            </div>
+
+                            <div class="wp-card text-center">
+                                <div class="postbox-header text-uppercase small">Album hình ảnh</div>
+                                <input type="file" name="gallery" class="form-control form-control-sm" multiple>
+                                <small class="text-muted mt-2 d-block" style="font-size: 10px;">Có thể chọn nhiều ảnh cùng lúc</small>
                             </div>
                         </div>
-
-                        <div class="wp-box">
-                            <div class="wp-box-header">Danh mục</div>
-                            <div class="wp-box-body">
-                                <div class="bg-light border p-2 mb-2" style="max-height: 200px; overflow-y: auto;">
-                                    <% if (typeof categories !== 'undefined' && categories.length > 0) { %>
-                                        <% categories.forEach(cat => { %>
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="radio" name="category" value="<%= cat.slug %>" id="cat_<%= cat._id %>" required
-                                                <%= (isEditing && product.category === cat.slug) ? 'checked' : '' %>>
-                                                
-                                                <label class="form-check-label" for="cat_<%= cat._id %>">
-                                                    <%= cat.name %>
-                                                </label>
-                                            </div>
-                                        <% }) %>
-                                    <% } else { %>
-                                        <p class="small text-muted mb-0">Chưa có danh mục nào.</p>
-                                    <% } %>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="wp-box">
-                            <div class="wp-box-header">Ảnh đại diện</div>
-                            <div class="wp-box-body text-center">
-                                <img id="thumbPreview" class="img-preview" 
-                                     src="<%= (isEditing && product.thumbnail) ? product.thumbnail : '' %>" 
-                                     style="<%= (isEditing && product.thumbnail) ? 'display:block;' : 'display:none;' %>"
-                                     alt="Preview">
-                                
-                                <label for="thumbnailInput" class="btn btn-outline-primary btn-sm w-100">
-                                    <%= isEditing ? 'Chọn ảnh khác (Nếu muốn thay)' : 'Chọn ảnh đại diện' %>
-                                </label>
-                                
-                                <input type="file" id="thumbnailInput" name="thumbnail" class="d-none" accept="image/*" 
-                                       onchange="previewImage(this, 'thumbPreview')" 
-                                       <%= isEditing ? '' : 'required' %>>
-                            </div>
-                        </div>
-
-                        <div class="wp-box">
-                            <div class="wp-box-header">Thư viện ảnh</div>
-                            <div class="wp-box-body">
-                                <input type="file" name="gallery" class="form-control form-control-sm" multiple accept="image/*">
-                                <small class="text-muted d-block mt-1 fst-italic">Giữ phím <b>Ctrl</b> để chọn nhiều ảnh.</small>
-                            </div>
-                        </div>
-
                     </div>
-                </div>
-            </form>
+                </form>
+            </div>
         </div>
     </div>
 
     <script>
-        function previewImage(input, imgId) {
-            if (input.files && input.files[0]) {
-                var reader = new FileReader();
-                reader.onload = function(e) {
-                    var img = document.getElementById(imgId);
-                    img.src = e.target.result;
-                    img.style.display = 'block';
-                }
-                reader.readAsDataURL(input.files[0]);
-            }
-        }
+        CKEDITOR.replace('prodDesc', {
+            height: 300,
+            removeButtons: 'PasteFromWord'
+        });
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
