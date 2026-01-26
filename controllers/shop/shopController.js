@@ -1,6 +1,6 @@
 // controllers/shop/shopController.js
 const Product = require('../../models/ProductModel'); // Nhớ gọi đúng tên Model
-const Category = require('../models/CategoryModel');
+const Category = require('../../models/CategoryModel');
 
 exports.getHomepage = async (req, res) => {
   try {
