@@ -1,26 +1,29 @@
 const express = require('express');
 const router = express.Router();
+
+// Import Controllers (Gom hết lên đầu cho gọn)
 const shopController = require('../controllers/shop/shopController');
-const cartController = require('../controllers/shop/cartController'); // <--- Import mới
+const cartController = require('../controllers/shop/cartController'); 
+const checkoutController = require('../controllers/shop/checkoutController'); // <-- Đảm bảo bạn đã tạo file này
 
-router.get('/', shopController.getHomepage);
-router.get('/products/:slug', shopController.getProductDetail);
+// --- 1. TRANG CHỦ & SẢN PHẨM ---
+// Lưu ý: Kiểm tra trong shopController tên hàm là 'getHomepage' hay 'getIndex'
+router.get('/', shopController.getHomepage); 
+router.get('/products/:productId', shopController.getProductDetail);
 
-// --- ROUTES GIỎ HÀNG ---
+// --- 2. GIỎ HÀNG ---
 router.get('/cart', cartController.getCart);
-router.post('/cart/add', cartController.addToCart);
+
+// Quan trọng: Route này là '/cart/add', nên bên HTML form phải sửa action thành '/cart/add'
+router.post('/cart/add', cartController.addToCart); 
+
+// Route xóa sản phẩm
 router.post('/cart/delete', cartController.removeFromCart);
 
-// ... (các dòng import cũ)
-const checkoutController = require('../controllers/shop/checkoutController'); // <--- Import mới
-
-// ... (các route cũ của cart)
-
-// --- ROUTES THANH TOÁN ---
+// --- 3. THANH TOÁN (CHECKOUT) ---
 router.get('/checkout', checkoutController.getCheckout);
 router.post('/checkout', checkoutController.postCheckout);
 router.get('/checkout/success', checkoutController.getSuccess);
 
-module.exports = router;
-
+// Chỉ được có 1 dòng module.exports ở cuối cùng
 module.exports = router;

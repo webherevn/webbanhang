@@ -6,9 +6,11 @@
     <title><%= pageTitle %></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        .main-img { width: 100%; height: auto; object-fit: cover; border-radius: 8px; }
-        .thumb-img { width: 80px; height: 80px; object-fit: cover; cursor: pointer; border: 1px solid #ddd; margin-right: 5px; }
+        .main-img { width: 100%; height: 500px; object-fit: contain; border: 1px solid #eee; border-radius: 8px; }
+        .thumb-img { width: 80px; height: 80px; object-fit: cover; cursor: pointer; border: 1px solid #ddd; margin-right: 5px; border-radius: 4px; }
         .thumb-img:hover { border: 2px solid #000; }
+        /* Ẩn input số lượng mặc định xấu xí */
+        input[type=number]::-webkit-inner-spin-button { opacity: 1; }
     </style>
 </head>
 <body>
@@ -16,7 +18,12 @@
         <div class="container">
             <a class="navbar-brand" href="/">FASHION SHOP</a>
             <div class="navbar-nav ms-auto">
-                <a class="nav-link" href="/cart">Giỏ hàng (<%= cart.totalQuantity %>)</a>
+                <a class="nav-link btn btn-outline-secondary text-white border-0" href="/cart">
+                    Giỏ hàng 
+                    <span class="badge bg-danger rounded-pill">
+                        <%= (typeof cart !== 'undefined' && cart.totalQuantity) ? cart.totalQuantity : 0 %>
+                    </span>
+                </a>
             </div>
         </div>
     </nav>
@@ -24,43 +31,66 @@
     <div class="container mt-5">
         <div class="row">
             <div class="col-md-6 mb-4">
-                <img src="<%= product.images[0] %>" class="main-img mb-3" id="mainImage">
+                <% if (product.images && product.images.length > 0) { %>
+                    <img src="<%= product.images[0] %>" class="main-img mb-3" id="mainImage">
+                <% } else { %>
+                    <img src="<%= product.thumbnail || 'https://via.placeholder.com/500x500?text=No+Image' %>" class="main-img mb-3" id="mainImage">
+                <% } %>
                 
-                <div class="d-flex">
-                    <% product.images.forEach(img => { %>
-                        <img src="<%= img %>" class="thumb-img" onclick="changeImage(this.src)">
-                    <% }) %>
+                <div class="d-flex overflow-auto">
+                    <% if (product.images && product.images.length > 0) { %>
+                        <% product.images.forEach(img => { %>
+                            <img src="<%= img %>" class="thumb-img" onclick="changeImage(this.src)">
+                        <% }) %>
+                    <% } %>
                 </div>
             </div>
 
             <div class="col-md-6">
-                <h2 class="fw-bold"><%= product.name %></h2>
-                <h3 class="text-danger my-3"><%= product.basePrice.toLocaleString('vi-VN') %> đ</h3>
-                
-                <p class="text-muted"><%= product.description %></p>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="/" class="text-decoration-none text-dark">Trang chủ</a></li>
+                        <li class="breadcrumb-item active" aria-current="page"><%= product.name %></li>
+                    </ol>
+                </nav>
 
-                <hr>
+                <h2 class="fw-bold"><%= product.name %></h2>
+                <h3 class="text-danger my-3 fw-bold"><%= product.basePrice ? product.basePrice.toLocaleString('vi-VN') : 0 %> ₫</h3>
+                
+                <p class="text-muted"><%= product.description || "Chưa có mô tả cho sản phẩm này." %></p>
+
+                <hr class="my-4">
 
                 <form action="/cart/add" method="POST">
                     <input type="hidden" name="productId" value="<%= product._id %>">
                     
                     <div class="mb-3">
-                        <label class="fw-bold">Chọn Phân Loại:</label>
-                        <select name="variant" class="form-select w-50 mt-2">
-                            <% product.variants.forEach(v => { %>
-                                <option value="<%= v.color %>-<%= v.size %>">
-                                    Màu <%= v.color %> - Size <%= v.size %> (Còn: <%= v.quantity %>)
-                                </option>
-                            <% }) %>
-                        </select>
+                        <label class="fw-bold mb-2">Chọn Phân Loại:</label>
+                        
+                        <% if (product.variants && product.variants.length > 0) { %>
+                            <select name="variant" class="form-select w-50">
+                                <% product.variants.forEach(v => { %>
+                                    <option value="<%= v.color %>-<%= v.size %>">
+                                        Màu <%= v.color %> - Size <%= v.size %> (Còn: <%= v.quantity %>)
+                                    </option>
+                                <% }) %>
+                            </select>
+                        <% } else { %>
+                            <div class="alert alert-secondary w-50 py-2">
+                                Tiêu chuẩn (Freesize)
+                            </div>
+                            <input type="hidden" name="variant" value="Tiêu chuẩn">
+                        <% } %>
                     </div>
 
                     <div class="mb-4">
-                        <label class="fw-bold">Số lượng:</label>
-                        <input type="number" name="quantity" value="1" min="1" class="form-control w-25 mt-2">
+                        <label class="fw-bold mb-2">Số lượng:</label>
+                        <input type="number" name="quantity" value="1" min="1" max="100" class="form-control w-25 text-center">
                     </div>
 
-                    <button type="submit" class="btn btn-dark btn-lg w-100">THÊM VÀO GIỎ HÀNG</button>
+                    <button type="submit" class="btn btn-dark btn-lg w-100 py-3 fw-bold text-uppercase">
+                        Thêm vào giỏ hàng
+                    </button>
                 </form>
             </div>
         </div>

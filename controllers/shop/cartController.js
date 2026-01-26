@@ -1,73 +1,93 @@
-const Product = require('../../models/ProductModel'); // Đảm bảo đúng tên file Model bạn đã sửa
+// Kiểm tra kỹ tên file Model (ProductModel hay productModel)
+const Product = require('../../models/ProductModel'); 
 
 // 1. Xem giỏ hàng
 exports.getCart = (req, res) => {
-  // Nếu chưa có giỏ hàng trong session thì tạo rỗng để tránh lỗi view
+  // Khởi tạo giỏ hàng an toàn
   const cart = req.session.cart || { items: [], totalQuantity: 0, totalPrice: 0 };
 
   res.render('shop/cart', {
     pageTitle: 'Giỏ hàng của bạn',
+    path: '/cart', // Thêm path để active menu nếu cần
     cart: cart
   });
 };
 
 // 2. Thêm vào giỏ hàng
 exports.addToCart = async (req, res) => {
+  console.log("--- THÊM VÀO GIỎ ---");
   try {
     const { productId, variant, quantity } = req.body;
-    const qty = parseInt(quantity);
+    
+    // VALIDATE SỐ LƯỢNG (Rất quan trọng)
+    // Đảm bảo qty luôn là số dương, nếu lỗi thì mặc định là 1
+    let qty = parseInt(quantity);
+    if (isNaN(qty) || qty < 1) qty = 1;
 
-    // Lấy thông tin sản phẩm từ DB để chắc chắn giá đúng
+    // Lấy sản phẩm từ DB
     const product = await Product.findById(productId);
     
+    // Nếu sản phẩm bị xóa hoặc không tìm thấy
     if (!product) {
+        console.log("❌ Không tìm thấy sản phẩm ID:", productId);
         return res.redirect('/');
     }
 
-    // Tạo cấu trúc item
+    // XỬ LÝ ẢNH AN TOÀN (Tránh crash nếu mảng ảnh rỗng)
+    const productImage = (product.images && product.images.length > 0) 
+                         ? product.images[0] 
+                         : product.thumbnail || "https://via.placeholder.com/150";
+
+    // Xử lý Variant (Nếu khách không chọn size/màu, gán mặc định)
+    const currentVariant = variant || "Tiêu chuẩn";
+
+    // Tạo item để lưu
     const cartItem = {
       productId: product._id,
       name: product.name,
       price: product.basePrice,
-      image: product.images[0], // Lấy ảnh đầu tiên
-      variant: variant, // VD: "Xanh-L"
+      image: productImage,
+      variant: currentVariant,
       quantity: qty,
       total: product.basePrice * qty
     };
 
-    // Lấy giỏ hàng từ session (nếu chưa có thì tạo mới)
+    // Lấy giỏ hàng hiện tại
     const cart = req.session.cart || { items: [], totalQuantity: 0, totalPrice: 0 };
     
-    // Kiểm tra xem sản phẩm này (cùng màu/size) đã có trong giỏ chưa?
+    // KIỂM TRA TRÙNG SẢN PHẨM (Cùng ID và cùng Variant)
     const existingItemIndex = cart.items.findIndex(item => 
-      item.productId.toString() === productId && item.variant === variant
+      item.productId.toString() === productId && item.variant === currentVariant
     );
 
     if (existingItemIndex >= 0) {
-      // Nếu có rồi -> Tăng số lượng và tiền
+      // Đã có -> Tăng số lượng & Cập nhật giá tổng của item đó
       cart.items[existingItemIndex].quantity += qty;
       cart.items[existingItemIndex].total += cartItem.total;
     } else {
-      // Nếu chưa -> Thêm mới vào mảng
+      // Chưa có -> Thêm mới
       cart.items.push(cartItem);
     }
 
-    // Cập nhật tổng giỏ hàng
+    // Cập nhật TỔNG CẢ GIỎ HÀNG
     cart.totalQuantity += qty;
     cart.totalPrice += cartItem.total;
 
-    // Cập nhật lại session
+    // Gán lại vào session
     req.session.cart = cart;
 
-    // QUAN TRỌNG: Lưu session xuống DB xong mới chuyển trang
-    // (Khắc phục lỗi giỏ hàng trống trên Render)
+    // --- LƯU SESSION (QUAN TRỌNG CHO RENDER) ---
     req.session.save(err => {
-      if (err) console.log('Lỗi lưu session:', err);
+      if (err) {
+          console.log('❌ Lỗi lưu session:', err);
+          return res.redirect('/');
+      }
+      console.log(`✅ Đã thêm: ${product.name} (x${qty})`);
       res.redirect('/cart');
     });
 
   } catch (err) {
-    console.log(err);
+    console.log("❌ Lỗi AddToCart:", err);
     res.redirect('/');
   }
 };
@@ -81,21 +101,29 @@ exports.removeFromCart = (req, res) => {
       return res.redirect('/cart');
   }
 
-  // Tìm vị trí sản phẩm cần xóa
+  // Tìm sản phẩm cần xóa (Khớp cả ID lẫn Variant)
+  // Lưu ý: Dùng currentVariant để khớp nếu bên view gửi lên
   const itemIndex = cart.items.findIndex(item => 
-    item.productId.toString() === productId && item.variant === variant
+    item.productId.toString() === productId && 
+    (item.variant === variant || (!variant && item.variant === "Tiêu chuẩn"))
   );
 
   if (itemIndex >= 0) {
-    // Trừ đi tổng tiền và số lượng của item đó
-    cart.totalQuantity -= cart.items[itemIndex].quantity;
-    cart.totalPrice -= cart.items[itemIndex].total;
+    const item = cart.items[itemIndex];
     
-    // Xóa item khỏi mảng
+    // Trừ đi tổng số lượng và tổng tiền
+    cart.totalQuantity -= item.quantity;
+    cart.totalPrice -= item.total;
+    
+    // Đảm bảo không bị âm tiền (Do lỗi làm tròn số học JS)
+    if (cart.totalPrice < 0) cart.totalPrice = 0;
+    if (cart.totalQuantity < 0) cart.totalQuantity = 0;
+
+    // Xóa khỏi mảng
     cart.items.splice(itemIndex, 1);
   }
 
-  // QUAN TRỌNG: Lưu session xong mới chuyển trang
+  // Lưu và reload
   req.session.save(err => {
     if (err) console.log(err);
     res.redirect('/cart');

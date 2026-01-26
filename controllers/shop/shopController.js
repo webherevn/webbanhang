@@ -22,7 +22,7 @@ exports.getHomepage = async (req, res) => {
 exports.getProductDetail = async (req, res) => {
   try {
     // Tìm sản phẩm dựa vào slug trên URL (ví dụ: ao-thun-mua-he)
-    const slug = req.params.slug;
+    const slug = req.params.productId;
     const product = await Product.findOne({ slug: slug, isActive: true });
 
     if (!product) {
