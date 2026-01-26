@@ -1,17 +1,20 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
+
+// --- QUAN TRỌNG: NẠP BIẾN MÔI TRƯỜNG NGAY LẬP TỨC ---
+// Phải chạy dòng này trước khi import routes hay session
+dotenv.config(); 
+
 const session = require('express-session');
-// --- THAY ĐỔI Ở ĐÂY: Dùng connect-mongo thay vì connect-mongodb-session ---
 const MongoStore = require('connect-mongo'); 
 const path = require('path');
 
-// Import Routes
+// Import Routes (Bây giờ import ở đây mới an toàn vì dotenv đã chạy rồi)
 const adminRoutes = require('./routes/admin.routes');
 const shopRoutes = require('./routes/shop.routes');
 
 // Khởi tạo App
-dotenv.config();
 const app = express();
 
 // ============================================================
@@ -34,33 +37,23 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // ============================================================
-// 3. CẤU HÌNH SESSION (SỬ DỤNG CONNECT-MONGO MỚI)
+// 3. CẤU HÌNH SESSION
 // ============================================================
-// Không cần tạo biến 'store' riêng lẻ lằng nhằng như cũ nữa
-// Chúng ta cấu hình trực tiếp bên trong app.use(session)
-
 app.use(session({
   secret: process.env.SESSION_SECRET || 'my secret key fashion shop', 
   resave: false,
   saveUninitialized: false, 
   
-  // --- CẤU HÌNH STORE MỚI (KHẮC PHỤC LỖI BSON) ---
   store: MongoStore.create({
     mongoUrl: process.env.MONGO_URI,
-    
-    // --- SỬA DÒNG NÀY ---
-    // Đổi tên từ 'sessions' thành 'sessions_new' (hoặc tên gì tùy bạn)
-    // Để nó tạo bảng mới, tránh xung đột với dữ liệu rác cũ
-    collectionName: 'sessions_new', 
-    
+    collectionName: 'sessions_new', // Tên bảng session
     ttl: 14 * 24 * 60 * 60, 
     autoRemove: 'native'
   }),
   
-  // Cấu hình Cookie
   cookie: {
-    maxAge: 14 * 24 * 60 * 60 * 1000, // 14 ngày (tính bằng mili giây)
-    secure: process.env.NODE_ENV === 'production', // Render -> True
+    maxAge: 14 * 24 * 60 * 60 * 1000, 
+    secure: process.env.NODE_ENV === 'production', 
     httpOnly: true,
     sameSite: 'lax' 
   }
@@ -90,5 +83,3 @@ app.use((req, res, next) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
-
-// Update config session for Render

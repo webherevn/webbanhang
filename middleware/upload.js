@@ -5,7 +5,10 @@ const dotenv = require('dotenv');
 
 // Load biến môi trường
 dotenv.config();
-
+// --- THÊM DÒNG LOG NÀY ĐỂ DEBUG ---
+console.log("CLOUDINARY CONFIG CHECK:", process.env.CLOUDINARY_CLOUD_NAME); 
+// Nếu nó in ra "undefined" -> Lỗi do thứ tự trong app.js
+// Nếu nó in ra tên cloud của bạn -> Code upload đúng, lỗi do chỗ khác.
 // 1. CẤU HÌNH CLOUDINARY
 // (Lấy thông tin từ .env)
 cloudinary.config({
