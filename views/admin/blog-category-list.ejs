@@ -1,0 +1,48 @@
+<%- include('../partials/head.ejs') %>
+</head>
+<body>
+    <%- include('../partials/navigation.ejs') %>
+    <div class="container py-5">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-dark text-white">Thêm Chuyên Mục Mới</div>
+                    <div class="card-body">
+                        <form action="/admin/add-blog-category" method="POST">
+                            <div class="mb-3">
+                                <label>Tên chuyên mục</label>
+                                <input type="text" name="name" class="form-control" required placeholder="VD: Khuyến Mãi">
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Thêm Mới</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-8">
+                <h3 class="mb-3">Danh Sách Chuyên Mục</h3>
+                <table class="table table-bordered table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Tên</th>
+                            <th>Slug (URL)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if(categories.length > 0) { %>
+                            <% categories.forEach(cat => { %>
+                                <tr>
+                                    <td><%= cat.name %></td>
+                                    <td><%= cat.slug %></td>
+                                </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr><td colspan="2" class="text-center">Chưa có chuyên mục nào.</td></tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

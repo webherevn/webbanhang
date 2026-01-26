@@ -5,7 +5,8 @@ const router = express.Router();
 const shopController = require('../controllers/shop/shopController');
 const cartController = require('../controllers/shop/cartController'); 
 const checkoutController = require('../controllers/shop/checkoutController'); 
-
+// --- ĐOẠN 1: Thêm dòng này ở đầu file ---
+const blogController = require('../controllers/shop/blogController');
 // ============================================================
 // 1. TRANG CHỦ & SẢN PHẨM
 // ============================================================
@@ -48,6 +49,10 @@ router.post('/checkout', checkoutController.postCheckout);
 router.get('/checkout/success', checkoutController.getSuccess);
 
 
-
+// =======================
+// BLOG KHÁCH HÀNG
+// =======================
+router.get('/blog', blogController.getIndex); // Trang danh sách
+router.get('/blog/:slug', blogController.getDetail); // Trang chi tiết
 
 module.exports = router;

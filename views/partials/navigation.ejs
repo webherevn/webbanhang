@@ -1,9 +1,11 @@
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4 shadow-sm">
   <div class="container">
-    <a class="navbar-brand fw-bold" href="/">FASHION SHOP</a>
+    <a class="navbar-brand fw-bold text-uppercase border p-1 px-2 rounded" href="/">FASHION SHOP</a>
+    
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
       <span class="navbar-toggler-icon"></span>
     </button>
+    
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav me-auto">
         <li class="nav-item">
@@ -12,21 +14,39 @@
         <li class="nav-item">
           <a class="nav-link <%= path === '/products' ? 'active' : '' %>" href="/products">Sản phẩm</a>
         </li>
+        <li class="nav-item">
+            <a class="nav-link <%= path === '/blog' ? 'active' : '' %>" href="/blog">Tin Tức</a>
+        </li>
       </ul>
       
-      <ul class="navbar-nav ms-auto">
-        <li class="nav-item">
+      <ul class="navbar-nav ms-auto align-items-center">
+        <li class="nav-item me-3">
             <a class="nav-link position-relative" href="/cart">
-                <i class="fas fa-shopping-cart"></i> Giỏ hàng
+                <i class="fas fa-shopping-cart fa-lg"></i> 
                 <% if (typeof cart !== 'undefined' && cart.totalQuantity > 0) { %>
-                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-light">
                         <%= cart.totalQuantity %>
                     </span>
                 <% } %>
             </a>
         </li>
-        <li class="nav-item ms-2">
-            <a class="nav-link btn btn-outline-light btn-sm px-3" href="/admin">Admin</a>
+
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle btn btn-outline-light btn-sm px-3 text-light" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="fas fa-user-shield me-1"></i> Admin
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="adminDropdown">
+                <li><h6 class="dropdown-header">Sản Phẩm</h6></li>
+                <li><a class="dropdown-item" href="/admin/products">Tất cả sản phẩm</a></li>
+                <li><a class="dropdown-item" href="/admin/add-product">Thêm sản phẩm mới</a></li>
+                
+                <li><hr class="dropdown-divider"></li>
+                
+                <li><h6 class="dropdown-header">Tin Tức (Blog)</h6></li>
+                <li><a class="dropdown-item" href="/admin/posts">Tất cả bài viết</a></li>
+                <li><a class="dropdown-item" href="/admin/add-post">Viết bài mới</a></li>
+                <li><a class="dropdown-item" href="/admin/blog-categories">Quản lý Chuyên mục</a></li>
+            </ul>
         </li>
       </ul>
     </div>

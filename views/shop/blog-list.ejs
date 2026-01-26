@@ -1,0 +1,47 @@
+<%- include('../partials/head.ejs') %>
+</head>
+<body>
+    <%- include('../partials/navigation.ejs') %>
+
+    <div class="container py-5">
+        <div class="text-center mb-5">
+            <h1 class="fw-bold">Tin Tức & Sự Kiện</h1>
+            <p class="text-muted">Cập nhật những xu hướng thời trang mới nhất</p>
+        </div>
+
+        <div class="row g-4">
+            <% if(posts.length > 0) { %>
+                <% posts.forEach(post => { %>
+                    <div class="col-md-4">
+                        <div class="card h-100 border-0 shadow-sm hover-shadow">
+                            <a href="/blog/<%= post.slug %>" class="overflow-hidden">
+                                <img src="<%= post.thumbnail %>" class="card-img-top transition-img" style="height: 220px; object-fit: cover; width: 100%;">
+                            </a>
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between mb-2">
+                                    <small class="text-muted"><i class="far fa-clock"></i> <%= post.createdAt.toLocaleDateString('vi-VN') %></small>
+                                    <small class="text-primary"><%= post.category ? post.category.name : 'Tin tức' %></small>
+                                </div>
+                                <h5 class="card-title fw-bold">
+                                    <a href="/blog/<%= post.slug %>" class="text-decoration-none text-dark">
+                                        <%= post.title %>
+                                    </a>
+                                </h5>
+                                <p class="card-text text-muted small" style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
+                                    <%= post.summary %>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <div class="col-12 text-center py-5">
+                    <p>Chưa có bài viết nào.</p>
+                </div>
+            <% } %>
+        </div>
+    </div>
+
+    <%- include('../partials/footer.ejs') %>
+</body>
+</html>

@@ -8,6 +8,9 @@ const upload = require('../middleware/upload');
 const adminController = require('../controllers/admin/adminController');
 const productController = require('../controllers/admin/productController');
 const categoryController = require('../controllers/admin/categoryController');
+// --- ĐOẠN 1: Thêm dòng này ở đầu file ---
+const postController = require('../controllers/admin/postController');
+
 
 // 3. CẤU HÌNH UPLOAD CHO SẢN PHẨM
 const productUpload = upload.fields([
@@ -57,5 +60,20 @@ router.get('/edit-category/:categoryId', categoryController.getEditCategory);
 // (Đã xóa dòng thừa, chỉ giữ lại dòng có upload)
 router.post('/edit-category', upload.single('image'), categoryController.postEditCategory);
 
+
+// =======================
+// QUẢN LÝ BLOG (TIN TỨC)
+// =======================
+
+// 1. Quản lý Chuyên mục
+router.get('/blog-categories', postController.getBlogCategories);
+router.post('/add-blog-category', postController.postAddBlogCategory);
+
+// 2. Quản lý Bài viết
+router.get('/posts', postController.getPosts); // Xem danh sách
+router.get('/add-post', postController.getAddPost); // Form viết bài
+
+// Lưu ý: 'thumbnail' là tên input file bên view. Dùng upload.single cho 1 ảnh.
+router.post('/add-post', upload.single('thumbnail'), postController.postAddPost);
 
 module.exports = router;
