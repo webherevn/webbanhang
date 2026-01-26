@@ -1,9 +1,50 @@
 <%- include('../partials/head.ejs') %>
+
 <style>
-    body { margin: 0; background-color: #f0f2f5; }
+    body { margin: 0; background-color: #f0f2f5; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
     .admin-wrapper { display: flex; min-height: 100vh; }
-    .admin-sidebar-container { width: 200px; position: fixed; top: 0; left: 0; bottom: 0; background-color: #23282d; z-index: 1000; }
-    .admin-content { flex: 1; margin-left: 200px; padding: 30px; }
+    
+    /* Sidebar đồng bộ 240px */
+    .admin-sidebar-container { 
+        width: 240px; 
+        position: fixed; 
+        top: 0; left: 0; bottom: 0; 
+        background-color: #23282d; 
+        z-index: 1000; 
+    }
+    
+    .admin-content { 
+        flex: 1; 
+        margin-left: 240px; 
+        padding: 30px; 
+    }
+
+    /* WP Style Table */
+    .wp-card { background: #fff; border: 1px solid #c3c4c7; box-shadow: 0 1px 1px rgba(0,0,0,.04); }
+    
+    .post-title-link { 
+        font-weight: 600; 
+        color: #2271b1; 
+        text-decoration: none; 
+        font-size: 15px; 
+    }
+    .post-title-link:hover { color: #135e96; }
+
+    /* Hiệu ứng hover hiện nút hành động */
+    .row-actions { 
+        visibility: hidden; 
+        font-size: 13px; 
+        margin-top: 4px; 
+    }
+    tr:hover .row-actions { 
+        visibility: visible !important; 
+    }
+
+    .table-head-wp { 
+        background-color: #f0f0f1; 
+        border-bottom: 2px solid #c3c4c7; 
+        color: #1d2327; 
+    }
 </style>
 </head>
 <body>
@@ -14,40 +55,76 @@
 
         <div class="admin-content">
             <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
-                <h2 class="fw-bold h4">Bài viết</h2>
-                <a href="/admin/add-post" class="btn btn-primary btn-sm">Viết bài mới</a>
+                <h2 class="fw-bold h4 text-dark">Bài viết</h2>
+                <a href="/admin/add-post" class="btn btn-primary btn-sm px-3 fw-bold shadow-sm">Viết bài mới</a>
             </div>
 
-            <div class="card shadow-sm border-0">
-                <div class="card-body p-0">
-                    <table class="table table-hover mb-0 align-middle">
-                        <thead class="table-light">
-                            <tr>
-                                <th class="ps-3">Tiêu đề</th>
-                                <th>Chuyên mục</th>
-                                <th>Ngày đăng</th>
-                                <th class="text-end pe-3">Hành động</th>
-                            </tr>
-                        </thead>
-                        <tbody>
+            <div class="wp-card shadow-sm overflow-hidden">
+                <table class="table table-hover mb-0 align-middle">
+                    <thead class="table-head-wp">
+                        <tr>
+                            <th class="ps-3" width="80">Ảnh</th>
+                            <th>Tiêu đề</th>
+                            <th>Chuyên mục</th>
+                            <th>Ngày đăng</th>
+                            <th class="text-center">Lượt xem</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (posts.length > 0) { %>
                             <% posts.forEach(p => { %>
                                 <tr>
-                                    <td class="ps-3 fw-bold text-primary"><%= p.title %></td>
-                                    <td><span class="badge bg-light text-dark border"><%= p.category ? p.category.name : '---' %></span></td>
-                                    <td><%= p.createdAt.toLocaleDateString('vi-VN') %></td>
-                                    <td class="text-end pe-3">
-                                        <form action="/admin/delete-post" method="POST" class="d-inline" onsubmit="return confirm('Xóa bài này?')">
-                                            <input type="hidden" name="postId" value="<%= p._id %>">
-                                            <button class="btn btn-link text-danger p-0 small">Xóa</button>
-                                        </form>
+                                    <td class="ps-3">
+                                        <img src="<%= p.thumbnail || 'https://via.placeholder.com/50' %>" 
+                                             style="width: 50px; height: 50px; object-fit: cover; border: 1px solid #ddd; border-radius: 2px;">
+                                    </td>
+
+                                    <td>
+                                        <a href="/admin/edit-post/<%= p._id %>" class="post-title-link">
+                                            <%= p.title %>
+                                        </a>
+                                        
+                                        <div class="row-actions">
+                                            <a href="/admin/edit-post/<%= p._id %>" class="text-primary text-decoration-none">Sửa</a>
+                                            <span class="text-muted mx-1">|</span>
+                                            
+                                            <form action="/admin/delete-post" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc muốn xóa bài viết này?')">
+                                                <input type="hidden" name="postId" value="<%= p._id %>">
+                                                <button type="submit" class="btn btn-link p-0 text-danger text-decoration-none border-0 bg-transparent" style="font-size: 13px;">Xóa</button>
+                                            </form>
+                                            
+                                            <span class="text-muted mx-1">|</span>
+                                            
+                                            <a href="/blog/post/<%= p.slug %>" target="_blank" class="text-success text-decoration-none">Xem</a>
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        <span class="badge bg-light text-dark border fw-normal">
+                                            <%= p.category ? p.category.name : 'Chưa phân loại' %>
+                                        </span>
+                                    </td>
+
+                                    <td class="small text-muted">
+                                        <%= p.createdAt.toLocaleDateString('vi-VN') %>
+                                    </td>
+
+                                    <td class="text-center small">
+                                        <span class="text-muted"><i class="far fa-eye me-1"></i> <%= p.views || 0 %></span>
                                     </td>
                                 </tr>
                             <% }) %>
-                        </tbody>
-                    </table>
-                </div>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="5" class="text-center py-5 text-muted">Chưa có bài viết nào được tìm thấy.</td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
