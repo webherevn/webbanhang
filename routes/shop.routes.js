@@ -34,4 +34,6 @@ router.get('/checkout/success', checkoutController.getSuccess);
 // --- THÊM ROUTE NÀY ---
 // Khi ai đó vào /category/quan-jean -> Gọi hàm getCategoryProducts
 router.get('/category/:slug', shopController.getCategoryProducts);
+// Route xem chi tiết sản phẩm
+router.get('/products/:slug', shopController.getProductDetail);
 module.exports = router;
