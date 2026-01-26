@@ -1,7 +1,7 @@
 // controllers/shop/shopController.js
 const Product = require('../../models/ProductModel'); 
 const Category = require('../../models/CategoryModel');
-
+const Page = require('../../models/PageModel');
 // ============================================================
 // 1. TRANG CHỦ
 // ============================================================
@@ -115,6 +115,34 @@ exports.getProducts = async (req, res) => {
         });
     } catch (err) {
         console.log("❌ Lỗi lấy danh sách sản phẩm:", err);
+        res.redirect('/');
+    }
+};
+
+// 2. Thêm chính xác hàm này vào (Lưu ý tên hàm phải khớp y hệt Route)
+exports.getPageDetail = async (req, res) => {
+    try {
+        const slug = req.params.slug;
+        
+        // Tìm trang dựa trên slug và trạng thái đang hoạt động
+        const page = await Page.findOne({ slug: slug, isActive: true });
+
+        // Nếu không thấy trang, trả về 404
+        if (!page) {
+            return res.status(404).render('404', { 
+                pageTitle: 'Trang không tồn tại', 
+                path: '/404' 
+            });
+        }
+
+        // Render ra file view page-detail
+        res.render('shop/page-detail', {
+            pageTitle: page.title,
+            path: '/pages', // Để active menu nếu cần
+            page: page
+        });
+    } catch (err) {
+        console.error("Lỗi hiển thị trang tĩnh:", err);
         res.redirect('/');
     }
 };
