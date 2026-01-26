@@ -60,20 +60,20 @@ router.get('/edit-category/:categoryId', categoryController.getEditCategory);
 // (Đã xóa dòng thừa, chỉ giữ lại dòng có upload)
 router.post('/edit-category', upload.single('image'), categoryController.postEditCategory);
 
-
-// =======================
-// QUẢN LÝ BLOG (TIN TỨC)
-// =======================
+// =============================================
+// QUẢN LÝ BLOG (CMS) - THÊM ĐOẠN NÀY VÀO
+// =============================================
 
 // 1. Quản lý Chuyên mục
 router.get('/blog-categories', postController.getBlogCategories);
 router.post('/add-blog-category', postController.postAddBlogCategory);
 
 // 2. Quản lý Bài viết
-router.get('/posts', postController.getPosts); // Xem danh sách
-router.get('/add-post', postController.getAddPost); // Form viết bài
+router.get('/posts', postController.getPosts); // Danh sách
+router.get('/add-post', postController.getAddPost); // Form thêm
+router.post('/delete-post', postController.postDeletePost); // Xóa
 
-// Lưu ý: 'thumbnail' là tên input file bên view. Dùng upload.single cho 1 ảnh.
-router.post('/add-post', upload.single('thumbnail'), postController.postAddPost);
+// Lưu ý: Dùng upload.fields để khớp với logic controller
+router.post('/add-post', upload.fields([{ name: 'thumbnail', maxCount: 1 }]), postController.postAddPost);
 
 module.exports = router;

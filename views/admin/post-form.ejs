@@ -1,63 +1,41 @@
 <%- include('../partials/head.ejs') %>
 <script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
-<script>
-  tinymce.init({
-    selector: '#content-editor',
-    height: 400,
-    plugins: 'lists link image code table help wordcount',
-    toolbar: 'undo redo | blocks | bold italic | alignleft aligncenter alignright | bullist numlist | help'
-  });
-</script>
+<script>tinymce.init({ selector: '#editor', height: 400 });</script>
 </head>
 <body>
     <%- include('../partials/navigation.ejs') %>
     <div class="container py-5">
-        <h2 class="mb-4">Viết Bài Mới</h2>
-        
+        <h2>Viết bài mới</h2>
         <form action="/admin/add-post" method="POST" enctype="multipart/form-data">
             <div class="row">
                 <div class="col-md-8">
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Tiêu đề bài viết</label>
-                        <input type="text" name="title" class="form-control form-control-lg" required>
+                        <label class="fw-bold">Tiêu đề</label>
+                        <input type="text" name="title" class="form-control" required>
                     </div>
-
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Mô tả ngắn (Sapo)</label>
-                        <textarea name="summary" class="form-control" rows="3" placeholder="Đoạn văn ngắn giới thiệu bài viết..."></textarea>
+                        <label class="fw-bold">Nội dung</label>
+                        <textarea id="editor" name="content"></textarea>
                     </div>
-
                     <div class="mb-3">
-                        <label class="form-label fw-bold">Nội dung chi tiết</label>
-                        <textarea id="content-editor" name="content"></textarea>
+                        <label class="fw-bold">Mô tả ngắn</label>
+                        <textarea name="summary" class="form-control" rows="3"></textarea>
                     </div>
                 </div>
-
                 <div class="col-md-4">
-                    <div class="card bg-light">
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Chuyên mục</label>
-                                <select name="categoryId" class="form-select" required>
-                                    <% if(categories.length > 0) { %>
-                                        <% categories.forEach(cat => { %>
-                                            <option value="<%= cat._id %>"><%= cat.name %></option>
-                                        <% }) %>
-                                    <% } else { %>
-                                        <option value="">Vui lòng tạo chuyên mục trước</option>
-                                    <% } %>
-                                </select>
-                            </div>
-
-                            <div class="mb-3">
-                                <label class="form-label fw-bold">Ảnh đại diện</label>
-                                <input type="file" name="thumbnail" class="form-control">
-                            </div>
-
-                            <hr>
-                            <button type="submit" class="btn btn-primary w-100 fw-bold">ĐĂNG BÀI</button>
-                        </div>
+                    <div class="mb-3">
+                        <label class="fw-bold">Chuyên mục</label>
+                        <select name="categoryId" class="form-select">
+                            <% categories.forEach(cat => { %>
+                                <option value="<%= cat._id %>"><%= cat.name %></option>
+                            <% }) %>
+                        </select>
                     </div>
+                    <div class="mb-3">
+                        <label class="fw-bold">Ảnh đại diện</label>
+                        <input type="file" name="thumbnail" class="form-control">
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Đăng bài</button>
                 </div>
             </div>
         </form>

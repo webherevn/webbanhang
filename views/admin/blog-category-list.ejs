@@ -11,34 +11,21 @@
                         <form action="/admin/add-blog-category" method="POST">
                             <div class="mb-3">
                                 <label>Tên chuyên mục</label>
-                                <input type="text" name="name" class="form-control" required placeholder="VD: Khuyến Mãi">
+                                <input type="text" name="name" class="form-control" required>
                             </div>
-                            <button type="submit" class="btn btn-primary w-100">Thêm Mới</button>
+                            <button type="submit" class="btn btn-primary w-100">Lưu</button>
                         </form>
                     </div>
                 </div>
             </div>
-
             <div class="col-md-8">
-                <h3 class="mb-3">Danh Sách Chuyên Mục</h3>
-                <table class="table table-bordered table-hover">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Tên</th>
-                            <th>Slug (URL)</th>
-                        </tr>
-                    </thead>
+                <h3>Danh sách Chuyên mục</h3>
+                <table class="table table-bordered">
+                    <thead><tr><th>Tên</th><th>Slug</th></tr></thead>
                     <tbody>
-                        <% if(categories.length > 0) { %>
-                            <% categories.forEach(cat => { %>
-                                <tr>
-                                    <td><%= cat.name %></td>
-                                    <td><%= cat.slug %></td>
-                                </tr>
-                            <% }) %>
-                        <% } else { %>
-                            <tr><td colspan="2" class="text-center">Chưa có chuyên mục nào.</td></tr>
-                        <% } %>
+                        <% categories.forEach(cat => { %>
+                            <tr><td><%= cat.name %></td><td><%= cat.slug %></td></tr>
+                        <% }) %>
                     </tbody>
                 </table>
             </div>
