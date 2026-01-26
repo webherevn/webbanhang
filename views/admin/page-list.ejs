@@ -1,50 +1,94 @@
 <%- include('../partials/head.ejs') %>
 <style>
-    .admin-content { margin-left: 240px; padding: 30px; background: #f0f0f1; min-height: 100vh; }
+    body { background-color: #f0f2f5; margin: 0; padding: 0; }
+    .admin-wrapper { display: flex; min-height: 100vh; }
+    
+    /* Sidebar đồng bộ chuẩn 240px */
+    .admin-sidebar-container { 
+        width: 240px; 
+        position: fixed; 
+        top: 0; left: 0; bottom: 0; 
+        background-color: #23282d; 
+        z-index: 1000; 
+    }
+    
+    .admin-content { 
+        flex: 1; 
+        margin-left: 240px; 
+        padding: 30px; 
+    }
+
     .wp-card { background: #fff; border: 1px solid #c3c4c7; box-shadow: 0 1px 1px rgba(0,0,0,.04); }
-    .row-actions { visibility: hidden; font-size: 13px; margin-top: 5px; }
+    
+    /* Hiệu ứng hover chuẩn WP */
+    .row-actions { visibility: hidden; font-size: 13px; margin-top: 4px; }
     tr:hover .row-actions { visibility: visible !important; }
+    
+    .page-title-link { font-weight: 600; color: #2271b1; text-decoration: none; font-size: 15px; }
+    .page-title-link:hover { color: #135e96; }
+    
+    .table-head-wp { background-color: #f0f0f1; border-bottom: 2px solid #c3c4c7; color: #1d2327; }
 </style>
 </head>
 <body>
     <div class="admin-wrapper">
-        <div class="admin-sidebar-container"><%- include('./partials/sidebar.ejs') %></div>
+        <div class="admin-sidebar-container">
+            <%- include('./partials/sidebar.ejs') %>
+        </div>
+
         <div class="admin-content">
-            <div class="d-flex justify-content-between mb-4">
-                <h2 class="fw-bold h4">Trang</h2>
-                <a href="/admin/add-page" class="btn btn-primary btn-sm">Thêm trang mới</a>
+            <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+                <div class="d-flex align-items-center gap-3">
+                    <h2 class="fw-bold h4 m-0 text-dark">Trang tĩnh</h2>
+                    <a href="/admin/add-page" class="btn btn-outline-primary btn-sm fw-bold shadow-sm">Thêm trang mới</a>
+                </div>
             </div>
-            <div class="wp-card overflow-hidden">
+
+            <div class="wp-card shadow-sm overflow-hidden">
                 <table class="table table-hover mb-0 align-middle">
-                    <thead class="table-light">
+                    <thead class="table-head-wp">
                         <tr>
                             <th class="ps-3">Tiêu đề</th>
                             <th>Đường dẫn (Slug)</th>
                             <th>Ngày tạo</th>
+                            <th class="text-center">Trạng thái</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <% pages.forEach(p => { %>
-                            <tr>
-                                <td class="ps-3">
-                                    <a href="/admin/edit-page/<%= p._id %>" class="fw-bold text-decoration-none"><%= p.title %></a>
-                                    <div class="row-actions">
-                                        <a href="/admin/edit-page/<%= p._id %>" class="text-primary">Sửa</a> | 
-                                        <form action="/admin/delete-page" method="POST" class="d-inline">
-                                            <input type="hidden" name="pageId" value="<%= p._id %>">
-                                            <button class="btn btn-link p-0 text-danger small border-0">Xóa</button>
-                                        </form> | 
-                                        <a href="/p/<%= p.slug %>" target="_blank" class="text-success">Xem</a>
-                                    </div>
-                                </td>
-                                <td class="text-muted small">/p/<%= p.slug %></td>
-                                <td class="small"><%= p.createdAt.toLocaleDateString('vi-VN') %></td>
-                            </tr>
-                        <% }) %>
+                        <% if (pages && pages.length > 0) { %>
+                            <% pages.forEach(p => { %>
+                                <tr>
+                                    <td class="ps-3">
+                                        <a href="/admin/edit-page/<%= p._id %>" class="page-title-link"><%= p.title %></a>
+                                        <div class="row-actions">
+                                            <a href="/admin/edit-page/<%= p._id %>" class="text-primary text-decoration-none">Sửa</a>
+                                            <span class="text-muted mx-1">|</span>
+                                            
+                                            <form action="/admin/delete-page" method="POST" class="d-inline" onsubmit="return confirm('Xóa trang này?')">
+                                                <input type="hidden" name="pageId" value="<%= p._id %>">
+                                                <button type="submit" class="btn btn-link p-0 text-danger text-decoration-none border-0 bg-transparent" style="font-size: 13px;">Xóa</button>
+                                            </form>
+                                            <span class="text-muted mx-1">|</span>
+                                            <a href="/p/<%= p.slug %>" target="_blank" class="text-success text-decoration-none fw-bold">Xem</a>
+                                        </div>
+                                    </td>
+                                    <td class="text-muted small">/p/<%= p.slug %></td>
+                                    <td class="small text-muted"><%= p.createdAt.toLocaleDateString('vi-VN') %></td>
+                                    <td class="text-center">
+                                        <span class="badge <%= p.isActive ? 'bg-success' : 'bg-secondary' %> fw-normal">
+                                            <%= p.isActive ? 'Đang bật' : 'Bản nháp' %>
+                                        </span>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr><td colspan="4" class="text-center py-5 text-muted">Chưa có trang tĩnh nào.</td></tr>
+                        <% } %>
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
