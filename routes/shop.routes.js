@@ -45,4 +45,7 @@ router.get('/blog/post/:slug', blogController.getDetail);
 // LƯU Ý: Phải đặt dòng này dưới cùng của nhóm Blog để không tranh chấp với /blog/post/
 router.get('/blog/:slug', blogController.getPostsByCategory);
 
+// Xem chi tiết trang tĩnh (Ví dụ: /p/gioi-thieu)
+router.get('/p/:slug', shopController.getPageDetail);
+
 module.exports = router;

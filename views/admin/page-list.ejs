@@ -1,0 +1,50 @@
+<%- include('../partials/head.ejs') %>
+<style>
+    .admin-content { margin-left: 240px; padding: 30px; background: #f0f0f1; min-height: 100vh; }
+    .wp-card { background: #fff; border: 1px solid #c3c4c7; box-shadow: 0 1px 1px rgba(0,0,0,.04); }
+    .row-actions { visibility: hidden; font-size: 13px; margin-top: 5px; }
+    tr:hover .row-actions { visibility: visible !important; }
+</style>
+</head>
+<body>
+    <div class="admin-wrapper">
+        <div class="admin-sidebar-container"><%- include('./partials/sidebar.ejs') %></div>
+        <div class="admin-content">
+            <div class="d-flex justify-content-between mb-4">
+                <h2 class="fw-bold h4">Trang</h2>
+                <a href="/admin/add-page" class="btn btn-primary btn-sm">Thêm trang mới</a>
+            </div>
+            <div class="wp-card overflow-hidden">
+                <table class="table table-hover mb-0 align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-3">Tiêu đề</th>
+                            <th>Đường dẫn (Slug)</th>
+                            <th>Ngày tạo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% pages.forEach(p => { %>
+                            <tr>
+                                <td class="ps-3">
+                                    <a href="/admin/edit-page/<%= p._id %>" class="fw-bold text-decoration-none"><%= p.title %></a>
+                                    <div class="row-actions">
+                                        <a href="/admin/edit-page/<%= p._id %>" class="text-primary">Sửa</a> | 
+                                        <form action="/admin/delete-page" method="POST" class="d-inline">
+                                            <input type="hidden" name="pageId" value="<%= p._id %>">
+                                            <button class="btn btn-link p-0 text-danger small border-0">Xóa</button>
+                                        </form> | 
+                                        <a href="/p/<%= p.slug %>" target="_blank" class="text-success">Xem</a>
+                                    </div>
+                                </td>
+                                <td class="text-muted small">/p/<%= p.slug %></td>
+                                <td class="small"><%= p.createdAt.toLocaleDateString('vi-VN') %></td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

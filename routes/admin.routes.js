@@ -81,4 +81,13 @@ router.get('/settings', adminController.getSettings);
 // Xử lý khi nhấn nút Lưu (POST)
 router.post('/settings/scripts', adminController.postSettings);
 
+
+// QUẢN LÝ TRANG (PAGES)
+router.get('/pages', pageController.getPages);
+router.get('/add-page', pageController.getAddPage);
+router.post('/add-page', pageController.postAddPage);
+router.get('/edit-page/:pageId', pageController.getEditPage);
+router.post('/edit-page', pageController.postEditPage);
+router.post('/delete-page', pageController.postDeletePage);
+
 module.exports = router;
