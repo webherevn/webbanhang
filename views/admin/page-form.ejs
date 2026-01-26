@@ -10,6 +10,7 @@
     .admin-content { flex: 1; margin-left: 240px; padding: 30px; }
     .wp-card { background: #fff; border: 1px solid #c3c4c7; box-shadow: 0 1px 1px rgba(0,0,0,.04); padding: 20px; margin-bottom: 20px; }
     .note-editor { border: 1px solid #c3c4c7 !important; }
+    .img-preview-sidebar { max-height: 150px; width: 100%; object-fit: cover; border-radius: 4px; margin-bottom: 10px; border: 1px solid #ddd; }
 </style>
 </head>
 <body>
@@ -19,7 +20,7 @@
         <div class="admin-content">
             <h2 class="fw-bold h4 mb-4 text-dark"><%= editing ? 'Chỉnh sửa trang' : 'Thêm trang mới' %></h2>
             
-            <form action="/admin/<%= editing ? 'edit-page' : 'add-page' %>" method="POST">
+            <form action="/admin/<%= editing ? 'edit-page' : 'add-page' %>" method="POST" enctype="multipart/form-data">
                 <% if (editing) { %>
                     <input type="hidden" name="pageId" value="<%= page._id %>">
                 <% } %>
@@ -27,6 +28,7 @@
                 <div class="row">
                     <div class="col-md-9">
                         <div class="mb-4">
+                            <label class="fw-bold small mb-1">Tiêu đề trang</label>
                             <input type="text" name="title" class="form-control form-control-lg fw-bold shadow-sm" 
                                    value="<%= editing ? page.title : '' %>" placeholder="Nhập tiêu đề trang (VD: Giới thiệu)..." required>
                         </div>
@@ -39,7 +41,7 @@
 
                     <div class="col-md-3">
                         <div class="wp-card shadow-sm">
-                            <h6 class="fw-bold small mb-3 text-uppercase border-bottom pb-2">Đăng trang</h6>
+                            <h6 class="fw-bold small mb-3 text-uppercase border-bottom pb-2">Trạng thái</h6>
                             <div class="form-check form-switch mb-3">
                                 <input class="form-check-input" type="checkbox" name="isActive" id="isActive" <%= (!editing || page.isActive) ? 'checked' : '' %>>
                                 <label class="form-check-label small" for="isActive">Công khai trang này</label>
@@ -49,10 +51,21 @@
                             </button>
                             <a href="/admin/pages" class="btn btn-link btn-sm w-100 mt-2 text-muted text-decoration-none">Hủy bỏ</a>
                         </div>
+
+                        <div class="wp-card shadow-sm">
+                            <h6 class="fw-bold small mb-3 text-uppercase border-bottom pb-2">Ảnh đại diện</h6>
+                            <% if (editing && page.thumbnail) { %>
+                                <img src="<%= page.thumbnail %>" class="img-preview-sidebar shadow-sm">
+                            <% } %>
+                            <input type="file" name="thumbnail" class="form-control form-control-sm" accept="image/*">
+                            <small class="text-muted mt-2 d-block" style="font-size: 10px;">Ảnh dùng làm banner hoặc thumbnail khi chia sẻ trang.</small>
+                        </div>
                         
                         <div class="wp-card bg-light border-dashed">
-                            <h6 class="fw-bold small mb-2 text-uppercase">Mẹo thiết kế</h6>
-                            <p class="small text-muted mb-0">Bạn có thể chèn hình ảnh, video và bảng biểu để trang trông sinh động hơn.</p>
+                            <h6 class="fw-bold small mb-2 text-uppercase text-muted">Thông tin SEO</h6>
+                            <p class="small text-muted mb-0">
+                                Link: <span class="text-primary">/p/<%= editing ? page.slug : 'tu-dong-tao' %></span>
+                            </p>
                         </div>
                     </div>
                 </div>

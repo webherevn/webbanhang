@@ -91,4 +91,7 @@ router.get('/edit-page/:pageId', pageController.getEditPage);
 router.post('/edit-page', pageController.postEditPage);
 router.post('/delete-page', pageController.postDeletePage);
 
+router.post('/add-page', upload.single('thumbnail'), pageController.postAddPage);
+router.post('/edit-page', upload.single('thumbnail'), pageController.postEditPage);
+
 module.exports = router;
