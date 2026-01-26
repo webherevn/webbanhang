@@ -1,12 +1,56 @@
 <%- include('../partials/head.ejs') %>
+
 <style>
-    body { margin: 0; background-color: #f0f2f5; }
+    body { background-color: #f0f2f5; margin: 0; padding: 0; }
     .admin-wrapper { display: flex; min-height: 100vh; }
-    .admin-sidebar-container { width: 200px; position: fixed; top: 0; left: 0; bottom: 0; background-color: #23282d; z-index: 1000; }
-    .admin-content { flex: 1; margin-left: 200px; padding: 30px; }
+    
+    /* Sidebar đồng bộ 240px */
+    .admin-sidebar-container {
+        width: 240px; 
+        position: fixed;
+        top: 0; left: 0; bottom: 0;
+        background-color: #23282d;
+        z-index: 1000;
+    }
+
+    .admin-content {
+        flex: 1;
+        margin-left: 240px; 
+        padding: 30px;
+    }
+
+    /* WP Style Card & Table */
+    .wp-card { background: #fff; border: 1px solid #c3c4c7; box-shadow: 0 1px 1px rgba(0,0,0,.04); }
+    
+    .product-name-link { 
+        font-weight: 600; 
+        color: #2271b1; 
+        text-decoration: none; 
+        font-size: 15px;
+    }
+    .product-name-link:hover { color: #135e96; }
+
+    /* HIỆU ỨNG WORDPRESS: HOVER HIỆN NÚT HÀNH ĐỘNG */
+    .row-actions { 
+        visibility: hidden; 
+        font-size: 13px; 
+        margin-top: 4px;
+    }
+    
+    tr:hover .row-actions { 
+        visibility: visible !important; 
+    }
+
+    .table-head-wp { 
+        background-color: #f0f0f1; 
+        border-bottom: 2px solid #c3c4c7; 
+        color: #1d2327;
+        font-size: 14px;
+    }
 </style>
 </head>
 <body>
+
     <div class="admin-wrapper">
         <div class="admin-sidebar-container">
             <%- include('./partials/sidebar.ejs') %>
@@ -14,45 +58,93 @@
 
         <div class="admin-content">
             <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
-                <h2 class="fw-bold h4">Sản phẩm</h2>
-                <a href="/admin/add-product" class="btn btn-primary btn-sm">Thêm sản phẩm mới</a>
+                <div class="d-flex align-items-center gap-3">
+                    <h2 class="fw-bold h4 m-0 text-dark">Sản phẩm</h2>
+                    <a href="/admin/add-product" class="btn btn-outline-primary btn-sm fw-bold shadow-sm">Thêm mới</a>
+                </div>
             </div>
 
-            <div class="card shadow-sm border-0">
-                <div class="card-body p-0 text-center">
-                    <table class="table table-hover mb-0 align-middle text-start">
-                        <thead class="table-light">
-                            <tr>
-                                <th class="ps-3">Tên sản phẩm</th>
-                                <th>Giá bán</th>
-                                <th>Ngày tạo</th>
-                                <th class="text-end pe-3">Hành động</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <% if (products.length > 0) { %>
-                                <% products.forEach(p => { %>
-                                    <tr>
-                                        <td class="ps-3 fw-bold text-primary"><%= p.name %></td>
-                                        <td><%= p.basePrice.toLocaleString() %>₫</td>
-                                        <td><%= p.createdAt.toLocaleDateString('vi-VN') %></td>
-                                        <td class="text-end pe-3">
-                                            <a href="/admin/edit-product/<%= p._id %>" class="btn btn-link p-0 small text-decoration-none me-2">Sửa</a>
-                                            <form action="/admin/delete-product" method="POST" class="d-inline">
+            <div class="wp-card shadow-sm overflow-hidden">
+                <table class="table table-hover align-middle mb-0 text-dark">
+                    <thead class="table-head-wp">
+                        <tr>
+                            <th class="ps-3" width="70">Ảnh</th>
+                            <th>Tên sản phẩm</th>
+                            <th width="150">Giá bán</th>
+                            <th width="180">Danh mục</th>
+                            <th width="120">Ngày đăng</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (products && products.length > 0) { %>
+                            <% products.forEach(p => { %>
+                                <tr>
+                                    <td class="ps-3">
+                                        <% if (p.thumbnail) { %>
+                                            <img src="<%= p.thumbnail %>" style="width: 50px; height: 50px; object-fit: cover; border: 1px solid #ddd; border-radius: 2px;">
+                                        <% } else { %>
+                                            <div class="bg-light border d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                                <i class="fas fa-box text-muted opacity-50"></i>
+                                            </div>
+                                        <% } %>
+                                    </td>
+
+                                    <td>
+                                        <a href="/admin/edit-product/<%= p._id %>" class="product-name-link">
+                                            <%= p.name %>
+                                        </a>
+
+                                        <div class="row-actions">
+                                            <a href="/admin/edit-product/<%= p._id %>" class="text-primary text-decoration-none">Sửa</a>
+                                            <span class="text-muted mx-1">|</span>
+                                            
+                                            <form action="/admin/delete-product" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc muốn xóa sản phẩm này?')">
                                                 <input type="hidden" name="productId" value="<%= p._id %>">
-                                                <button class="btn btn-link text-danger p-0 small text-decoration-none">Xóa</button>
+                                                <button type="submit" class="btn btn-link p-0 text-danger text-decoration-none border-0 bg-transparent" style="font-size: 13px;">Xóa</button>
                                             </form>
-                                        </td>
-                                    </tr>
-                                <% }) %>
-                            <% } else { %>
-                                <tr><td colspan="4" class="text-center py-4">Chưa có sản phẩm nào.</td></tr>
-                            <% } %>
-                        </tbody>
-                    </table>
-                </div>
+                                            
+                                            <span class="text-muted mx-1">|</span>
+                                            
+                                            <a href="/products/<%= p.slug %>" target="_blank" class="text-success text-decoration-none fw-bold">Xem</a>
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        <div class="fw-bold">
+                                            <% if (p.salePrice) { %>
+                                                <span class="text-danger"><%= p.salePrice.toLocaleString('vi-VN') %>₫</span>
+                                                <div class="text-muted small text-decoration-line-through fw-normal"><%= p.basePrice.toLocaleString('vi-VN') %>₫</div>
+                                            <% } else { %>
+                                                <%= p.basePrice.toLocaleString('vi-VN') %>₫
+                                            <% } %>
+                                        </div>
+                                    </td>
+
+                                    <td>
+                                        <span class="badge bg-light text-dark border fw-normal py-2 px-3">
+                                            <%= p.category ? p.category.name : 'Chưa phân loại' %>
+                                        </span>
+                                    </td>
+
+                                    <td class="small text-muted">
+                                        <%= p.createdAt.toLocaleDateString('vi-VN') %>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="5" class="text-center py-5 text-muted">
+                                    <i class="fas fa-shopping-bag fa-3x mb-3 opacity-25"></i>
+                                    <p>Chưa có sản phẩm nào. Bắt đầu đăng bán ngay!</p>
+                                </td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
