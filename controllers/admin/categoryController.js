@@ -18,32 +18,37 @@ exports.getCategories = async (req, res) => {
     }
 };
 
-// 2. XỬ LÝ THÊM DANH MỤC MỚI
+// 2. XỬ LÝ THÊM DANH MỤC MỚI (CẬP NHẬT)
 exports.postAddCategory = async (req, res) => {
     try {
         const { name, description } = req.body;
+        
+        // 1. Lấy link ảnh (Nếu có upload)
+        let imageUrl = "";
+        if (req.file) {
+            imageUrl = req.file.path;
+        }
 
-        // Kiểm tra rỗng
+        // 2. Kiểm tra tên
         if (!name || name.trim() === '') {
             return res.redirect('/admin/categories');
         }
 
-        // Tạo mới (Slug tự động tạo bên Model rồi)
+        // 3. Tạo mới
         await Category.create({ 
             name: name, 
-            description: description 
+            description: description,
+            image: imageUrl // <--- Lưu ảnh vào đây
         });
 
         console.log(`✅ Đã thêm danh mục: ${name}`);
         res.redirect('/admin/categories');
 
     } catch (err) {
-        // Nếu lỗi trùng tên (duplicate key) hoặc lỗi khác
         console.log("❌ Lỗi thêm danh mục:", err);
         res.redirect('/admin/categories');
     }
 };
-
 // 3. XÓA DANH MỤC
 exports.postDeleteCategory = async (req, res) => {
     try {

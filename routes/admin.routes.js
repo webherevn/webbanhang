@@ -41,6 +41,7 @@ router.post('/delete-product', productController.postDeleteProduct);
 // C. QUẢN LÝ DANH MỤC (CATEGORIES)
 // ============================================================
 router.get('/categories', categoryController.getCategories);
+router.post('/categories', upload.single('image'), categoryController.postAddCategory);
 router.post('/categories', categoryController.postAddCategory);
 router.post('/delete-category', categoryController.postDeleteCategory); // Xóa
 

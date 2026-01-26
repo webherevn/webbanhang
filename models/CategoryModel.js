@@ -5,6 +5,7 @@ const categorySchema = new mongoose.Schema({
   name: { type: String, required: true, trim: true },
   slug: { type: String, unique: true },
   description: { type: String },
+  image: { type: String } // <--- THÊM DÒNG NÀY
 }, { timestamps: true });
 
 // Tự động tạo slug khi lưu (Ví dụ: "Áo Thun" -> "ao-thun")
