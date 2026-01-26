@@ -72,7 +72,13 @@ router.post('/edit-post', upload.fields([{ name: 'thumbnail', maxCount: 1 }]), p
 router.post('/add-post', upload.fields([{ name: 'thumbnail', maxCount: 1 }]), postController.postAddPost);
 
 
-router.get('/settings', adminController.getScripts);
-router.post('/settings/scripts', adminController.postScripts);
+
+// routes/admin.routes.js
+
+// Trang hiển thị các ô nhập mã (GET)
+router.get('/settings', adminController.getSettings);
+
+// Xử lý khi nhấn nút Lưu (POST)
+router.post('/settings/scripts', adminController.postSettings);
 
 module.exports = router;

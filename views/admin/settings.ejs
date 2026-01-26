@@ -1,9 +1,21 @@
 <%- include('../partials/head.ejs') %>
 <style>
-    .code-editor { font-family: 'Courier New', Courier, monospace; background: #272822; color: #f8f8f2; }
-    .admin-content { margin-left: 240px; padding: 30px; background: #f0f0f1; min-height: 100vh; }
-    .wp-card { background: #fff; border: 1px solid #c3c4c7; padding: 20px; margin-bottom: 20px; }
-    label { font-weight: bold; display: block; margin-bottom: 10px; color: #1d2327; }
+    body { background-color: #f0f0f1; margin: 0; }
+    .admin-wrapper { display: flex; min-height: 100vh; }
+    .admin-sidebar-container { width: 240px; position: fixed; top: 0; left: 0; bottom: 0; background-color: #23282d; z-index: 1000; }
+    .admin-content { flex: 1; margin-left: 240px; padding: 30px; }
+    
+    /* Giao diện ô nhập Code */
+    .code-editor { 
+        font-family: 'Consolas', 'Monaco', 'Courier New', monospace; 
+        background: #1e1e1e; 
+        color: #d4d4d4; 
+        border: 1px solid #333;
+        line-height: 1.5;
+        padding: 15px;
+    }
+    .wp-card { background: #fff; border: 1px solid #c3c4c7; box-shadow: 0 1px 1px rgba(0,0,0,.04); padding: 25px; margin-bottom: 25px; }
+    label { font-weight: bold; color: #1d2327; margin-bottom: 8px; display: block; }
 </style>
 </head>
 <body>
@@ -11,30 +23,35 @@
         <div class="admin-sidebar-container"><%- include('./partials/sidebar.ejs') %></div>
 
         <div class="admin-content">
-            <h2 class="fw-bold h4 mb-4">WPCode Editor - Chèn Script</h2>
+            <h2 class="fw-bold h4 mb-4 border-bottom pb-3 text-dark">WPCode Editor - Quản lý Script</h2>
             
             <form action="/admin/settings/scripts" method="POST">
                 <div class="wp-card shadow-sm">
-                    <label>Header Scripts (Trước thẻ &lt;/head&gt;)</label>
-                    <p class="small text-muted">Dùng cho: Google Search Console, Analytics, Facebook Pixel, CSS tùy chỉnh.</p>
-                    <textarea name="headerScripts" class="form-control code-editor" rows="8"><%= settings.headerScripts %></textarea>
+                    <label><i class="fas fa-code me-2 text-primary"></i>Header Scripts (Trước thẻ &lt;/head&gt;)</label>
+                    <p class="small text-muted italic">Dùng cho: Google Search Console, Google Analytics, Facebook Pixel, CSS tùy chỉnh.</p>
+                    <textarea name="headerScripts" class="form-control code-editor" rows="8" placeholder=""><%= settings.headerScripts %></textarea>
                 </div>
 
                 <div class="wp-card shadow-sm">
-                    <label>Body Scripts (Sau thẻ &lt;body&gt;)</label>
-                    <p class="small text-muted">Dùng cho: Các mã tracking yêu cầu đặt ngay sau body.</p>
-                    <textarea name="bodyScripts" class="form-control code-editor" rows="8"><%= settings.bodyScripts %></textarea>
+                    <label><i class="fas fa-terminal me-2 text-success"></i>Body Scripts (Ngay sau thẻ &lt;body&gt;)</label>
+                    <p class="small text-muted italic">Dùng cho: Các đoạn mã yêu cầu hiển thị ngay đầu trang hoặc Tag Manager.</p>
+                    <textarea name="bodyScripts" class="form-control code-editor" rows="6" placeholder=""><%= settings.bodyScripts %></textarea>
                 </div>
 
                 <div class="wp-card shadow-sm">
-                    <label>Footer Scripts (Trước thẻ &lt;/body&gt;)</label>
-                    <p class="small text-muted">Dùng cho: Live chat, mã Javascript nặng, liên kết ngoài.</p>
-                    <textarea name="footerScripts" class="form-control code-editor" rows="8"><%= settings.footerScripts %></textarea>
+                    <label><i class="fas fa-file-code me-2 text-warning"></i>Footer Scripts (Trước thẻ &lt;/body&gt;)</label>
+                    <p class="small text-muted italic">Dùng cho: Live Chat (Tawk.to, Messenger), mã JS nặng, Script liên kết ngoài.</p>
+                    <textarea name="footerScripts" class="form-control code-editor" rows="8" placeholder=""><%= settings.footerScripts %></textarea>
                 </div>
 
-                <button type="submit" class="btn btn-primary fw-bold px-5">Lưu thay đổi</button>
+                <div class="mt-4">
+                    <button type="submit" class="btn btn-primary fw-bold px-5 py-2 shadow-sm">Lưu toàn bộ thay đổi</button>
+                    <span class="ms-3 text-muted small"><i class="fas fa-info-circle me-1"></i> Lưu ý: Kiểm tra kỹ mã trước khi lưu để tránh lỗi giao diện.</span>
+                </div>
             </form>
         </div>
     </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

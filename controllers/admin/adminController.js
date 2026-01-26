@@ -10,21 +10,30 @@ exports.getDashboard = (req, res) => {
 
 const Setting = require('../../models/SettingModel');
 
-exports.getScripts = async (req, res) => {
-    const settings = await Setting.findOne({ key: 'global_settings' });
-    res.render('admin/settings', { 
-        pageTitle: 'Quản lý Script', 
-        path: '/admin/settings',
-        settings 
-    });
+// Lấy dữ liệu cũ để hiện lên ô nhập
+exports.getSettings = async (req, res) => {
+    try {
+        let settings = await Setting.findOne({ key: 'global_settings' });
+        if (!settings) {
+            settings = await Setting.create({ key: 'global_settings' });
+        }
+        res.render('admin/settings', {
+            pageTitle: 'Cấu hình Script hệ thống',
+            path: '/admin/settings',
+            settings: settings
+        });
+    } catch (err) { res.redirect('/admin'); }
 };
 
-exports.postScripts = async (req, res) => {
-    const { headerScripts, bodyScripts, footerScripts } = req.body;
-    await Setting.findOneAndUpdate(
-        { key: 'global_settings' },
-        { headerScripts, bodyScripts, footerScripts },
-        { upsert: true }
-    );
-    res.redirect('/admin/settings');
+// Lưu dữ liệu mới khi nhấn nút
+exports.postSettings = async (req, res) => {
+    try {
+        const { headerScripts, bodyScripts, footerScripts } = req.body;
+        await Setting.findOneAndUpdate(
+            { key: 'global_settings' },
+            { headerScripts, bodyScripts, footerScripts },
+            { upsert: true }
+        );
+        res.redirect('/admin/settings');
+    } catch (err) { res.redirect('/admin/settings'); }
 };
