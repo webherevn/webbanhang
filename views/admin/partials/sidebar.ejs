@@ -1,53 +1,46 @@
-<div class="d-flex flex-column flex-shrink-0 p-3 text-white bg-dark" style="width: 280px; height: 100vh; position: sticky; top: 0;">
-    <a href="/admin" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
-        <i class="fas fa-crown fa-lg me-2 text-warning"></i>
-        <span class="fs-4 fw-bold">Admin Panel</span>
-    </a>
-    <hr>
-    <ul class="nav nav-pills flex-column mb-auto">
+<div class="admin-sidebar bg-dark text-white shadow" style="min-width: 240px; min-height: 100vh;">
+    <div class="sidebar-header p-3 border-bottom border-secondary">
+        <a href="/" class="text-white text-decoration-none fw-bold fs-5">
+            <i class="fas fa-globe me-2"></i> Xem Website
+        </a>
+    </div>
+    <ul class="nav flex-column mt-2">
         <li class="nav-item">
-            <a href="/admin" class="nav-link text-white <%= path === '/admin' ? 'active' : '' %>">
-                <i class="fas fa-tachometer-alt me-2" style="width: 20px;"></i> Bảng tin
+            <a class="nav-link text-white py-3 px-4 <%= path === '/admin' ? 'bg-primary' : '' %>" href="/admin">
+                <i class="fas fa-tachometer-alt me-2"></i> Bảng tin
             </a>
         </li>
         
-        <li class="mt-3 text-uppercase text-secondary small fw-bold mb-1">Sản phẩm</li>
-        <li>
-            <a href="/admin/products" class="nav-link text-white <%= path === '/admin/products' ? 'active' : '' %>">
-                <i class="fas fa-box me-2" style="width: 20px;"></i> Tất cả sản phẩm
+        <li class="nav-item">
+            <a class="nav-link text-white py-3 px-4 <%= path.includes('/admin/post') ? 'bg-primary' : '' %>" href="/admin/posts">
+                <i class="fas fa-thumbtack me-2"></i> Bài viết
             </a>
         </li>
-        <li>
-            <a href="/admin/add-product" class="nav-link text-white <%= path === '/admin/add-product' ? 'active' : '' %>">
-                <i class="fas fa-plus-circle me-2" style="width: 20px;"></i> Thêm mới
-            </a>
-        </li>
-        
-        <li>
-            <a href="/admin/categories" class="nav-link text-white <%= path === '/admin/categories' ? 'active' : '' %>">
-                <i class="fas fa-tags me-2" style="width: 20px;"></i> Danh mục
+        <li class="nav-item">
+            <a class="nav-link text-white py-3 px-4 ps-5 small" href="/admin/blog-categories">
+                <i class="fas fa-folder me-2"></i> Chuyên mục Blog
             </a>
         </li>
 
-        <li class="mt-3 text-uppercase text-secondary small fw-bold mb-1">Bán hàng</li>
-        <li>
-            <a href="#" class="nav-link text-white">
-                <i class="fas fa-shopping-cart me-2" style="width: 20px;"></i> Đơn hàng
+        <hr class="border-secondary mx-3">
+
+        <li class="nav-item">
+            <a class="nav-link text-white py-3 px-4 <%= path.includes('/admin/product') ? 'bg-primary' : '' %>" href="/admin/products">
+                <i class="fas fa-box me-2"></i> Sản phẩm
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-white py-3 px-4 ps-5 small" href="/admin/categories">
+                <i class="fas fa-tags me-2"></i> Danh mục sản phẩm
+            </a>
+        </li>
+
+        <hr class="border-secondary mx-3">
+
+        <li class="nav-item">
+            <a class="nav-link text-white py-3 px-4" href="/admin/logout">
+                <i class="fas fa-sign-out-alt me-2"></i> Đăng xuất
             </a>
         </li>
     </ul>
-    <hr>
-    <div class="dropdown">
-        <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
-            <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-2" style="width: 32px; height: 32px;">
-                A
-            </div>
-            <strong>Admin</strong>
-        </a>
-        <ul class="dropdown-menu dropdown-menu-dark text-small shadow">
-            <li><a class="dropdown-item" href="/">Xem trang web</a></li>
-            <li><hr class="dropdown-divider"></li>
-            <li><a class="dropdown-item" href="#">Đăng xuất</a></li>
-        </ul>
-    </div>
 </div>

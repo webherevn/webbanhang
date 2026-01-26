@@ -1,80 +1,45 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản lý sản phẩm</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<%- include('partials/head.ejs') %>
 </head>
 <body>
-
-    <div class="d-flex">
+    <div class="admin-wrapper">
         <%- include('partials/sidebar.ejs') %>
 
-        <div class="flex-grow-1 bg-light">
-            <nav class="navbar navbar-light bg-white shadow-sm mb-4 px-4 py-3">
-                <span class="navbar-brand mb-0 h1">Sản phẩm</span>
-                <a href="/admin/add-product" class="btn btn-primary btn-sm">
-                    <i class="fas fa-plus"></i> Thêm mới
-                </a>
-            </nav>
+        <div class="admin-content">
+            <div class="container-fluid">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="fw-bold">Bài viết</h2>
+                    <a href="/admin/add-post" class="btn btn-primary">Viết bài mới</a>
+                </div>
 
-            <div class="container-fluid px-4">
-                <div class="card shadow-sm">
-                    <div class="card-body">
-                        <table class="table table-hover align-middle">
-                            <thead class="table-light">
+                <div class="card shadow-sm p-3">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>Tiêu đề</th>
+                                <th>Tác giả</th>
+                                <th>Chuyên mục</th>
+                                <th>Ngày</th>
+                                <th>Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% posts.forEach(p => { %>
                                 <tr>
-                                    <th scope="col" width="50">#</th>
-                                    <th scope="col" width="80">Ảnh</th>
-                                    <th scope="col">Tên sản phẩm</th>
-                                    <th scope="col">Giá</th>
-                                    <th scope="col">Danh mục</th>
-                                    <th scope="col" class="text-end">Hành động</th>
+                                    <td class="fw-bold text-primary"><%= p.title %></td>
+                                    <td>Admin</td>
+                                    <td><%= p.category ? p.category.name : '---' %></td>
+                                    <td><%= p.createdAt.toLocaleDateString('vi-VN') %></td>
+                                    <td>
+                                        <a href="/admin/edit-post/<%= p._id %>" class="btn btn-sm btn-outline-secondary">Sửa</a>
+                                        <button class="btn btn-sm btn-outline-danger">Xóa</button>
+                                    </td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                <% if (products.length > 0) { %>
-                                    <% products.forEach((prod, index) => { %>
-                                    <tr>
-                                        <td><%= index + 1 %></td>
-                                        <td>
-                                            <img src="<%= prod.thumbnail || prod.images[0] %>" 
-                                                 style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px;">
-                                        </td>
-                                        <td class="fw-bold text-primary"><%= prod.name %></td>
-                                        <td><%= prod.basePrice.toLocaleString('vi-VN') %> đ</td>
-                                        <td><span class="badge bg-secondary"><%= prod.category %></span></td>
-                                        <td class="text-end">
-                                            <a href="/products/<%= prod.slug %>" target="_blank" class="btn btn-info btn-sm text-white">
-                                                <i class="fas fa-eye"></i> Xem
-                                            </a>
-                                            <a href="/admin/edit-product/<%= prod._id %>" class="btn btn-sm btn-outline-primary">
-                                                <i class="fas fa-edit"></i> Sửa
-                                            </a>
-                                            <form action="/admin/delete-product" method="POST" class="d-inline">
-                                                <input type="hidden" name="productId" value="<%= prod._id %>">
-                                                <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Bạn chắc chắn muốn xóa?')">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                    <% }) %>
-                                <% } else { %>
-                                    <tr>
-                                        <td colspan="6" class="text-center py-4">Chưa có sản phẩm nào.</td>
-                                    </tr>
-                                <% } %>
-                            </tbody>
-                        </table>
-                    </div>
+                            <% }) %>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
