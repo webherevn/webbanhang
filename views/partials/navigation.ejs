@@ -1,0 +1,34 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+  <div class="container">
+    <a class="navbar-brand fw-bold" href="/">FASHION SHOP</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item">
+          <a class="nav-link <%= path === '/' ? 'active' : '' %>" href="/">Trang chủ</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link <%= path === '/products' ? 'active' : '' %>" href="/products">Sản phẩm</a>
+        </li>
+      </ul>
+      
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item">
+            <a class="nav-link position-relative" href="/cart">
+                <i class="fas fa-shopping-cart"></i> Giỏ hàng
+                <% if (typeof cart !== 'undefined' && cart.totalQuantity > 0) { %>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                        <%= cart.totalQuantity %>
+                    </span>
+                <% } %>
+            </a>
+        </li>
+        <li class="nav-item ms-2">
+            <a class="nav-link btn btn-outline-light btn-sm px-3" href="/admin">Admin</a>
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
