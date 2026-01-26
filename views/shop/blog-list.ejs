@@ -1,44 +1,95 @@
 <%- include('../partials/head.ejs') %>
+<style>
+    .transition-img { transition: transform 0.5s ease; }
+    .card:hover .transition-img { transform: scale(1.1); }
+    .category-badge { position: absolute; top: 15px; left: 15px; z-index: 10; }
+    .blog-header { background: #f8f9fa; border-bottom: 1px solid #eee; padding: 60px 0; }
+    .category-desc { max-width: 800px; margin: 0 auto; line-height: 1.6; }
+</style>
 </head>
 <body>
     <%- include('../partials/navigation.ejs') %>
 
-    <div class="container py-5">
-        <div class="text-center mb-5">
-            <h1 class="fw-bold">Tin Tức & Sự Kiện</h1>
-            <p class="text-muted">Cập nhật những xu hướng thời trang mới nhất</p>
+    <header class="blog-header mb-5">
+        <div class="container text-center">
+            <% if (typeof currentCategory !== 'undefined' && currentCategory) { %>
+                <% if (currentCategory.image) { %>
+                    <img src="<%= currentCategory.image %>" class="rounded-circle mb-3 shadow-sm" style="width: 100px; height: 100px; object-fit: cover;">
+                <% } %>
+                <h1 class="fw-bold display-4"><%= currentCategory.name %></h1>
+                <div class="category-desc text-muted mt-3">
+                    <%- currentCategory.description || 'Khám phá những bài viết hay nhất về ' + currentCategory.name %>
+                </div>
+            <% } else { %>
+                <h1 class="fw-bold display-4">Tin Tức & Sự Kiện</h1>
+                <p class="text-muted mt-2">Cập nhật những xu hướng thời trang và tin tức mới nhất từ Fashion Shop</p>
+            <% } %>
         </div>
+    </header>
 
-        <div class="row g-4">
-            <% if(posts.length > 0) { %>
-                <% posts.forEach(post => { %>
-                    <div class="col-md-4">
-                        <div class="card h-100 border-0 shadow-sm hover-shadow">
-                            <a href="/blog/<%= post.slug %>" class="overflow-hidden">
-                                <img src="<%= post.thumbnail %>" class="card-img-top transition-img" style="height: 220px; object-fit: cover; width: 100%;">
-                            </a>
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between mb-2">
-                                    <small class="text-muted"><i class="far fa-clock"></i> <%= post.createdAt.toLocaleDateString('vi-VN') %></small>
-                                    <small class="text-primary"><%= post.category ? post.category.name : 'Tin tức' %></small>
-                                </div>
-                                <h5 class="card-title fw-bold">
-                                    <a href="/blog/<%= post.slug %>" class="text-decoration-none text-dark">
-                                        <%= post.title %>
+    <div class="container pb-5">
+        <div class="row">
+            <div class="col-lg-9">
+                <div class="row g-4">
+                    <% if(posts.length > 0) { %>
+                        <% posts.forEach(post => { %>
+                            <div class="col-md-6">
+                                <div class="card h-100 border-0 shadow-sm overflow-hidden position-relative">
+                                    <span class="badge bg-primary category-badge">
+                                        <%= post.category ? post.category.name : 'Tin tức' %>
+                                    </span>
+
+                                    <a href="/blog/post/<%= post.slug %>" class="overflow-hidden">
+                                        <img src="<%= post.thumbnail %>" class="card-img-top transition-img" style="height: 250px; object-fit: cover;">
                                     </a>
-                                </h5>
-                                <p class="card-text text-muted small" style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
-                                    <%= post.summary %>
-                                </p>
+
+                                    <div class="card-body p-4">
+                                        <div class="mb-2">
+                                            <small class="text-muted"><i class="far fa-calendar-alt me-1"></i> <%= post.createdAt.toLocaleDateString('vi-VN') %></small>
+                                        </div>
+                                        <h5 class="card-title fw-bold mb-3">
+                                            <a href="/blog/post/<%= post.slug %>" class="text-decoration-none text-dark hover-primary">
+                                                <%= post.title %>
+                                            </a>
+                                        </h5>
+                                        <p class="card-text text-muted small mb-0" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                                            <%= post.summary %>
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
+                        <% }) %>
+                    <% } else { %>
+                        <div class="col-12 text-center py-5 bg-white rounded">
+                            <i class="fas fa-newspaper fa-3x text-light mb-3"></i>
+                            <p class="text-muted">Chưa có bài viết nào trong mục này.</p>
+                            <a href="/blog" class="btn btn-outline-primary btn-sm">Xem tất cả bài viết</a>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+
+            <div class="col-lg-3">
+                <div class="sticky-top" style="top: 100px;">
+                    <div class="card border-0 shadow-sm mb-4">
+                        <div class="card-header bg-white fw-bold border-0 pt-3 ps-3">CHUYÊN MỤC</div>
+                        <div class="card-body">
+                            <ul class="list-unstyled mb-0">
+                                <li class="mb-2 pb-2 border-bottom border-light">
+                                    <a href="/blog" class="text-decoration-none <%= !currentCategory ? 'fw-bold text-primary' : 'text-dark' %>">Tất cả bài viết</a>
+                                </li>
+                                <% categories.forEach(cat => { %>
+                                    <li class="mb-2 pb-2 border-bottom border-light">
+                                        <a href="/blog/<%= cat.slug %>" class="text-decoration-none <%= (typeof currentCategory !== 'undefined' && currentCategory && currentCategory.slug === cat.slug) ? 'fw-bold text-primary' : 'text-dark' %>">
+                                            <%= cat.name %>
+                                        </a>
+                                    </li>
+                                <% }) %>
+                            </ul>
                         </div>
                     </div>
-                <% }) %>
-            <% } else { %>
-                <div class="col-12 text-center py-5">
-                    <p>Chưa có bài viết nào.</p>
                 </div>
-            <% } %>
+            </div>
         </div>
     </div>
 

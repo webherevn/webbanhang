@@ -5,54 +5,44 @@ const router = express.Router();
 const shopController = require('../controllers/shop/shopController');
 const cartController = require('../controllers/shop/cartController'); 
 const checkoutController = require('../controllers/shop/checkoutController'); 
-// --- ĐOẠN 1: Thêm dòng này ở đầu file ---
 const blogController = require('../controllers/shop/blogController');
+
 // ============================================================
-// 1. TRANG CHỦ & SẢN PHẨM
+// 1. TRANG CHỦ & SẢN PHẨM (GIỮ NGUYÊN)
 // ============================================================
-// Trang chủ
 router.get('/', shopController.getHomepage); 
-// 1. Trang danh sách tất cả sản phẩm (Thêm dòng này vào)
 router.get('/products', shopController.getProducts);
-
-// Xem chi tiết sản phẩm (QUAN TRỌNG: Chỉ khai báo 1 lần duy nhất ở đây)
 router.get('/products/:slug', shopController.getProductDetail);
-
-// Xem danh sách sản phẩm theo Danh Mục
 router.get('/category/:slug', shopController.getCategoryProducts);
 
-
-// --- 2. GIỎ HÀNG ---
-
+// ============================================================
+// 2. GIỎ HÀNG (GIỮ NGUYÊN)
+// ============================================================
 router.get('/cart', cartController.getCart);
-
-
-
-// Quan trọng: Route này là '/cart/add', nên bên HTML form phải sửa action thành '/cart/add'
-
 router.post('/cart/add', cartController.addToCart);
-
-
-
-// Route xóa sản phẩm
-
 router.post('/cart/delete', cartController.removeFromCart);
 
-
-
-// --- 3. THANH TOÁN (CHECKOUT) ---
-
+// ============================================================
+// 3. THANH TOÁN (CHECKOUT) (GIỮ NGUYÊN)
+// ============================================================
 router.get('/checkout', checkoutController.getCheckout);
-
 router.post('/checkout', checkoutController.postCheckout);
-
 router.get('/checkout/success', checkoutController.getSuccess);
 
+// ============================================================
+// 4. BLOG KHÁCH HÀNG (ĐÃ CẬP NHẬT CHUẨN SEO & FIX LỖI 404)
+// ============================================================
 
-// =======================
-// BLOG KHÁCH HÀNG
-// =======================
-router.get('/blog', blogController.getIndex); // Trang danh sách
-router.get('/blog/:slug', blogController.getDetail); // Trang chi tiết
+// A. Trang danh sách tất cả bài viết
+router.get('/blog', blogController.getIndex);
+
+// B. Trang chi tiết bài viết (Thêm /post/ để phân biệt với chuyên mục)
+// URL ví dụ: domain.com/blog/post/cach-phoi-do-mua-he
+router.get('/blog/post/:slug', blogController.getDetail);
+
+// C. Trang danh sách bài viết theo Chuyên mục (Chuẩn SEO tối thượng)
+// URL ví dụ: domain.com/blog/tu-van
+// LƯU Ý: Phải đặt dòng này dưới cùng của nhóm Blog để không tranh chấp với /blog/post/
+router.get('/blog/:slug', blogController.getPostsByCategory);
 
 module.exports = router;
