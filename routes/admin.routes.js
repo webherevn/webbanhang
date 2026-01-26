@@ -23,7 +23,7 @@ const productUpload = upload.fields([
 router.get('/', adminController.getDashboard);
 
 // ============================================================
-// B. QUẢN LÝ SẢN PHẨM (GIỮ NGUYÊN)
+// B. QUẢN LÝ SẢN PHẨM
 // ============================================================
 router.get('/products', productController.getProducts);
 router.get('/add-product', productController.getAddProduct);
@@ -33,7 +33,7 @@ router.post('/edit-product', productUpload, productController.postEditProduct);
 router.post('/delete-product', productController.postDeleteProduct);
 
 // ============================================================
-// C. QUẢN LÝ DANH MỤC SP (GIỮ NGUYÊN)
+// C. QUẢN LÝ DANH MỤC SP
 // ============================================================
 router.get('/categories', categoryController.getCategories);
 router.post('/categories', upload.single('image'), categoryController.postAddCategory);
@@ -42,56 +42,41 @@ router.get('/edit-category/:categoryId', categoryController.getEditCategory);
 router.post('/edit-category', upload.single('image'), categoryController.postEditCategory);
 
 // ============================================================
-// D. QUẢN LÝ BLOG (CMS) - PHẦN ĐÃ FIX LỖI TRÙNG LẶP
+// D. QUẢN LÝ BLOG (CMS)
 // ============================================================
-// 1. Quản lý Chuyên mục Blog
 router.get('/blog-categories', postController.getBlogCategories);
-
-// Thêm mới chuyên mục (Có upload ảnh để nhận được req.body)
 router.post('/add-blog-category', upload.single('image'), postController.postAddBlogCategory);
-
-// Sửa chuyên mục
 router.get('/edit-blog-category/:categoryId', postController.getEditBlogCategory);
 router.post('/edit-blog-category', upload.single('image'), postController.postEditBlogCategory);
-
-// Xóa chuyên mục
 router.post('/delete-blog-category', postController.postDeleteBlogCategory);
 
-// 2. Quản lý Bài viết Blog
 router.get('/posts', postController.getPosts);
 router.get('/add-post', postController.getAddPost);
+router.post('/add-post', upload.fields([{ name: 'thumbnail', maxCount: 1 }]), postController.postAddPost);
+router.get('/edit-post/:postId', postController.getEditPost);
+router.post('/edit-post', upload.fields([{ name: 'thumbnail', maxCount: 1 }]), postController.postEditPost);
 router.post('/delete-post', postController.postDeletePost);
 
-// 1. Trang hiển thị form sửa (GET)
-router.get('/edit-post/:postId', postController.getEditPost);
-
-// 2. Xử lý lưu dữ liệu sửa (POST) - Nhớ dùng upload.fields để nhận ảnh
-router.post('/edit-post', upload.fields([{ name: 'thumbnail', maxCount: 1 }]), postController.postEditPost);
-
-
-// Upload ảnh cho bài viết (Dùng fields vì thường có thumbnail)
-router.post('/add-post', upload.fields([{ name: 'thumbnail', maxCount: 1 }]), postController.postAddPost);
-
-
-
-// routes/admin.routes.js
-
-// Trang hiển thị các ô nhập mã (GET)
+// ============================================================
+// E. CẤU HÌNH HỆ THỐNG (SCRIPTS)
+// ============================================================
 router.get('/settings', adminController.getSettings);
-
-// Xử lý khi nhấn nút Lưu (POST)
 router.post('/settings/scripts', adminController.postSettings);
 
-
-// QUẢN LÝ TRANG (PAGES)
+// ============================================================
+// F. QUẢN LÝ TRANG (PAGES) - ĐÃ FIX LỖI TRÙNG LẶP
+// ============================================================
 router.get('/pages', pageController.getPages);
 router.get('/add-page', pageController.getAddPage);
-router.post('/add-page', pageController.postAddPage);
-router.get('/edit-page/:pageId', pageController.getEditPage);
-router.post('/edit-page', pageController.postEditPage);
-router.post('/delete-page', pageController.postDeletePage);
 
+// Chỉ giữ lại route có upload.single để xử lý cả Ảnh và Dữ liệu chữ
 router.post('/add-page', upload.single('thumbnail'), pageController.postAddPage);
+
+router.get('/edit-page/:pageId', pageController.getEditPage);
+
+// Chỉ giữ lại route có upload.single
 router.post('/edit-page', upload.single('thumbnail'), pageController.postEditPage);
+
+router.post('/delete-page', pageController.postDeletePage);
 
 module.exports = router;
