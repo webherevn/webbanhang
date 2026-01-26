@@ -43,7 +43,6 @@ router.post('/edit-category', upload.single('image'), categoryController.postEdi
 // ============================================================
 // D. QUẢN LÝ BLOG (CMS) - PHẦN ĐÃ FIX LỖI TRÙNG LẶP
 // ============================================================
-
 // 1. Quản lý Chuyên mục Blog
 router.get('/blog-categories', postController.getBlogCategories);
 
@@ -61,6 +60,13 @@ router.post('/delete-blog-category', postController.postDeleteBlogCategory);
 router.get('/posts', postController.getPosts);
 router.get('/add-post', postController.getAddPost);
 router.post('/delete-post', postController.postDeletePost);
+
+// 1. Trang hiển thị form sửa (GET)
+router.get('/edit-post/:postId', postController.getEditPost);
+
+// 2. Xử lý lưu dữ liệu sửa (POST) - Nhớ dùng upload.fields để nhận ảnh
+router.post('/edit-post', upload.fields([{ name: 'thumbnail', maxCount: 1 }]), postController.postEditPost);
+
 
 // Upload ảnh cho bài viết (Dùng fields vì thường có thumbnail)
 router.post('/add-post', upload.fields([{ name: 'thumbnail', maxCount: 1 }]), postController.postAddPost);

@@ -147,3 +147,48 @@ exports.postDeletePost = async (req, res) => {
         res.redirect('/admin/posts');
     } catch (err) { console.log(err); res.redirect('/admin/posts'); }
 };
+
+// controllers/admin/postController.js
+
+// A. Hiển thị form sửa
+exports.getEditPost = async (req, res) => {
+    try {
+        const postId = req.params.postId;
+        const post = await Post.findById(postId).populate('category');
+        const categories = await BlogCategory.find();
+
+        if (!post) return res.redirect('/admin/posts');
+
+        res.render('admin/post-form', {
+            pageTitle: 'Chỉnh sửa bài viết',
+            path: '/admin/posts',
+            post: post,
+            categories: categories,
+            editing: true // Biến để EJS biết đang ở chế độ Sửa
+        });
+    } catch (err) { res.redirect('/admin/posts'); }
+};
+
+// B. Xử lý cập nhật bài viết
+exports.postEditPost = async (req, res) => {
+    try {
+        const { postId, title, content, summary, categoryId } = req.body;
+        const post = await Post.findById(postId);
+
+        post.title = title;
+        post.content = content;
+        post.summary = summary;
+        post.category = categoryId;
+        
+        // Cập nhật slug mới dựa trên title mới
+        post.slug = slugify(title, { lower: true, strict: true });
+
+        // Nếu có upload ảnh thumbnail mới
+        if (req.files && req.files['thumbnail']) {
+            post.thumbnail = req.files['thumbnail'][0].path;
+        }
+
+        await post.save();
+        res.redirect('/admin/posts');
+    } catch (err) { res.redirect('/admin/posts'); }
+};
