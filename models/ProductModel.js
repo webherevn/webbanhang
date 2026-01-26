@@ -1,10 +1,7 @@
-// QUAN TRỌNG: Kiểm tra kỹ tên file trong thư mục models
-// Nếu file của bạn tên là "productModel.js" (chữ p thường) thì sửa dòng dưới thành: require('../../models/productModel');
-// Nếu file của bạn tên là "ProductModel.js" (chữ P hoa) thì giữ nguyên.
-const mongoose = require('mongoose');
-
-
-const slugify = require('slugify');
+// --- SỬA LỖI QUAN TRỌNG TẠI ĐÂY ---
+// Thay vì gọi mongoose/slugify, ta phải gọi cái MODEL ra
+// LƯU Ý: Kiểm tra kỹ tên file bên trái VSCode là 'ProductModel.js' hay 'productModel.js' để sửa dòng dưới cho khớp
+const Product = require('../../models/ProductModel'); 
 
 exports.getAddProduct = (req, res) => {
   res.render('admin/product-form', { pageTitle: 'Thêm Sản Phẩm' });
@@ -14,65 +11,53 @@ exports.postAddProduct = async (req, res) => {
   console.log("--- BẮT ĐẦU XỬ LÝ ---");
   
   try {
-    // 1. Log dữ liệu nhận được để kiểm tra
+    // 1. Log dữ liệu để debug
     console.log("Body:", req.body);
     console.log("Files:", req.files ? req.files.length : "0 files");
 
     const { name, basePrice, category, description } = req.body;
 
-    // 2. VALIDATE ẢNH (Bắt buộc phải có ảnh)
-    // Nếu không có ảnh, hoặc mảng ảnh rỗng -> Báo lỗi ngay
+    // 2. VALIDATE ẢNH
     if (!req.files || req.files.length === 0) {
-        console.log("❌ LỖI: Không có ảnh được upload.");
-        return res.status(400).send("Lỗi: Bạn chưa chọn ảnh! (Hoặc quên enctype='multipart/form-data' bên EJS)");
+        console.log("❌ LỖI: Không có ảnh upload");
+        return res.status(400).send("Lỗi: Bạn chưa chọn ảnh! (Hoặc quên enctype='multipart/form-data')");
     }
     const imageLinks = req.files.map(file => file.path);
 
-    // 3. VALIDATE DỮ LIỆU CƠ BẢN (Chống crash do thiếu dữ liệu)
-    
-    // Nếu thiếu tên -> Báo lỗi
+    // 3. VALIDATE DỮ LIỆU CƠ BẢN
     if (!name || name.trim() === "") {
         return res.status(400).send("Lỗi: Tên sản phẩm không được để trống");
     }
 
-    // Xử lý giá tiền (Chuyển từ String sang Number an toàn)
+    // Xử lý giá (Xóa dấu chấm/phẩy: 100.000 -> 100000)
     let price = 0;
     if (basePrice) {
-        // Xóa dấu phẩy hoặc chấm nếu người dùng nhập kiểu 100.000
         price = Number(basePrice.toString().replace(/[,.]/g, '')); 
     }
-    // Nếu chuyển đổi thất bại (NaN) thì gán về 0
     if (isNaN(price)) price = 0; 
 
-    // Xử lý Category (Nếu quên nhập thì gán mặc định)
-    const finalCategory = category || "Uncategorized";
-
     // 4. TẠO SẢN PHẨM
+    // (Lệnh này sẽ hoạt động vì ta đã require Product ở dòng đầu tiên)
     const product = new Product({
       name: name,
-      basePrice: price,         // Đã xử lý thành số
-      category: finalCategory,  // Đã xử lý
+      basePrice: price,
+      category: category || "Uncategorized",
       description: description || "",
-      images: imageLinks,       // Link từ Cloudinary
-      thumbnail: imageLinks[0], // Ảnh đầu tiên làm đại diện
-      
-      // Tạm thời để variants rỗng
+      images: imageLinks,       
+      thumbnail: imageLinks[0],
       variants: [] 
     });
 
     // 5. LƯU VÀO DB
-    console.log("⏳ Đang gọi lệnh lưu vào DB...");
+    console.log("⏳ Đang lưu vào DB...");
     await product.save();
     
     console.log("✅ LƯU THÀNH CÔNG!");
     res.redirect('/');
 
   } catch (err) {
-    // 6. BẮT LỖI MONGOOSE CHI TIẾT
-    console.log("❌ LỖI KHI LƯU DB:");
-    console.error(err); // Dùng console.error để hiện đỏ trong log
+    console.log("❌ LỖI KHI LƯU DB:", err);
 
-    // Nếu là lỗi Validation của Mongoose (VD: thiếu trường required)
     if (err.name === 'ValidationError') {
         let errorMessages = Object.values(err.errors).map(e => e.message);
         return res.status(400).send("Lỗi Dữ Liệu: " + errorMessages.join(', '));
