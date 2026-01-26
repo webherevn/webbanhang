@@ -11,11 +11,13 @@ const categoryController = require('../controllers/admin/categoryController');
 // --- ĐOẠN 1: Thêm dòng này ở đầu file ---
 const postController = require('../controllers/admin/postController');
 
-
-// admin.routes.js
-console.log("Check ProductController:", Object.keys(productController));
-console.log("Check CategoryController:", Object.keys(categoryController));
-console.log("Check PostController:", Object.keys(postController));
+// Dán đoạn này vào sau các dòng require trong admin.routes.js
+console.log("--- KIỂM TRA HÀM TRONG CONTROLLER ---");
+console.log("AdminController:", Object.keys(adminController || {}));
+console.log("ProductController:", Object.keys(productController || {}));
+console.log("CategoryController:", Object.keys(categoryController || {}));
+console.log("PostController:", Object.keys(postController || {}));
+console.log("-------------------------------------");
 
 // 3. CẤU HÌNH UPLOAD CHO SẢN PHẨM
 const productUpload = upload.fields([
