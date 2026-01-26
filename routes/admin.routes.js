@@ -12,6 +12,11 @@ const categoryController = require('../controllers/admin/categoryController');
 const postController = require('../controllers/admin/postController');
 
 
+// admin.routes.js
+console.log("Check ProductController:", Object.keys(productController));
+console.log("Check CategoryController:", Object.keys(categoryController));
+console.log("Check PostController:", Object.keys(postController));
+
 // 3. CẤU HÌNH UPLOAD CHO SẢN PHẨM
 const productUpload = upload.fields([
     { name: 'thumbnail', maxCount: 1 }, 
