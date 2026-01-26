@@ -9,6 +9,7 @@ const adminController = require('../controllers/admin/adminController');
 const productController = require('../controllers/admin/productController');
 const categoryController = require('../controllers/admin/categoryController');
 const postController = require('../controllers/admin/postController');
+const pageController = require('../controllers/admin/pageController');
 
 // 3. CẤU HÌNH UPLOAD CHO SẢN PHẨM
 const productUpload = upload.fields([
