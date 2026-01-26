@@ -62,11 +62,16 @@
                                         <tr>
                                             <td><input type="checkbox" class="form-check-input"></td>
                                             <td>
-                                                <strong><a href="#" class="text-decoration-none text-dark"><%= cat.name %></a></strong>
-                                                <div class="small mt-1">
+                                                <strong><a href="/admin/edit-category/<%= cat._id %>" class="text-decoration-none text-dark fw-bold fs-6"><%= cat.name %></a></strong>
+                                                
+                                                <div class="small mt-1 opacity-75">
+                                                    <a href="/admin/edit-category/<%= cat._id %>" class="text-primary text-decoration-none me-2">Sửa</a>
+                                                    
+                                                    <span class="text-muted">|</span>
+
                                                     <form action="/admin/delete-category" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa danh mục này?');">
                                                         <input type="hidden" name="categoryId" value="<%= cat._id %>">
-                                                        <button type="submit" class="btn btn-link p-0 text-danger text-decoration-none" style="font-size: 12px;">Xóa vĩnh viễn</button>
+                                                        <button type="submit" class="btn btn-link p-0 text-danger text-decoration-none ms-2" style="font-size: 13px;">Xóa vĩnh viễn</button>
                                                     </form>
                                                 </div>
                                             </td>

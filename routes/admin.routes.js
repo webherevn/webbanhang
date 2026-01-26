@@ -44,5 +44,9 @@ router.get('/categories', categoryController.getCategories);
 router.post('/categories', categoryController.postAddCategory);
 router.post('/delete-category', categoryController.postDeleteCategory); // Xóa
 
+// --- SỬA DANH MỤC ---
+router.get('/edit-category/:categoryId', categoryController.getEditCategory);
+router.post('/edit-category', categoryController.postEditCategory);
+
 
 module.exports = router;
