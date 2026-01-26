@@ -1,40 +1,53 @@
-<%- include('partials/head.ejs') %>
+<%- include('../partials/head.ejs') %>
+<style>
+    body { margin: 0; background-color: #f0f2f5; }
+    .admin-wrapper { display: flex; min-height: 100vh; }
+    .admin-sidebar-container { width: 200px; position: fixed; top: 0; left: 0; bottom: 0; background-color: #23282d; z-index: 1000; }
+    .admin-content { flex: 1; margin-left: 200px; padding: 30px; }
+</style>
 </head>
 <body>
     <div class="admin-wrapper">
-        <%- include('partials/sidebar.ejs') %>
+        <div class="admin-sidebar-container">
+            <%- include('./partials/sidebar.ejs') %>
+        </div>
 
         <div class="admin-content">
-            <div class="container-fluid">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h2 class="fw-bold">Bài viết</h2>
-                    <a href="/admin/add-post" class="btn btn-primary">Viết bài mới</a>
-                </div>
+            <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+                <h2 class="fw-bold h4">Sản phẩm</h2>
+                <a href="/admin/add-product" class="btn btn-primary btn-sm">Thêm sản phẩm mới</a>
+            </div>
 
-                <div class="card shadow-sm p-3">
-                    <table class="table table-hover align-middle">
-                        <thead>
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-0 text-center">
+                    <table class="table table-hover mb-0 align-middle text-start">
+                        <thead class="table-light">
                             <tr>
-                                <th>Tiêu đề</th>
-                                <th>Tác giả</th>
-                                <th>Chuyên mục</th>
-                                <th>Ngày</th>
-                                <th>Hành động</th>
+                                <th class="ps-3">Tên sản phẩm</th>
+                                <th>Giá bán</th>
+                                <th>Ngày tạo</th>
+                                <th class="text-end pe-3">Hành động</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <% posts.forEach(p => { %>
-                                <tr>
-                                    <td class="fw-bold text-primary"><%= p.title %></td>
-                                    <td>Admin</td>
-                                    <td><%= p.category ? p.category.name : '---' %></td>
-                                    <td><%= p.createdAt.toLocaleDateString('vi-VN') %></td>
-                                    <td>
-                                        <a href="/admin/edit-post/<%= p._id %>" class="btn btn-sm btn-outline-secondary">Sửa</a>
-                                        <button class="btn btn-sm btn-outline-danger">Xóa</button>
-                                    </td>
-                                </tr>
-                            <% }) %>
+                            <% if (products.length > 0) { %>
+                                <% products.forEach(p => { %>
+                                    <tr>
+                                        <td class="ps-3 fw-bold text-primary"><%= p.name %></td>
+                                        <td><%= p.basePrice.toLocaleString() %>₫</td>
+                                        <td><%= p.createdAt.toLocaleDateString('vi-VN') %></td>
+                                        <td class="text-end pe-3">
+                                            <a href="/admin/edit-product/<%= p._id %>" class="btn btn-link p-0 small text-decoration-none me-2">Sửa</a>
+                                            <form action="/admin/delete-product" method="POST" class="d-inline">
+                                                <input type="hidden" name="productId" value="<%= p._id %>">
+                                                <button class="btn btn-link text-danger p-0 small text-decoration-none">Xóa</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                <% }) %>
+                            <% } else { %>
+                                <tr><td colspan="4" class="text-center py-4">Chưa có sản phẩm nào.</td></tr>
+                            <% } %>
                         </tbody>
                     </table>
                 </div>

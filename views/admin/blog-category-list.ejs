@@ -1,33 +1,43 @@
 <%- include('../partials/head.ejs') %>
+<style>
+    body { margin: 0; background-color: #f0f2f5; }
+    .admin-wrapper { display: flex; min-height: 100vh; }
+    .admin-sidebar-container { width: 200px; position: fixed; top: 0; left: 0; bottom: 0; background-color: #23282d; z-index: 1000; }
+    .admin-content { flex: 1; margin-left: 200px; padding: 30px; }
+</style>
 </head>
 <body>
-    <%- include('../partials/navigation.ejs') %>
-    <div class="container py-5">
-        <div class="row">
-            <div class="col-md-4">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-dark text-white">Thêm Chuyên Mục Mới</div>
-                    <div class="card-body">
-                        <form action="/admin/add-blog-category" method="POST">
-                            <div class="mb-3">
-                                <label>Tên chuyên mục</label>
-                                <input type="text" name="name" class="form-control" required>
-                            </div>
-                            <button type="submit" class="btn btn-primary w-100">Lưu</button>
-                        </form>
+    <div class="admin-wrapper">
+        <div class="admin-sidebar-container">
+            <%- include('./partials/sidebar.ejs') %>
+        </div>
+
+        <div class="admin-content">
+            <h2 class="fw-bold h4 mb-4 border-bottom pb-3">Chuyên mục Blog</h2>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h6 class="fw-bold mb-3">Thêm chuyên mục</h6>
+                            <form action="/admin/add-blog-category" method="POST">
+                                <input type="text" name="name" class="form-control mb-3" placeholder="Tên chuyên mục" required>
+                                <button class="btn btn-primary btn-sm w-100">Lưu chuyên mục</button>
+                            </form>
+                        </div>
                     </div>
                 </div>
-            </div>
-            <div class="col-md-8">
-                <h3>Danh sách Chuyên mục</h3>
-                <table class="table table-bordered">
-                    <thead><tr><th>Tên</th><th>Slug</th></tr></thead>
-                    <tbody>
-                        <% categories.forEach(cat => { %>
-                            <tr><td><%= cat.name %></td><td><%= cat.slug %></td></tr>
-                        <% }) %>
-                    </tbody>
-                </table>
+                <div class="col-md-8">
+                    <div class="card shadow-sm p-3">
+                        <table class="table table-hover">
+                            <thead><tr><th>Tên</th><th>Slug</th></tr></thead>
+                            <tbody>
+                                <% categories.forEach(cat => { %>
+                                    <tr><td><%= cat.name %></td><td><%= cat.slug %></td></tr>
+                                <% }) %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
