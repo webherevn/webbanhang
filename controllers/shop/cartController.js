@@ -49,7 +49,8 @@ exports.addToCart = async (req, res) => {
       image: productImage,
       variant: currentVariant,
       quantity: qty,
-      total: product.basePrice * qty
+      total: product.basePrice * qty,
+      slug: product.slug  // <--- THÊM DÒNG NÀY VÀO
     };
 
     // Lấy giỏ hàng hiện tại
