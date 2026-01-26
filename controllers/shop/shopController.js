@@ -88,8 +88,12 @@ exports.getProductDetail = async (req, res) => {
         });
 
     } catch (err) {
-        console.log("❌ Lỗi xem chi tiết:", err);
-        // Render thẳng lỗi ra màn hình để dễ đọc thay vì redirect
-        res.status(500).send("<h1>LỖI SERVER: " + err.message + "</h1>");
+        console.error("❌ LỖI CHẾT NGƯỜI:", err); 
+        // Thay vì redirect hay render 404, hãy in lỗi ra màn hình:
+        res.status(500).send(`
+            <h1>LỖI SERVER CHI TIẾT:</h1>
+            <h3>${err.message}</h3>
+            <pre>${err.stack}</pre>
+        `);
     }
 };
