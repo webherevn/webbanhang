@@ -1,5 +1,5 @@
 const Product = require('../../models/ProductModel');
-const Category = require('../../models/CategoryModel'); // <--- 1. Import thêm Model Category
+const Category = require('../../models/CategoryModel');
 const slugify = require('slugify');
 
 // ============================================================
@@ -7,7 +7,6 @@ const slugify = require('slugify');
 // ============================================================
 exports.getProducts = async (req, res) => {
   try {
-    // Lấy tất cả sản phẩm, sắp xếp mới nhất lên đầu
     const products = await Product.find().sort({ createdAt: -1 });
     
     res.render('admin/product-list', { 
@@ -22,17 +21,16 @@ exports.getProducts = async (req, res) => {
 };
 
 // ============================================================
-// 2. HIỂN THỊ FORM THÊM MỚI (CẬP NHẬT)
+// 2. HIỂN THỊ FORM THÊM MỚI
 // ============================================================
 exports.getAddProduct = async (req, res) => {
   try {
-    // Lấy danh sách danh mục để hiển thị ra cột bên phải (Sidebar chọn danh mục)
     const categories = await Category.find(); 
 
     res.render('admin/product-form', { 
       pageTitle: 'Thêm Sản Phẩm Mới',
       path: '/admin/add-product',
-      categories: categories // <--- Truyền danh mục sang View
+      categories: categories
     });
   } catch (err) {
     console.log("❌ Lỗi tải form thêm sản phẩm:", err);
@@ -41,7 +39,7 @@ exports.getAddProduct = async (req, res) => {
 };
 
 // ============================================================
-// 3. XỬ LÝ LƯU SẢN PHẨM MỚI (CẬP NHẬT LOGIC ẢNH)
+// 3. XỬ LÝ LƯU SẢN PHẨM MỚI (UPDATE LOGIC SLUG SEO)
 // ============================================================
 exports.postAddProduct = async (req, res) => {
   console.log("--- BẮT ĐẦU THÊM SẢN PHẨM ---");
@@ -49,17 +47,13 @@ exports.postAddProduct = async (req, res) => {
   try {
     const { name, basePrice, category, description, salePrice } = req.body;
 
-    // --- A. XỬ LÝ ẢNH (QUAN TRỌNG: Logic mới cho upload.fields) ---
-    // Do bên Route dùng upload.fields, nên req.files bây giờ là Object
-    
-    // 1. Lấy ảnh đại diện (Bắt buộc)
+    // --- A. XỬ LÝ ẢNH ---
     const thumbnailFiles = req.files['thumbnail']; 
     if (!thumbnailFiles || thumbnailFiles.length === 0) {
         return res.status(400).send("Lỗi: Bạn chưa chọn Ảnh đại diện (Thumbnail)!");
     }
     const thumbnailPath = thumbnailFiles[0].path;
 
-    // 2. Lấy album ảnh (Không bắt buộc)
     const galleryFiles = req.files['gallery'] || [];
     const galleryPaths = galleryFiles.map(file => file.path);
 
@@ -68,45 +62,46 @@ exports.postAddProduct = async (req, res) => {
         return res.status(400).send("Lỗi: Tên sản phẩm không được để trống");
     }
 
-    // --- C. Xử lý Giá (Xóa dấu phẩy) ---
+    // --- C. Xử lý Giá ---
     let price = 0;
-    if (basePrice) {
-        price = Number(basePrice.toString().replace(/[,.]/g, '')); 
-    }
+    if (basePrice) price = Number(basePrice.toString().replace(/[,.]/g, '')); 
     if (isNaN(price)) price = 0; 
     
-    // Xử lý giá khuyến mãi (nếu có)
     let sale = 0;
-    if (salePrice) {
-        sale = Number(salePrice.toString().replace(/[,.]/g, ''));
-    }
+    if (salePrice) sale = Number(salePrice.toString().replace(/[,.]/g, ''));
 
-    // --- D. Tạo Slug ---
-    let productSlug = "";
-    if (name) {
-        productSlug = slugify(name, { lower: true, strict: true });
-        productSlug += "-" + Date.now(); 
+    // --- D. TẠO SLUG CHUẨN SEO (LOGIC MỚI) ---
+    // 1. Tạo slug gốc từ tên
+    let productSlug = slugify(name, { lower: true, strict: true });
+    
+    // 2. Kiểm tra xem slug này đã có trong DB chưa
+    let originalSlug = productSlug;
+    let count = 1;
+    
+    // Vòng lặp: Nếu tìm thấy sản phẩm có slug này -> Thêm số vào đuôi và tìm tiếp
+    while (await Product.findOne({ slug: productSlug })) {
+        productSlug = `${originalSlug}-${count}`;
+        count++;
     }
+    // Kết quả: quan-jean -> quan-jean-1 -> quan-jean-2 ...
 
     // --- E. Tạo Object Sản phẩm ---
     const product = new Product({
       name: name,
       slug: productSlug,
       basePrice: price,
-      salePrice: sale || 0, // Lưu thêm giá giảm
-      category: category || "Uncategorized", // Lưu Slug của danh mục
+      salePrice: sale || 0,
+      category: category || "Uncategorized",
       description: description || "", 
-      
-      // Lưu đúng trường trong Model
-      thumbnail: thumbnailPath, // Ảnh đại diện (String)
-      images: galleryPaths,     // Album ảnh (Array String)
+      thumbnail: thumbnailPath,
+      images: galleryPaths,
       variants: [] 
     });
 
     // --- F. Lưu vào Database ---
     await product.save();
     
-    console.log(`✅ Đã thêm sản phẩm: ${name}`);
+    console.log(`✅ Đã thêm: ${name} (Slug: ${productSlug})`);
     res.redirect('/admin/products');
 
   } catch (err) {
@@ -136,24 +131,18 @@ exports.postDeleteProduct = async (req, res) => {
 exports.getEditProduct = async (req, res) => {
     try {
         const prodId = req.params.productId;
-        
-        // 1. Tìm sản phẩm cần sửa
         const product = await Product.findById(prodId);
-        
-        // 2. Lấy danh mục để hiện ra Sidebar
         const categories = await Category.find();
 
         if (!product) {
             return res.redirect('/admin/products');
         }
 
-        // 3. Render giao diện (Dùng chung form với trang Add hoặc file riêng)
-        // Ở đây tôi giả định bạn dùng file 'admin/product-edit' cho an toàn
         res.render('admin/product-form', { 
             pageTitle: 'Chỉnh sửa sản phẩm',
             path: '/admin/edit-product',
-            editing: true,      // Cờ báo hiệu đang ở chế độ Sửa
-            product: product,   // Truyền dữ liệu cũ sang để điền vào ô input
+            editing: true,
+            product: product,
             categories: categories
         });
 
@@ -164,50 +153,53 @@ exports.getEditProduct = async (req, res) => {
 };
 
 // ============================================================
-// 6. XỬ LÝ LƯU THAY ĐỔI (POST)
+// 6. XỬ LÝ LƯU THAY ĐỔI (POST) - (UPDATE LOGIC SLUG SEO)
 // ============================================================
 exports.postEditProduct = async (req, res) => {
     try {
         const { productId, name, basePrice, salePrice, category, description } = req.body;
 
-        // 1. Tìm sản phẩm cũ
         const product = await Product.findById(productId);
-        if (!product) {
-            return res.redirect('/admin/products');
-        }
+        if (!product) return res.redirect('/admin/products');
 
-        // 2. Cập nhật thông tin cơ bản
-        product.name = name;
+        // Cập nhật thông tin cơ bản
         product.category = category;
         product.description = description;
 
-        // Xử lý giá (Xóa dấu phẩy)
         if (basePrice) product.basePrice = Number(basePrice.toString().replace(/[,.]/g, ''));
         if (salePrice) product.salePrice = Number(salePrice.toString().replace(/[,.]/g, ''));
 
-        // Cập nhật Slug nếu tên thay đổi
-        if (name) {
-             product.slug = slugify(name, { lower: true, strict: true }) + "-" + Date.now();
+        // --- LOGIC CẬP NHẬT SLUG KHI SỬA TÊN ---
+        // Chỉ đổi slug nếu người dùng thực sự sửa tên sản phẩm
+        if (name && name !== product.name) {
+            product.name = name; // Cập nhật tên mới
+
+            let newSlug = slugify(name, { lower: true, strict: true });
+            let originalSlug = newSlug;
+            let count = 1;
+
+            // Kiểm tra trùng: Tìm sản phẩm CÓ slug này nhưng KHÔNG PHẢI sản phẩm đang sửa (_id != productId)
+            while (await Product.findOne({ slug: newSlug, _id: { $ne: productId } })) {
+                newSlug = `${originalSlug}-${count}`;
+                count++;
+            }
+            
+            product.slug = newSlug;
         }
 
-        // 3. XỬ LÝ ẢNH (Logic: Chỉ thay nếu có ảnh mới up lên)
-        
-        // A. Nếu có Upload Thumbnail mới -> Thay thế ảnh cũ
+        // XỬ LÝ ẢNH
         if (req.files && req.files['thumbnail']) {
             product.thumbnail = req.files['thumbnail'][0].path;
         }
 
-        // B. Nếu có Upload Gallery mới -> Có thể chọn: Ghi đè hoặc Thêm vào?
-        // Ở đây mình chọn cách: THÊM VÀO (push) danh sách ảnh cũ
         if (req.files && req.files['gallery']) {
             const newImages = req.files['gallery'].map(f => f.path);
-            product.images.push(...newImages); // Nối mảng mới vào mảng cũ
+            product.images.push(...newImages);
         }
 
-        // 4. Lưu lại
         await product.save();
         
-        console.log(`✅ Đã cập nhật sản phẩm: ${name}`);
+        console.log(`✅ Đã cập nhật: ${name} (Slug: ${product.slug})`);
         res.redirect('/admin/products');
 
     } catch (err) {
