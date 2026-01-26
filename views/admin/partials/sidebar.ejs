@@ -1,46 +1,78 @@
-<div class="admin-sidebar bg-dark text-white shadow" style="min-width: 240px; min-height: 100vh;">
-    <div class="sidebar-header p-3 border-bottom border-secondary">
-        <a href="/" class="text-white text-decoration-none fw-bold fs-5">
-            <i class="fas fa-globe me-2"></i> Xem Website
+<div class="admin-sidebar shadow" style="width: 200px; background-color: #23282d; min-height: 100vh; position: fixed; left: 0; top: 0; z-index: 1000;">
+    <div class="sidebar-header p-3 border-bottom border-secondary" style="background-color: #1d2327;">
+        <a href="/" class="text-white text-decoration-none fw-bold small">
+            <i class="fas fa-globe me-2 text-secondary"></i>Xem Website
         </a>
     </div>
+
     <ul class="nav flex-column mt-2">
         <li class="nav-item">
-            <a class="nav-link text-white py-3 px-4 <%= path === '/admin' ? 'bg-primary' : '' %>" href="/admin">
-                <i class="fas fa-tachometer-alt me-2"></i> Bảng tin
-            </a>
-        </li>
-        
-        <li class="nav-item">
-            <a class="nav-link text-white py-3 px-4 <%= path.includes('/admin/post') ? 'bg-primary' : '' %>" href="/admin/posts">
-                <i class="fas fa-thumbtack me-2"></i> Bài viết
-            </a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link text-white py-3 px-4 ps-5 small" href="/admin/blog-categories">
-                <i class="fas fa-folder me-2"></i> Chuyên mục Blog
+            <a class="nav-link admin-nav-link <%= path === '/admin' ? 'active' : '' %>" href="/admin">
+                <i class="fas fa-tachometer-alt me-2"></i>Bảng tin
             </a>
         </li>
 
-        <hr class="border-secondary mx-3">
-
-        <li class="nav-item">
-            <a class="nav-link text-white py-3 px-4 <%= path.includes('/admin/product') ? 'bg-primary' : '' %>" href="/admin/products">
-                <i class="fas fa-box me-2"></i> Sản phẩm
+        <li class="nav-item mt-2">
+            <a class="nav-link admin-nav-link <%= path.includes('/admin/post') && !path.includes('category') ? 'active' : '' %>" href="/admin/posts">
+                <i class="fas fa-thumbtack me-2"></i>Bài viết
             </a>
         </li>
         <li class="nav-item">
-            <a class="nav-link text-white py-3 px-4 ps-5 small" href="/admin/categories">
-                <i class="fas fa-tags me-2"></i> Danh mục sản phẩm
+            <a class="nav-link admin-nav-link ps-4 small <%= path === '/admin/blog-categories' ? 'active' : '' %>" href="/admin/blog-categories" style="font-size: 0.85rem; opacity: 0.8;">
+                <i class="fas fa-folder-open me-2"></i>Chuyên mục
             </a>
         </li>
 
-        <hr class="border-secondary mx-3">
+        <hr class="border-secondary mx-3 my-2 opacity-25">
 
         <li class="nav-item">
-            <a class="nav-link text-white py-3 px-4" href="/admin/logout">
-                <i class="fas fa-sign-out-alt me-2"></i> Đăng xuất
+            <a class="nav-link admin-nav-link <%= path.includes('/admin/product') ? 'active' : '' %>" href="/admin/products">
+                <i class="fas fa-box me-2"></i>Sản phẩm
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link admin-nav-link ps-4 small <%= path === '/admin/categories' ? 'active' : '' %>" href="/admin/categories" style="font-size: 0.85rem; opacity: 0.8;">
+                <i class="fas fa-tags me-2"></i>Danh mục SP
+            </a>
+        </li>
+
+        <hr class="border-secondary mx-3 my-2 opacity-25">
+
+        <li class="nav-item">
+            <a class="nav-link admin-nav-link text-danger" href="/admin/logout">
+                <i class="fas fa-sign-out-alt me-2"></i>Đăng xuất
             </a>
         </li>
     </ul>
 </div>
+
+<style>
+    /* WordPress Style Navigation */
+    .admin-nav-link {
+        color: #eee !important;
+        padding: 10px 15px !important;
+        transition: all 0.2s;
+        border-left: 4px solid transparent;
+    }
+
+    .admin-nav-link:hover {
+        background-color: #1d2327;
+        color: #72aee6 !important;
+    }
+
+    .admin-nav-link.active {
+        background-color: #2271b1 !important;
+        color: #fff !important;
+        border-left: 4px solid #72aee6;
+    }
+
+    .admin-nav-link i {
+        width: 20px;
+        text-align: center;
+        opacity: 0.7;
+    }
+
+    .admin-nav-link.active i {
+        opacity: 1;
+    }
+</style>
