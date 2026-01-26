@@ -44,22 +44,27 @@ exports.getProductDetail = async (req, res) => {
 exports.getCategoryProducts = async (req, res) => {
     try {
         const slug = req.params.slug;
+        
+        // --- IN LOG KIỂM TRA ---
+        console.log("1. Slug trên URL nhận được là:", slug);
+        console.log("   (Độ dài chuỗi):", slug.length); // Để soi xem có khoảng trắng thừa không
 
-        // 1. Tìm Danh mục theo Slug
-        const category = await Category.findOne({ slug: slug });
+        // 1. Tìm Danh mục
+        // Dùng trim() để cắt khoảng trắng thừa nếu có
+        const category = await Category.findOne({ slug: slug.trim() });
+        
+        console.log("2. Kết quả tìm trong DB:", category);
 
         if (!category) {
-            // Nếu khách gõ bậy bạ -> Về trang 404 hoặc trang chủ
-            return res.status(404).render('404', { pageTitle: 'Không tìm thấy danh mục', path: '/404' });
+            console.log("❌ KHÔNG TÌM THẤY TRONG DB!");
+            return res.status(404).render('404', { pageTitle: 'Lỗi', path: '/404' });
         }
 
-        // 2. Tìm Sản phẩm thuộc danh mục này
-        // Lưu ý: Trong ProductModel lúc lưu, bạn lưu field 'category' là slug hay tên?
-        // Code bên dưới giả định bạn lưu category là Slug (như logic bài trước chúng ta làm)
+        // ... đoạn code tìm sản phẩm phía dưới giữ nguyên ...
+        
         const products = await Product.find({ category: slug }).sort({ createdAt: -1 });
 
-        // 3. Render ra view
-        res.render('shop/category-products', { // Chúng ta sẽ tạo file view này ở Bước 4
+        res.render('shop/category-products', { 
             pageTitle: category.name,
             path: '/category',
             category: category,
@@ -67,7 +72,7 @@ exports.getCategoryProducts = async (req, res) => {
         });
 
     } catch (err) {
-        console.log(err);
+        console.log("❌ LỖI CODE:", err);
         res.redirect('/');
     }
 };
