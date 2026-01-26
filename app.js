@@ -2,7 +2,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const session = require('express-session');
-const MongoDBStore = require('connect-mongodb-session')(session);
+// --- THAY ĐỔI Ở ĐÂY: Dùng connect-mongo thay vì connect-mongodb-session ---
+const MongoStore = require('connect-mongo'); 
 const path = require('path');
 
 // Import Routes
@@ -16,7 +17,7 @@ const app = express();
 // ============================================================
 // 1. CẤU HÌNH RENDER & VIEW
 // ============================================================
-app.set('trust proxy', 1); // Bắt buộc cho Render
+app.set('trust proxy', 1); 
 app.set('view engine', 'ejs');
 app.set('views', 'views');
 
@@ -26,38 +27,35 @@ mongoose.connect(process.env.MONGO_URI)
   .catch(err => console.error('❌ DB Connection Error:', err));
 
 // ============================================================
-// 2. MIDDLEWARE XỬ LÝ DỮ LIỆU (QUAN TRỌNG)
+// 2. MIDDLEWARE XỬ LÝ DỮ LIỆU
 // ============================================================
-// Xử lý dữ liệu từ Form (req.body) - PHẢI CÓ DÒNG NÀY ĐỂ CART HOẠT ĐỘNG
 app.use(express.urlencoded({ extended: true }));
-
-// [THÊM MỚI] Xử lý dữ liệu JSON (Phòng khi dùng fetch api/axios sau này)
 app.use(express.json()); 
-
 app.use(express.static(path.join(__dirname, 'public')));
 
 // ============================================================
-// 3. CẤU HÌNH SESSION & COOKIE
+// 3. CẤU HÌNH SESSION (SỬ DỤNG CONNECT-MONGO MỚI)
 // ============================================================
-const store = new MongoDBStore({
-  uri: process.env.MONGO_URI,
-  collection: 'sessions',
-  expires: 1000 * 60 * 60 * 24 * 7 
-});
-
-store.on('error', function(error) {
-  console.error('❌ LỖI SESSION STORE:', error);
-});
+// Không cần tạo biến 'store' riêng lẻ lằng nhằng như cũ nữa
+// Chúng ta cấu hình trực tiếp bên trong app.use(session)
 
 app.use(session({
   secret: process.env.SESSION_SECRET || 'my secret key fashion shop', 
   resave: false,
   saveUninitialized: false, 
-  store: store,
+  
+  // --- CẤU HÌNH STORE MỚI (KHẮC PHỤC LỖI BSON) ---
+  store: MongoStore.create({
+    mongoUrl: process.env.MONGO_URI,
+    collectionName: 'sessions', // Tên bảng lưu session
+    ttl: 14 * 24 * 60 * 60, // Tự xóa sau 14 ngày (tính bằng giây)
+    autoRemove: 'native' // Tự động xóa session hết hạn
+  }),
+  
+  // Cấu hình Cookie
   cookie: {
-    maxAge: 1000 * 60 * 60 * 24 * 7,
-    // Render: Production -> True (HTTPS), Local -> False (HTTP)
-    secure: process.env.NODE_ENV === 'production', 
+    maxAge: 14 * 24 * 60 * 60 * 1000, // 14 ngày (tính bằng mili giây)
+    secure: process.env.NODE_ENV === 'production', // Render -> True
     httpOnly: true,
     sameSite: 'lax' 
   }
