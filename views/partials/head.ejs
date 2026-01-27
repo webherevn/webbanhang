@@ -6,25 +6,17 @@
 
     <% 
         // 1. LOGIC SEO & THEME SETTINGS
-        // Kiểm tra thứ ưu tiên: Bài viết -> Sản phẩm -> Trang tĩnh -> Mặc định
         let currentItem = (typeof post !== 'undefined') ? post : ((typeof product !== 'undefined') ? product : ((typeof page !== 'undefined') ? page : null));
-        
-        // Lấy dữ liệu theme từ res.locals (Middleware trong app.js)
         let siteTheme = (typeof theme !== 'undefined' && theme) ? theme : {};
 
-        // Tiêu đề: Ưu tiên SEO Title -> Tên item -> Tiêu đề trang
-        let finalTitle = (currentItem && currentItem.seoTitle) ? currentItem.seoTitle : pageTitle;
+        let finalTitle = (currentItem && currentItem.seoTitle) ? currentItem.seoTitle : (typeof pageTitle !== 'undefined' ? pageTitle : "Fashion Store");
         
-        // Mô tả: Ưu tiên SEO Description -> Tóm tắt bài viết -> Top Bar Text -> Mặc định
         let rawDesc = (currentItem && currentItem.seoDescription) ? currentItem.seoDescription : 
                       ((currentItem && currentItem.summary) ? currentItem.summary : 
-                      (siteTheme.topBarText || "Chuyên cung cấp sản phẩm chất lượng cao."));
-        // Loại bỏ HTML nếu có trong mô tả để tránh lỗi thẻ meta
-        let finalDesc = rawDesc.replace(/<[^>]*>?/gm, '').substring(0, 160);
-
-        // Ảnh: Ưu tiên Thumbnail -> Logo website -> Ảnh mặc định
-        let finalImage = (currentItem && currentItem.thumbnail) ? currentItem.thumbnail : (siteTheme.logo || "/images/default-share.jpg");
+                      (siteTheme.topBarText || "Chuyên cung cấp sản phẩm thời trang cao cấp."));
         
+        let finalDesc = rawDesc.replace(/<[^>]*>?/gm, '').substring(0, 160);
+        let finalImage = (currentItem && currentItem.thumbnail) ? currentItem.thumbnail : (siteTheme.logo || "/images/default-share.jpg");
         let domain = "https://webbanhang-es90.onrender.com"; 
     %>
 
@@ -44,14 +36,12 @@
     <meta property="og:description" content="<%= finalDesc %>">
     <meta property="og:image" content="<%= finalImage %>">
 
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="<%= finalTitle %>">
-    <meta name="twitter:description" content="<%= finalDesc %>">
-    <meta name="twitter:image" content="<%= finalImage %>">
-
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
+
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 
     <% if (typeof globalScripts !== 'undefined' && globalScripts.headerScripts) { %>
@@ -59,15 +49,43 @@
     <% } %>
 
     <style>
-        body { background-color: #f0f2f5; }
-        .admin-wrapper { display: flex; }
-        .admin-content { flex: 1; padding: 20px; min-height: 100vh; overflow-y: auto; }
-        .nav-link:hover { background-color: #343a40; }
-        .nav-link.active { background-color: #0d6efd !important; }
-        .card { border: none; border-radius: 8px; }
+        :root {
+            --primary-font: 'Montserrat', sans-serif;
+        }
+        body { 
+            background-color: #fff; /* Đổi thành trắng cho đúng chất Shop thời trang */
+            font-family: var(--primary-font);
+            color: #333;
+        }
+        
+        /* Hiệu ứng Animation cho Hero Section */
+        .animate-up {
+            opacity: 0;
+            transform: translateY(30px);
+            animation: moveUp 0.8s ease forwards;
+        }
+        @keyframes moveUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
 
-        /* NHÚNG CUSTOM CSS TỪ ADMIN CUSTOMIZE */
+        /* Tối ưu ảnh sản phẩm cho đều nhau */
+        .product-img {
+            aspect-ratio: 3/4;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        .product-card:hover .product-img {
+            transform: scale(1.05);
+        }
+        
+        .letter-spacing-2 { letter-spacing: 2px; }
+
+        /* Giữ lại style admin nếu bạn dùng chung file head */
+        .admin-wrapper { display: flex; }
+        .admin-content { flex: 1; padding: 20px; min-height: 100vh; }
+
         <% if (siteTheme.customCss) { %>
             <%- siteTheme.customCss %>
         <% } %>
     </style>
+</head>
