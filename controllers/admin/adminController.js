@@ -1,7 +1,7 @@
 const Post = require('../../models/PostModel');
 const Product = require('../../models/ProductModel');
 const Setting = require('../../models/SettingModel');
-const Theme = require('../../models/ThemeModel'); // BỔ SUNG: Import model Theme
+const Theme = require('../../models/ThemeModel');
 
 // ==========================================
 // 1. TRANG BẢNG TIN (DASHBOARD)
@@ -23,36 +23,27 @@ exports.getDashboard = async (req, res) => {
             Product.countDocuments()
         ]);
 
-        const seoData = [
-            seoGoodPosts + seoGoodProds,
-            seoOkPosts + seoOkProds,
-            seoBadPosts + seoBadProds
-        ];
-
         res.render('admin/dashboard', {
             pageTitle: 'Bảng tin (Dashboard)',
             path: '/admin',
-            seoData: seoData,
-            totalPosts: totalPosts,
-            totalProducts: totalProducts
+            seoData: [seoGoodPosts + seoGoodProds, seoOkPosts + seoOkProds, seoBadPosts + seoBadProds],
+            totalPosts,
+            totalProducts
         });
     } catch (err) {
         console.error("Lỗi Dashboard:", err);
         res.render('admin/dashboard', {
             pageTitle: 'Bảng tin (Dashboard)',
             path: '/admin',
-            seoData: [0, 0, 0],
-            totalPosts: 0,
-            totalProducts: 0
+            seoData: [0, 0, 0], totalPosts: 0, totalProducts: 0
         });
     }
 };
 
 // ==========================================
-// 2. CẤU HÌNH GIAO DIỆN (CUSTOMIZE) - MỚI BỔ SUNG
+// 2. CẤU HÌNH GIAO DIỆN (CUSTOMIZE)
 // ==========================================
 
-// Hiển thị trang chỉnh sửa giao diện
 exports.getCustomize = async (req, res) => {
     try {
         let theme = await Theme.findOne({ key: 'theme_settings' });
@@ -62,7 +53,8 @@ exports.getCustomize = async (req, res) => {
         res.render('admin/customize', {
             pageTitle: 'Tùy biến giao diện',
             path: '/admin/customize',
-            theme: theme
+            theme: theme,
+            query: req.query // Hỗ trợ hiển thị thông báo thành công
         });
     } catch (err) {
         console.error("Lỗi getCustomize:", err);
@@ -70,36 +62,44 @@ exports.getCustomize = async (req, res) => {
     }
 };
 
-// Lưu dữ liệu tùy biến giao diện (bao gồm Footer)
 exports.postCustomize = async (req, res) => {
     try {
-        const {
-            logo, favicon, topBarText, topBarBgColor, 
-            headerBottomHtml, customCss, footerBgColor, 
-            footerTextColor, footerAbout, footerCopyright,
-            contactPhone, contactEmail, address,
-            socialFacebook, socialInstagram, socialTiktok, socialYoutube
-        } = req.body;
+        // 1. Tạo object chứa dữ liệu text từ form
+        // Chúng ta lấy toàn bộ body, sau đó xử lý các trường đặc biệt
+        const updateData = { ...req.body };
 
-        // Xử lý các nút gạt (Checkbox/Switch thường trả về 'on' hoặc undefined)
-        const topBarShow = req.body.topBarShow === 'on';
-        const headerSticky = req.body.headerSticky === 'on';
+        // 2. XỬ LÝ ẢNH TỪ CLOUDINARY (req.files thay vì req.body)
+        if (req.files) {
+            if (req.files['logo'] && req.files['logo'][0]) {
+                updateData.logo = req.files['logo'][0].path;
+            } else {
+                delete updateData.logo; // Không xóa logo cũ nếu không có file mới
+            }
+            
+            if (req.files['favicon'] && req.files['favicon'][0]) {
+                updateData.favicon = req.files['favicon'][0].path;
+            } else {
+                delete updateData.favicon; // Không xóa favicon cũ nếu không có file mới
+            }
+        }
 
-        await Theme.findOneAndUpdate(
+        // 3. Xử lý các nút gạt Checkbox (Boolean)
+        updateData.topBarShow = req.body.topBarShow === 'on';
+        updateData.headerSticky = req.body.headerSticky === 'on';
+
+        // 4. LƯU VÀO DATABASE
+        // { new: true } để trả về dữ liệu sau khi update
+        const updatedTheme = await Theme.findOneAndUpdate(
             { key: 'theme_settings' },
-            {
-                logo, favicon, topBarShow, topBarText, topBarBgColor,
-                headerSticky, headerBottomHtml, customCss,
-                footerBgColor, footerTextColor, footerAbout, footerCopyright,
-                contactPhone, contactEmail, address,
-                socialFacebook, socialInstagram, socialTiktok, socialYoutube
-            },
-            { upsert: true }
+            updateData,
+            { upsert: true, new: true }
         );
 
+        console.log("✅ Cập nhật Theme thành công");
         res.redirect('/admin/customize?status=success');
+
     } catch (err) {
-        console.error("Lỗi postCustomize:", err);
+        console.error("❌ Lỗi postCustomize:", err);
         res.redirect('/admin/customize?status=error');
     }
 };
@@ -117,7 +117,8 @@ exports.getSettings = async (req, res) => {
         res.render('admin/settings', {
             pageTitle: 'Cấu hình Script hệ thống',
             path: '/admin/settings',
-            settings: settings
+            settings: settings,
+            query: req.query
         });
     } catch (err) { 
         console.error(err);
@@ -133,9 +134,9 @@ exports.postSettings = async (req, res) => {
             { headerScripts, bodyScripts, footerScripts },
             { upsert: true }
         );
-        res.redirect('/admin/settings');
+        res.redirect('/admin/settings?status=success');
     } catch (err) { 
         console.error(err);
-        res.redirect('/admin/settings'); 
+        res.redirect('/admin/settings?status=error'); 
     }
 };
