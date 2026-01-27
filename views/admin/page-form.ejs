@@ -4,72 +4,140 @@
 <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.js"></script>
 
 <style>
-    body { background-color: #f0f0f1; margin: 0; }
+    /* 1. ĐỒNG BỘ BIẾN HỆ THỐNG */
+    :root {
+        --sidebar-width: 240px;
+        --admin-bg: #f0f0f1;
+        --sidebar-bg: #23282d;
+        --base-font: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
+    }
+
+    body { 
+        background-color: var(--admin-bg); 
+        margin: 0; padding: 0; 
+        font-family: var(--base-font);
+        font-size: 14px; 
+        color: #3c434a;
+        overflow-x: hidden;
+    }
+
+    /* 2. ĐỒNG BỘ LAYOUT */
     .admin-wrapper { display: flex; min-height: 100vh; }
-    .admin-sidebar-container { width: 240px; position: fixed; top: 0; left: 0; bottom: 0; background-color: #23282d; z-index: 1000; }
-    .admin-content { flex: 1; margin-left: 240px; padding: 30px; }
-    .wp-card { background: #fff; border: 1px solid #c3c4c7; box-shadow: 0 1px 1px rgba(0,0,0,.04); padding: 20px; margin-bottom: 20px; }
-    .note-editor { border: 1px solid #c3c4c7 !important; }
-    .img-preview-sidebar { max-height: 150px; width: 100%; object-fit: cover; border-radius: 4px; margin-bottom: 10px; border: 1px solid #ddd; }
+    
+    .admin-sidebar-container { 
+        width: var(--sidebar-width); 
+        position: fixed; 
+        top: 0; left: 0; bottom: 0; 
+        background-color: var(--sidebar-bg); 
+        z-index: 1000; 
+    }
+
+    .admin-content { 
+        flex: 1; 
+        margin-left: var(--sidebar-width); 
+        padding: 30px; 
+        min-width: 0;
+    }
+
+    /* 3. ĐỒNG BỘ CARD & COMPONENT */
+    .wp-card { 
+        background: #fff; 
+        border: 1px solid #c3c4c7; 
+        box-shadow: 0 1px 1px rgba(0,0,0,.04); 
+        padding: 20px; 
+        margin-bottom: 20px; 
+    }
+
+    .postbox-header { 
+        border-bottom: 1px solid #f0f0f1; 
+        padding-bottom: 10px; 
+        margin-bottom: 15px; 
+        font-weight: 700; 
+        color: #1d2327;
+        text-transform: uppercase;
+        font-size: 13px;
+        letter-spacing: 0.5px;
+    }
+
+    .note-editor { border: 1px solid #c3c4c7 !important; border-radius: 0 !important; }
+    .img-preview-sidebar { max-height: 150px; width: 100%; object-fit: contain; background: #f8f9fa; border-radius: 2px; margin-bottom: 10px; border: 1px solid #dcdcde; }
+    
+    .form-label { font-weight: 600; font-size: 13px; color: #1d2327; }
+
+    @media (max-width: 992px) { 
+        .admin-sidebar-container { display: none; } 
+        .admin-content { margin-left: 0; padding: 15px; } 
+    }
 </style>
 </head>
 <body>
     <div class="admin-wrapper">
-        <div class="admin-sidebar-container"><%- include('./partials/sidebar.ejs') %></div>
+        <div class="admin-sidebar-container">
+            <%- include('./partials/sidebar.ejs') %>
+        </div>
 
         <div class="admin-content">
-            <h2 class="fw-bold h4 mb-4 text-dark"><%= editing ? 'Chỉnh sửa trang' : 'Thêm trang mới' %></h2>
-            
-            <form action="/admin/<%= editing ? 'edit-page' : 'add-page' %>" method="POST" enctype="multipart/form-data">
-                <% if (editing) { %>
-                    <input type="hidden" name="pageId" value="<%= page._id %>">
-                <% } %>
-
-                <div class="row">
-                    <div class="col-md-9">
-                        <div class="mb-4">
-                            <label class="fw-bold small mb-1">Tiêu đề trang</label>
-                            <input type="text" name="title" class="form-control form-control-lg fw-bold shadow-sm" 
-                                   value="<%= editing ? page.title : '' %>" placeholder="Nhập tiêu đề trang (VD: Giới thiệu)..." required>
-                        </div>
-
-                        <div class="wp-card">
-                            <label class="fw-bold small mb-2 text-uppercase text-muted">Nội dung trang</label>
-                            <textarea name="content" id="page-editor"><%= editing ? page.content : '' %></textarea>
-                        </div>
-                    </div>
-
-                    <div class="col-md-3">
-                        <div class="wp-card shadow-sm">
-                            <h6 class="fw-bold small mb-3 text-uppercase border-bottom pb-2">Trạng thái</h6>
-                            <div class="form-check form-switch mb-3">
-                                <input class="form-check-input" type="checkbox" name="isActive" id="isActive" <%= (!editing || page.isActive) ? 'checked' : '' %>>
-                                <label class="form-check-label small" for="isActive">Công khai trang này</label>
-                            </div>
-                            <button type="submit" class="btn btn-primary w-100 fw-bold shadow-sm">
-                                <%= editing ? 'Cập nhật trang' : 'Đăng trang' %>
-                            </button>
-                            <a href="/admin/pages" class="btn btn-link btn-sm w-100 mt-2 text-muted text-decoration-none">Hủy bỏ</a>
-                        </div>
-
-                        <div class="wp-card shadow-sm">
-                            <h6 class="fw-bold small mb-3 text-uppercase border-bottom pb-2">Ảnh đại diện</h6>
-                            <% if (editing && page.thumbnail) { %>
-                                <img src="<%= page.thumbnail %>" class="img-preview-sidebar shadow-sm">
-                            <% } %>
-                            <input type="file" name="thumbnail" class="form-control form-control-sm" accept="image/*">
-                            <small class="text-muted mt-2 d-block" style="font-size: 10px;">Ảnh dùng làm banner hoặc thumbnail khi chia sẻ trang.</small>
-                        </div>
-                        
-                        <div class="wp-card bg-light border-dashed">
-                            <h6 class="fw-bold small mb-2 text-uppercase text-muted">Thông tin SEO</h6>
-                            <p class="small text-muted mb-0">
-                                Link: <span class="text-primary">/p/<%= editing ? page.slug : 'tu-dong-tao' %></span>
-                            </p>
-                        </div>
-                    </div>
+            <div class="container-fluid">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="fw-bold h4 mb-0 text-dark"><%= editing ? 'Chỉnh sửa trang' : 'Thêm trang mới' %></h2>
+                    <a href="/admin/pages" class="btn btn-outline-secondary btn-sm"><i class="fas fa-file-alt me-1"></i> Tất cả trang</a>
                 </div>
-            </form>
+                
+                <form action="/admin/<%= editing ? 'edit-page' : 'add-page' %>" method="POST" enctype="multipart/form-data">
+                    <% if (editing) { %>
+                        <input type="hidden" name="pageId" value="<%= page._id %>">
+                    <% } %>
+
+                    <div class="row">
+                        <div class="col-md-9">
+                            <div class="mb-4">
+                                <label class="form-label">Tiêu đề trang</label>
+                                <input type="text" name="title" class="form-control form-control-lg fw-bold shadow-sm" 
+                                       style="border-radius: 2px;"
+                                       value="<%= editing ? page.title : '' %>" placeholder="Nhập tiêu đề trang (VD: Giới thiệu, Chính sách)..." required>
+                            </div>
+
+                            <div class="wp-card">
+                                <div class="postbox-header">Nội dung chi tiết</div>
+                                <textarea name="content" id="page-editor"><%= editing ? page.content : '' %></textarea>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="wp-card sticky-top" style="top: 20px;">
+                                <div class="postbox-header">Trạng thái & Đăng</div>
+                                <div class="form-check form-switch mb-3">
+                                    <input class="form-check-input" type="checkbox" name="isActive" id="isActive" <%= (!editing || page.isActive) ? 'checked' : '' %>>
+                                    <label class="form-check-label small fw-bold" for="isActive">Công khai trang này</label>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100 fw-bold shadow-sm">
+                                    <i class="fas fa-save me-2"></i><%= editing ? 'Cập nhật trang' : 'Đăng trang' %>
+                                </button>
+                                <a href="/admin/pages" class="btn btn-link btn-sm w-100 mt-2 text-muted text-decoration-none">Hủy bỏ</a>
+                            </div>
+
+                            <div class="wp-card">
+                                <div class="postbox-header">Ảnh tiêu đề / Banner</div>
+                                <% if (editing && page.thumbnail) { %>
+                                    <img src="<%= page.thumbnail %>" class="img-preview-sidebar shadow-sm p-1">
+                                <% } %>
+                                <input type="file" name="thumbnail" class="form-control form-control-sm" accept="image/*">
+                                <small class="text-muted mt-2 d-block" style="font-size: 11px; line-height: 1.4;">
+                                    <i class="fas fa-info-circle me-1"></i> Ảnh dùng làm banner nội dung hoặc thumbnail khi chia sẻ.
+                                </small>
+                            </div>
+                            
+                            <div class="wp-card bg-light border-dashed">
+                                <div class="postbox-header" style="border-bottom: none; margin-bottom: 5px;">Thông tin SEO</div>
+                                <div class="small">
+                                    <span class="text-muted">Đường dẫn tĩnh:</span><br>
+                                    <code class="text-primary fw-bold" style="word-break: break-all;">/p/<%= editing ? page.slug : 'tu-dong-tao' %></code>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
@@ -90,5 +158,6 @@
             });
         });
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

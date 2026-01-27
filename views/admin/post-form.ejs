@@ -4,135 +4,194 @@
 <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.js"></script>
 
 <style>
-    body { background-color: #f0f0f1; margin: 0; padding: 0; }
+    /* 1. ĐỒNG BỘ BIẾN HỆ THỐNG */
+    :root {
+        --sidebar-width: 240px;
+        --admin-bg: #f0f0f1;
+        --sidebar-bg: #23282d;
+        --base-font: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
+    }
+
+    body { 
+        background-color: var(--admin-bg); 
+        margin: 0; padding: 0; 
+        font-family: var(--base-font);
+        font-size: 14px; 
+        color: #3c434a;
+    }
+
+    /* 2. ĐỒNG BỘ LAYOUT */
     .admin-wrapper { display: flex; min-height: 100vh; }
-    .admin-sidebar-container { width: 240px; position: fixed; top: 0; left: 0; bottom: 0; background-color: #23282d; z-index: 1000; }
-    .admin-content { flex: 1; margin-left: 240px; padding: 30px; }
-    .wp-card { background: #fff; border: 1px solid #c3c4c7; box-shadow: 0 1px 1px rgba(0,0,0,.04); padding: 20px; margin-bottom: 20px; }
-    .postbox-header { border-bottom: 1px solid #c3c4c7; padding: 10px 0; margin-bottom: 15px; font-weight: 600; }
-    .seo-item { margin-bottom: 10px; font-size: 13px; display: flex; align-items: center; }
+    
+    .admin-sidebar-container { 
+        width: var(--sidebar-width); 
+        position: fixed; 
+        top: 0; left: 0; bottom: 0; 
+        background-color: var(--sidebar-bg); 
+        z-index: 1000; 
+    }
+
+    .admin-content { 
+        flex: 1; 
+        margin-left: var(--sidebar-width); 
+        padding: 30px; 
+        min-width: 0;
+    }
+
+    /* 3. ĐỒNG BỘ CARD & COMPONENT */
+    .wp-card { 
+        background: #fff; 
+        border: 1px solid #c3c4c7; 
+        box-shadow: 0 1px 1px rgba(0,0,0,.04); 
+        padding: 20px; 
+        margin-bottom: 20px; 
+    }
+
+    .postbox-header { 
+        border-bottom: 1px solid #f0f0f1; 
+        padding-bottom: 10px; 
+        margin-bottom: 15px; 
+        font-weight: 700; 
+        color: #1d2327;
+        text-transform: uppercase;
+        font-size: 13px;
+    }
+
+    /* SEO Preview Styling */
     .google-preview #preview-title { color: #1a0dab; font-size: 20px; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    @media (max-width: 992px) { .admin-sidebar-container { display: none; } .admin-content { margin-left: 0; } }
+    .seo-item { margin-bottom: 8px; font-size: 13px; display: flex; align-items: center; }
+    
+    .form-control-lg { border-radius: 2px; border: 1px solid #8c8f94; }
+    .form-control:focus { border-color: #2271b1; box-shadow: 0 0 0 1px #2271b1; }
+
+    @media (max-width: 992px) { 
+        .admin-sidebar-container { display: none; } 
+        .admin-content { margin-left: 0; padding: 15px; } 
+    }
 </style>
 </head>
 <body>
     <div class="admin-wrapper">
-        <div class="admin-sidebar-container"><%- include('./partials/sidebar.ejs') %></div>
+        <div class="admin-sidebar-container">
+            <%- include('./partials/sidebar.ejs') %>
+        </div>
 
         <div class="admin-content">
-            <h2 class="fw-bold h4 mb-4 text-dark"><%= editing ? 'Chỉnh sửa bài viết' : 'Viết bài mới' %></h2>
-            
-            <form action="/admin/<%= editing ? 'edit-post' : 'add-post' %>" method="POST" enctype="multipart/form-data">
-                <% if (editing) { %>
-                    <input type="hidden" name="postId" value="<%= post._id %>">
-                <% } %>
+            <div class="container-fluid">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="fw-bold h4 mb-0 text-dark"><%= editing ? 'Chỉnh sửa bài viết' : 'Viết bài mới' %></h2>
+                    <a href="/admin/posts" class="btn btn-outline-secondary btn-sm"><i class="fas fa-list me-1"></i> Danh sách</a>
+                </div>
+                
+                <form action="/admin/<%= editing ? 'edit-post' : 'add-post' %>" method="POST" enctype="multipart/form-data">
+                    <% if (editing) { %>
+                        <input type="hidden" name="postId" value="<%= post._id %>">
+                    <% } %>
 
-                <div class="row">
-                    <div class="col-md-9">
-                        <div class="mb-4">
-                            <input type="text" name="title" class="form-control form-control-lg fw-bold shadow-sm" 
-                                   value="<%= editing ? post.title : '' %>" placeholder="Nhập tiêu đề bài viết..." required>
-                        </div>
-
-                        <div class="wp-card">
-                            <div class="postbox-header text-uppercase small text-muted">Nội dung chi tiết</div>
-                            <textarea name="content" id="content-editor"><%= editing ? post.content : '' %></textarea>
-                        </div>
-
-                        <div class="wp-card">
-                            <div class="postbox-header text-uppercase small text-muted">Tóm tắt ngắn (Summary)</div>
-                            <textarea name="summary" class="form-control" rows="3" placeholder="Mô tả ngắn hiển thị ngoài danh sách..."><%= editing ? post.summary : '' %></textarea>
-                        </div>
-
-                        <div class="wp-card shadow-sm border-top border-4 border-info">
-                            <h6 class="fw-bold small mb-3 text-uppercase text-info"><i class="fab fa-google me-2"></i>Xem trước kết quả tìm kiếm</h6>
-                            
-                            <div class="google-preview p-3 mb-4 border rounded bg-white shadow-sm" style="max-width: 600px; font-family: arial, sans-serif;">
-                                <div id="preview-url" class="text-muted small mb-1" style="font-size: 12px;">https://yourdomain.com › blog › ...</div>
-                                <div id="preview-title" class="mb-1">Tiêu đề SEO hiển thị tại đây</div>
-                                <div id="preview-desc" class="text-muted" style="font-size: 14px; line-height: 1.5;">Mô tả Meta của bạn sẽ xuất hiện ở đây...</div>
+                    <div class="row">
+                        <div class="col-md-9">
+                            <div class="mb-4">
+                                <input type="text" name="title" class="form-control form-control-lg fw-bold shadow-sm" 
+                                       value="<%= editing ? post.title : '' %>" placeholder="Nhập tiêu đề bài viết..." required>
                             </div>
 
-                            <div class="mb-3">
-                                <label class="small fw-bold">SEO Title</label>
-                                <input type="text" id="seoTitle" name="seoTitle" class="form-control" 
-                                       value="<%= editing ? post.seoTitle : '' %>" placeholder="Tiêu đề hiển thị trên Google">
-                                <div class="progress mt-1" style="height: 4px;"><div id="seo-title-bar" class="progress-bar" style="width: 0%"></div></div>
+                            <div class="wp-card">
+                                <div class="postbox-header">Nội dung chi tiết</div>
+                                <textarea name="content" id="content-editor"><%= editing ? post.content : '' %></textarea>
                             </div>
-                            <div class="mb-0">
-                                <label class="small fw-bold">Meta Description</label>
-                                <textarea id="seoDescription" name="seoDescription" class="form-control" rows="3" 
-                                          placeholder="Mô tả meta thu hút..."><%= editing ? post.seoDescription : '' %></textarea>
-                                <div class="progress mt-1" style="height: 4px;"><div id="seo-desc-bar" class="progress-bar" style="width: 0%"></div></div>
+
+                            <div class="wp-card">
+                                <div class="postbox-header">Tóm tắt ngắn (Summary)</div>
+                                <textarea name="summary" class="form-control" rows="3" placeholder="Mô tả ngắn hiển thị ngoài danh sách..."><%= editing ? post.summary : '' %></textarea>
+                            </div>
+
+                            <div class="wp-card border-top border-4 border-info">
+                                <div class="postbox-header text-info"><i class="fab fa-google me-2"></i>Xem trước kết quả tìm kiếm</div>
+                                
+                                <div class="google-preview p-3 mb-4 border rounded bg-white shadow-sm" style="max-width: 600px; font-family: arial, sans-serif;">
+                                    <div id="preview-url" class="text-muted small mb-1" style="font-size: 12px;">https://webbanhang.onrender.com › blog › ...</div>
+                                    <div id="preview-title" class="mb-1 text-primary">Tiêu đề SEO hiển thị tại đây</div>
+                                    <div id="preview-desc" class="text-muted" style="font-size: 14px; line-height: 1.5;">Mô tả Meta của bạn sẽ xuất hiện ở đây...</div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="small fw-bold">SEO Title</label>
+                                    <input type="text" id="seoTitle" name="seoTitle" class="form-control" 
+                                           value="<%= editing ? post.seoTitle : '' %>" placeholder="Tiêu đề hiển thị trên Google">
+                                    <div class="progress mt-1" style="height: 4px;"><div id="seo-title-bar" class="progress-bar" style="width: 0%"></div></div>
+                                </div>
+                                <div class="mb-0">
+                                    <label class="small fw-bold">Meta Description</label>
+                                    <textarea id="seoDescription" name="seoDescription" class="form-control" rows="3" 
+                                              placeholder="Mô tả meta thu hút..."><%= editing ? post.seoDescription : '' %></textarea>
+                                    <div class="progress mt-1" style="height: 4px;"><div id="seo-desc-bar" class="progress-bar" style="width: 0%"></div></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="wp-card border-top border-4 border-primary">
+                                <div class="postbox-header text-primary"><i class="fas fa-rocket me-2"></i>RankMath SEO</div>
+                                
+                                <div class="mb-3">
+                                    <label class="small fw-bold">Từ khóa chính</label>
+                                    <input type="text" id="focusKeyword" name="focusKeyword" class="form-control form-control-sm" 
+                                           value="<%= editing ? post.focusKeyword : '' %>" placeholder="Ví dụ: cách làm SEO">
+                                </div>
+
+                                <div class="p-3 bg-light rounded mb-3 border text-center">
+                                    <div class="small fw-bold">Điểm SEO: <span id="seo-score-text" class="h5">0/100</span></div>
+                                    <div class="progress mt-1" style="height: 8px;"><div id="seo-progress-bar" class="progress-bar" style="width: 0%"></div></div>
+                                    <div class="mt-2"><i id="overall-emoji" class="fas fa-meh fa-2x text-muted"></i></div>
+                                </div>
+
+                                <div class="seo-checklist-groups">
+                                    <div class="small fw-bold text-muted border-bottom mb-2 pb-1">Cơ bản</div>
+                                    <ul class="list-unstyled mb-3">
+                                        <li class="seo-item" data-check="title-length"><i class="fas fa-circle-notch text-muted me-2"></i>Tiêu đề < 60 ký tự</li>
+                                        <li class="seo-item" data-check="desc-length"><i class="fas fa-circle-notch text-muted me-2"></i>Mô tả < 155 ký tự</li>
+                                        <li class="seo-item" data-check="h1-check"><i class="fas fa-circle-notch text-muted me-2"></i>Duy nhất 1 thẻ H1</li>
+                                    </ul>
+
+                                    <div class="small fw-bold text-muted border-bottom mb-2 pb-1">Nâng cao</div>
+                                    <ul class="list-unstyled mb-0">
+                                        <li class="seo-item" data-check="img-alt-keyword"><i class="fas fa-circle-notch text-muted me-2"></i>Ảnh có thẻ Alt</li>
+                                        <li class="seo-item" data-check="internal-link"><i class="fas fa-circle-notch text-muted me-2"></i>Liên kết nội bộ</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="wp-card sticky-top" style="top: 20px;">
+                                <div class="postbox-header">Xuất bản</div>
+                                <button type="submit" class="btn btn-primary w-100 fw-bold shadow-sm">
+                                    <i class="fas fa-save me-2"></i><%= editing ? 'Cập nhật' : 'Đăng bài' %>
+                                </button>
+                                <a href="/admin/posts" class="btn btn-link btn-sm w-100 mt-2 text-decoration-none text-muted">Hủy bỏ</a>
+                            </div>
+
+                            <div class="wp-card">
+                                <div class="postbox-header">Chuyên mục</div>
+                                <select name="categoryId" class="form-select form-select-sm" required>
+                                    <% categories.forEach(cat => { %>
+                                        <option value="<%= cat._id %>" 
+                                            <%= (editing && post.category && post.category._id.toString() === cat._id.toString()) ? 'selected' : '' %>>
+                                            <%= cat.name %>
+                                        </option>
+                                    <% }) %>
+                                </select>
+                            </div>
+
+                            <div class="wp-card text-center">
+                                <div class="postbox-header">Ảnh đại diện</div>
+                                <% if (editing && post.thumbnail) { %>
+                                    <img src="<%= post.thumbnail %>" class="img-fluid mb-2 border rounded shadow-sm">
+                                <% } %>
+                                <input type="file" name="thumbnail" class="form-control form-control-sm">
                             </div>
                         </div>
                     </div>
-
-                    <div class="col-md-3">
-                        <div class="wp-card shadow-sm border-top border-4 border-primary">
-                            <h6 class="fw-bold small mb-3 text-uppercase text-primary"><i class="fas fa-rocket me-2"></i>RankMath SEO</h6>
-                            
-                            <div class="mb-3">
-                                <label class="small fw-bold">Từ khóa chính</label>
-                                <input type="text" id="focusKeyword" name="focusKeyword" class="form-control form-control-sm" 
-                                       value="<%= editing ? post.focusKeyword : '' %>" placeholder="Ví dụ: cách làm SEO">
-                            </div>
-
-                            <div class="p-2 bg-light rounded mb-3 border text-center">
-                                <div class="small fw-bold">Điểm SEO: <span id="seo-score-text" class="h5">0/100</span></div>
-                                <div class="small fw-bold mb-1">Dễ đọc: <span id="readability-score-text" class="text-muted">N/A</span></div>
-                                <div class="progress mt-1" style="height: 8px;"><div id="seo-progress-bar" class="progress-bar" style="width: 0%"></div></div>
-                                <div class="mt-2"><i id="overall-emoji" class="fas fa-meh fa-2x text-muted"></i></div>
-                            </div>
-
-                            <div class="seo-checklist-groups">
-                                <div class="small fw-bold text-muted border-bottom mb-2 pb-1">Cơ bản</div>
-                                <ul class="list-unstyled mb-3">
-                                    <li class="seo-item" data-check="title-length"><i class="fas fa-circle-notch text-muted me-2"></i>Tiêu đề < 60 ký tự</li>
-                                    <li class="seo-item" data-check="desc-length"><i class="fas fa-circle-notch text-muted me-2"></i>Mô tả < 155 ký tự</li>
-                                    <li class="seo-item" data-check="h1-check"><i class="fas fa-circle-notch text-muted me-2"></i>Duy nhất 1 thẻ H1</li>
-                                    <li class="seo-item" data-check="keyword-density"><i class="fas fa-circle-notch text-muted me-2"></i>Mật độ từ khóa (1-2%)</li>
-                                </ul>
-
-                                <div class="small fw-bold text-muted border-bottom mb-2 pb-1">Nâng cao</div>
-                                <ul class="list-unstyled mb-0">
-                                    <li class="seo-item" data-check="subheading-keyword"><i class="fas fa-circle-notch text-muted me-2"></i>Từ khóa trong H2, H3</li>
-                                    <li class="seo-item" data-check="img-alt-keyword"><i class="fas fa-circle-notch text-muted me-2"></i>Ảnh có thẻ Alt</li>
-                                    <li class="seo-item" data-check="internal-link"><i class="fas fa-circle-notch text-muted me-2"></i>Liên kết nội bộ</li>
-                                    <li class="seo-item" data-check="external-link"><i class="fas fa-circle-notch text-muted me-2"></i>Liên kết ngoài</li>
-                                </ul>
-                            </div>
-                        </div>
-
-                        <div class="wp-card shadow-sm">
-                            <div class="postbox-header text-uppercase small text-muted">Đăng bài viết</div>
-                            <button type="submit" class="btn btn-primary w-100 fw-bold shadow-sm">
-                                <%= editing ? 'Cập nhật' : 'Đăng bài viết' %>
-                            </button>
-                            <a href="/admin/posts" class="btn btn-link btn-sm w-100 mt-2 text-decoration-none text-muted">Hủy bỏ</a>
-                        </div>
-
-                        <div class="wp-card shadow-sm">
-                            <div class="postbox-header text-uppercase small text-muted">Chuyên mục</div>
-                            <select name="categoryId" class="form-select form-select-sm" required>
-                                <% categories.forEach(cat => { %>
-                                    <option value="<%= cat._id %>" 
-                                        <%= (editing && post.category && post.category._id.toString() === cat._id.toString()) ? 'selected' : '' %>>
-                                        <%= cat.name %>
-                                    </option>
-                                <% }) %>
-                            </select>
-                        </div>
-
-                        <div class="wp-card shadow-sm text-center">
-                            <div class="postbox-header text-uppercase small text-muted">Ảnh đại diện</div>
-                            <% if (editing && post.thumbnail) { %>
-                                <img src="<%= post.thumbnail %>" class="img-fluid mb-2 border rounded shadow-sm">
-                            <% } %>
-                            <input type="file" name="thumbnail" class="form-control form-control-sm">
-                        </div>
-                    </div>
-                </div> </form>
+                </form>
+            </div>
         </div>
     </div>
 

@@ -1,49 +1,101 @@
 <%- include('../partials/head.ejs') %>
 
 <style>
-    body { margin: 0; background-color: #f0f2f5; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    /* 1. ĐỒNG BỘ BIẾN HỆ THỐNG */
+    :root {
+        --sidebar-width: 240px;
+        --admin-bg: #f0f0f1;
+        --sidebar-bg: #23282d;
+        --wp-blue: #2271b1;
+        --base-font: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
+    }
+
+    body { 
+        margin: 0; 
+        background-color: var(--admin-bg); 
+        font-family: var(--base-font);
+        font-size: 14px;
+        color: #3c434a;
+    }
+
+    /* 2. ĐỒNG BỘ LAYOUT */
     .admin-wrapper { display: flex; min-height: 100vh; }
     
-    /* Sidebar đồng bộ 240px */
     .admin-sidebar-container { 
-        width: 240px; 
+        width: var(--sidebar-width); 
         position: fixed; 
         top: 0; left: 0; bottom: 0; 
-        background-color: #23282d; 
+        background-color: var(--sidebar-bg); 
         z-index: 1000; 
     }
     
     .admin-content { 
         flex: 1; 
-        margin-left: 240px; 
+        margin-left: var(--sidebar-width); 
         padding: 30px; 
+        min-width: 0;
     }
 
-    /* WP Style Table */
-    .wp-card { background: #fff; border: 1px solid #c3c4c7; box-shadow: 0 1px 1px rgba(0,0,0,.04); }
+    /* 3. WP STYLE TABLE & CARD */
+    .wp-card { 
+        background: #fff; 
+        border: 1px solid #c3c4c7; 
+        box-shadow: 0 1px 1px rgba(0,0,0,.04); 
+    }
     
+    .table-head-wp { 
+        background-color: #fff; 
+        border-bottom: 2px solid #dcdcde; 
+        color: #1d2327; 
+    }
+
+    .table-head-wp th {
+        font-weight: 600;
+        padding: 12px 10px;
+        font-size: 14px;
+    }
+
     .post-title-link { 
         font-weight: 600; 
-        color: #2271b1; 
+        color: var(--wp-blue); 
         text-decoration: none; 
-        font-size: 15px; 
+        font-size: 14px; 
+        display: block;
     }
     .post-title-link:hover { color: #135e96; }
 
-    /* Hiệu ứng hover hiện nút hành động */
+    /* Row Actions - Chỉ hiện khi hover dòng */
     .row-actions { 
         visibility: hidden; 
         font-size: 13px; 
-        margin-top: 4px; 
+        margin-top: 5px; 
+        color: #a7aaad;
     }
     tr:hover .row-actions { 
         visibility: visible !important; 
     }
 
-    .table-head-wp { 
-        background-color: #f0f0f1; 
-        border-bottom: 2px solid #c3c4c7; 
-        color: #1d2327; 
+    .row-actions a, .row-actions button {
+        color: var(--wp-blue);
+        text-decoration: none;
+    }
+    .row-actions a:hover, .row-actions button:hover {
+        color: #135e96;
+    }
+    .row-actions .delete-action { color: #b32d2e !important; }
+
+    /* Badge & Meta */
+    .badge-category {
+        background-color: #f6f7f7;
+        color: #3c434a;
+        border: 1px solid #c3c4c7;
+        font-weight: normal;
+        font-size: 12px;
+    }
+
+    @media (max-width: 992px) {
+        .admin-sidebar-container { display: none; }
+        .admin-content { margin-left: 0; padding: 15px; }
     }
 </style>
 </head>
@@ -54,10 +106,10 @@
         </div>
 
         <div class="admin-content">
-            <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+            <div class="d-flex justify-content-between align-items-center mb-4">
                 <div class="d-flex align-items-center gap-3">
                     <h2 class="fw-bold h4 m-0 text-dark">Bài viết</h2>
-                    <a href="/admin/add-post" class="btn btn-outline-primary btn-sm fw-bold">Viết bài mới</a>
+                    <a href="/admin/add-post" class="btn btn-outline-primary btn-sm fw-bold px-3">Viết bài mới</a>
                 </div>
             </div>
 
@@ -65,11 +117,11 @@
                 <table class="table table-hover mb-0 align-middle">
                     <thead class="table-head-wp">
                         <tr>
-                            <th class="ps-3" width="80">Ảnh</th>
+                            <th class="ps-3" width="70">Ảnh</th>
                             <th>Tiêu đề</th>
-                            <th>Chuyên mục</th>
-                            <th>Ngày đăng</th>
-                            <th class="text-center">Lượt xem</th>
+                            <th width="150">Chuyên mục</th>
+                            <th width="120">Ngày đăng</th>
+                            <th class="text-center" width="100">Lượt xem</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -78,7 +130,8 @@
                                 <tr>
                                     <td class="ps-3">
                                         <img src="<%= p.thumbnail || 'https://via.placeholder.com/50' %>" 
-                                             style="width: 55px; height: 55px; object-fit: cover; border: 1px solid #ddd; border-radius: 2px;">
+                                             alt="thumbnail"
+                                             style="width: 50px; height: 50px; object-fit: cover; border: 1px solid #dcdcde; border-radius: 2px;">
                                     </td>
 
                                     <td>
@@ -87,22 +140,21 @@
                                         </a>
                                         
                                         <div class="row-actions">
-                                            <a href="/admin/edit-post/<%= p._id %>" class="text-primary text-decoration-none">Sửa</a>
-                                            <span class="text-muted mx-1">|</span>
+                                            <a href="/admin/edit-post/<%= p._id %>">Sửa</a>
+                                            <span class="mx-1">|</span>
                                             
                                             <form action="/admin/delete-post" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc muốn xóa bài viết này?')">
                                                 <input type="hidden" name="postId" value="<%= p._id %>">
-                                                <button type="submit" class="btn btn-link p-0 text-danger text-decoration-none border-0 bg-transparent" style="font-size: 13px;">Xóa</button>
+                                                <button type="submit" class="btn btn-link p-0 delete-action border-0 bg-transparent" style="font-size: 13px;">Xóa</button>
                                             </form>
                                             
-                                            <span class="text-muted mx-1">|</span>
-                                            
-                                            <a href="/blog/post/<%= p.slug %>" target="_blank" class="text-success text-decoration-none fw-bold">Xem</a>
+                                            <span class="mx-1">|</span>
+                                            <a href="/blog/post/<%= p.slug %>" target="_blank" class="text-success fw-bold">Xem</a>
                                         </div>
                                     </td>
 
                                     <td>
-                                        <span class="badge bg-light text-dark border fw-normal">
+                                        <span class="badge badge-category">
                                             <%= p.category ? p.category.name : 'Chưa phân loại' %>
                                         </span>
                                     </td>
@@ -126,6 +178,10 @@
                         <% } %>
                     </tbody>
                 </table>
+            </div>
+
+            <div class="mt-3 small text-muted">
+                Tổng cộng: <strong><%= posts ? posts.length : 0 %></strong> bài viết
             </div>
         </div>
     </div>

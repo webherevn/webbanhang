@@ -1,55 +1,86 @@
 <%- include('../partials/head.ejs') %>
-
 <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.js"></script>
 
 <style>
-    body { background-color: #f0f0f1; margin: 0; padding: 0; }
+    /* 1. ĐỒNG BỘ BIẾN HỆ THỐNG */
+    :root {
+        --sidebar-width: 240px;
+        --admin-bg: #f0f0f1;
+        --sidebar-bg: #23282d;
+        --wp-blue: #2271b1;
+        --base-font: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
+    }
+
+    body { 
+        background-color: var(--admin-bg); 
+        margin: 0; padding: 0; 
+        font-family: var(--base-font);
+        font-size: 14px; 
+        color: #3c434a;
+        overflow-x: hidden;
+    }
+
+    /* 2. ĐỒNG BỘ LAYOUT */
     .admin-wrapper { display: flex; min-height: 100vh; }
+    
     .admin-sidebar-container { 
-        width: 240px; 
+        width: var(--sidebar-width); 
         position: fixed; 
         top: 0; left: 0; bottom: 0; 
-        background-color: #23282d; 
-        z-index: 1000;
+        background-color: var(--sidebar-bg); 
+        z-index: 1000; 
     }
-    .admin-content { flex: 1; margin-left: 240px; padding: 30px; }
-    
-    /* WordPress Style Card */
+
+    .admin-content { 
+        flex: 1; 
+        margin-left: var(--sidebar-width); 
+        padding: 30px; 
+        min-width: 0;
+    }
+
+    /* 3. ĐỒNG BỘ CARD & COMPONENT */
     .wp-card { 
         background: #fff; 
         border: 1px solid #c3c4c7; 
         box-shadow: 0 1px 1px rgba(0,0,0,.04); 
-        padding: 25px; 
-        border-radius: 2px;
+        padding: 20px; 
+        margin-bottom: 20px; 
     }
 
-    /* Tùy chỉnh Summernote đồng bộ WP */
-    .note-editor { background-color: #fff; border: 1px solid #ccd0d4 !important; }
-    .note-editable { min-height: 250px; font-family: sans-serif; background-color: #fff !important; }
-    .note-toolbar { background: #f0f0f1 !important; border-bottom: 1px solid #c3c4c7 !important; }
+    .postbox-header { 
+        border-bottom: 1px solid #f0f0f1; 
+        padding-bottom: 10px; 
+        margin-bottom: 15px; 
+        font-weight: 700; 
+        color: #1d2327;
+        text-transform: uppercase;
+        font-size: 13px;
+        letter-spacing: 0.5px;
+    }
 
+    /* Image Preview Box */
     .img-preview-box {
-        width: 100%;
-        max-width: 300px;
-        height: 180px;
-        background: #f0f0f1;
-        border: 1px dashed #c3c4c7;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-bottom: 10px;
-        overflow: hidden;
-        border-radius: 4px;
+        width: 100%; height: 160px; background: #f8f9fa; border: 1px dashed #c3c4c7;
+        display: flex; align-items: center; justify-content: center;
+        margin-bottom: 10px; overflow: hidden; border-radius: 2px;
         cursor: pointer;
     }
-    .img-preview-box img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
+    .img-preview-box img { width: 100%; height: 100%; object-fit: contain; }
+    .placeholder-text { color: #8c8f94; font-size: 12px; text-align: center; }
+
+    /* Tùy chỉnh Summernote */
+    .note-editor { border: 1px solid #c3c4c7 !important; border-radius: 0 !important; }
+    .note-toolbar { background: #f0f0f1 !important; border-bottom: 1px solid #c3c4c7 !important; }
+    
+    .form-label { font-weight: 600; font-size: 13px; color: #1d2327; }
+    .breadcrumb-item a { color: var(--wp-blue); }
+
+    @media (max-width: 992px) { 
+        .admin-sidebar-container { display: none; } 
+        .admin-content { margin-left: 0; padding: 15px; } 
     }
-    .placeholder-text { color: #8c8f94; font-size: 13px; text-align: center; }
 </style>
 </head>
 <body>
@@ -59,99 +90,114 @@
         </div>
 
         <div class="admin-content">
-            <nav aria-label="breadcrumb" class="mb-3">
-                <ol class="breadcrumb small">
-                    <li class="breadcrumb-item"><a href="/admin/blog-categories" class="text-decoration-none">Chuyên mục Blog</a></li>
-                    <li class="breadcrumb-item active">Chỉnh sửa</li>
-                </ol>
-            </nav>
+            <div class="container-fluid">
+                <nav aria-label="breadcrumb" class="mb-3">
+                    <ol class="breadcrumb small mb-0">
+                        <li class="breadcrumb-item"><a href="/admin/blog-categories" class="text-decoration-none">Chuyên mục Blog</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Chỉnh sửa</li>
+                    </ol>
+                </nav>
 
-            <h2 class="fw-bold h4 mb-4 text-dark">Chỉnh sửa chuyên mục bài viết</h2>
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="fw-bold h4 mb-0 text-dark">Chỉnh sửa chuyên mục bài viết</h2>
+                    <a href="/admin/blog-categories" class="btn btn-outline-secondary btn-sm">
+                        <i class="fas fa-arrow-left me-1"></i> Quay lại
+                    </a>
+                </div>
 
-            <div class="row">
-                <div class="col-md-8">
-                    <div class="wp-card shadow-sm">
-                        <form action="/admin/edit-blog-category" method="POST" enctype="multipart/form-data">
-                            <input type="hidden" name="categoryId" value="<%= category._id %>">
+                <form action="/admin/edit-blog-category" method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="categoryId" value="<%= category._id %>">
 
-                            <div class="mb-4">
-                                <label class="form-label fw-bold small text-uppercase">Tên chuyên mục</label>
-                                <input type="text" name="name" class="form-control" value="<%= category.name %>" required>
-                                <div class="form-text small">Tên này sẽ xuất hiện trên giao diện trang tin tức.</div>
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="wp-card">
+                                <div class="mb-4">
+                                    <label class="form-label text-uppercase small">Tên chuyên mục</label>
+                                    <input type="text" name="name" class="form-control form-control-lg fw-bold shadow-sm" 
+                                           style="border-radius: 2px;"
+                                           value="<%= category.name %>" required>
+                                    <div class="form-text small mt-2 opacity-75">Tên này sẽ xuất hiện trên trang Blog và các nhãn bài viết.</div>
+                                </div>
+
+                                <div class="mb-0">
+                                    <label class="form-label text-uppercase small">Mô tả chi tiết</label>
+                                    <textarea name="description" id="blogCatEditDesc"><%= category.description %></textarea>
+                                </div>
                             </div>
+                        </div>
 
-                            <div class="mb-4">
-                                <label class="form-label fw-bold small text-uppercase">Mô tả</label>
-                                <textarea name="description" id="blogCatEditDesc"><%= category.description %></textarea>
-                            </div>
-
-                            <div class="mb-4">
-                                <label class="form-label fw-bold small text-uppercase">Ảnh đại diện chuyên mục</label>
+                        <div class="col-md-4">
+                            <div class="wp-card sticky-top" style="top: 20px;">
+                                <div class="postbox-header">Hành động</div>
+                                <div class="mb-3 small">
+                                    <i class="fas fa-calendar-alt me-2 text-muted"></i> 
+                                    Ngày tạo: <span class="fw-bold text-dark"><%= category.createdAt ? category.createdAt.toLocaleDateString('vi-VN') : '---' %></span>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100 fw-bold shadow-sm mb-2">
+                                    <i class="fas fa-save me-2"></i> Cập nhật chuyên mục
+                                </button>
+                                <a href="/admin/blog-categories" class="btn btn-link btn-sm w-100 text-decoration-none text-muted">Hủy bỏ</a>
                                 
-                                <div class="img-preview-box shadow-sm" onclick="document.getElementById('fileInput').click()">
+                                <hr class="my-3 opacity-25">
+                                <div class="text-center">
+                                    <a href="/blog/<%= category.slug %>" target="_blank" class="small text-success fw-bold text-decoration-none">
+                                        <i class="fas fa-eye me-1"></i> Xem ngoài trang chủ
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div class="wp-card">
+                                <div class="postbox-header">Ảnh đại diện</div>
+                                <div class="img-preview-box shadow-sm mb-3" onclick="document.getElementById('fileInput').click()">
                                     <% if (category.image) { %>
                                         <img id="previewImg" src="<%= category.image %>">
                                         <span id="placeholder" class="placeholder-text" style="display: none;">
-                                            <i class="fas fa-cloud-upload-alt fa-2x mb-2 d-block"></i>Thay đổi ảnh
+                                            <i class="fas fa-cloud-upload-alt fa-2x mb-2 d-block opacity-50"></i>Thay đổi ảnh
                                         </span>
                                     <% } else { %>
                                         <img id="previewImg" src="" style="display: none;">
                                         <span id="placeholder" class="placeholder-text">
-                                            <i class="fas fa-image fa-2x mb-2 d-block"></i>Bấm để chọn ảnh
+                                            <i class="fas fa-image fa-2x mb-2 d-block opacity-50"></i>Bấm để chọn ảnh
                                         </span>
                                     <% } %>
                                 </div>
-                                
-                                <input type="file" name="image" id="fileInput" class="form-control form-control-sm d-none" accept="image/*" onchange="previewFile(this)">
-                                <small class="text-muted italic">Mẹo: Nên chọn ảnh tỉ lệ 16:9 để hiển thị đẹp nhất.</small>
+                                <input type="file" name="image" id="fileInput" class="d-none" onchange="previewFile(this)" accept="image/*">
+                                <small class="text-muted d-block" style="font-size: 11px; line-height: 1.4;">
+                                    <i class="fas fa-info-circle me-1"></i> Nên sử dụng ảnh tỉ lệ 16:9 để có trải nghiệm thị giác tốt nhất trên blog.
+                                </small>
                             </div>
 
-                            <hr class="my-4 opacity-25">
-
-                            <div class="d-flex gap-2">
-                                <button type="submit" class="btn btn-primary btn-sm px-4 fw-bold shadow-sm">Cập nhật chuyên mục</button>
-                                <a href="/admin/blog-categories" class="btn btn-outline-secondary btn-sm px-4">Hủy bỏ</a>
+                            <div class="wp-card bg-light border-dashed">
+                                <div class="postbox-header border-0 mb-1" style="padding-bottom: 0;">Thông tin SEO</div>
+                                <div class="small">
+                                    <span class="text-muted">Slug (URL):</span><br>
+                                    <code class="text-primary fw-bold" style="word-break: break-all;">/blog/<%= category.slug %></code>
+                                </div>
                             </div>
-                        </form>
+                        </div>
                     </div>
-                </div>
-
-                <div class="col-md-4">
-                    <div class="wp-card bg-light border-dashed">
-                        <h6 class="fw-bold small mb-3 text-uppercase">Thông tin hệ thống</h6>
-                        <ul class="list-unstyled mb-0 small text-muted">
-                            <li class="mb-2"><i class="fas fa-link me-2"></i> Slug hiện tại: <code class="text-primary"><%= category.slug %></code></li>
-                            <li class="mb-2"><i class="fas fa-calendar-alt me-2"></i> Ngày tạo: <%= category.createdAt ? category.createdAt.toLocaleDateString('vi-VN') : '---' %></li>
-                            <li><i class="fas fa-database me-2"></i> ID: <span class="user-select-all small"><%= category._id %></span></li>
-                        </ul>
-                    </div>
-                </div>
+                </form>
             </div>
         </div>
     </div>
 
     <script>
         $(document).ready(function() {
-            // Khởi tạo Summernote cho mô tả
             $('#blogCatEditDesc').summernote({
-                placeholder: 'Nhập mô tả chi tiết cho chuyên mục...',
-                tabsize: 2,
                 height: 250,
+                placeholder: 'Nhập mô tả chi tiết cho chuyên mục...',
                 toolbar: [
                     ['style', ['style']],
-                    ['font', ['bold', 'underline', 'clear', 'italic', 'strikethrough']],
-                    ['fontname', ['fontname']],
-                    ['fontsize', ['fontsize']],
+                    ['font', ['bold', 'underline', 'clear', 'italic']],
                     ['color', ['color']],
                     ['para', ['ul', 'ol', 'paragraph']],
                     ['table', ['table']],
-                    ['insert', ['link', 'picture', 'video', 'hr']],
+                    ['insert', ['link', 'picture', 'hr']],
                     ['view', ['fullscreen', 'codeview']]
                 ]
             });
         });
 
-        // Hàm xem trước ảnh
         function previewFile(input) {
             const preview = document.getElementById('previewImg');
             const placeholder = document.getElementById('placeholder');

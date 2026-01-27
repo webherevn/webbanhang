@@ -1,33 +1,98 @@
 <%- include('../partials/head.ejs') %>
+
 <style>
-    body { background-color: #f0f2f5; margin: 0; padding: 0; }
+    /* 1. ĐỒNG BỘ BIẾN HỆ THỐNG */
+    :root {
+        --sidebar-width: 240px;
+        --admin-bg: #f0f0f1;
+        --sidebar-bg: #23282d;
+        --wp-blue: #2271b1;
+        --base-font: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
+    }
+
+    body { 
+        margin: 0; 
+        background-color: var(--admin-bg); 
+        font-family: var(--base-font);
+        font-size: 14px;
+        color: #3c434a;
+    }
+
+    /* 2. ĐỒNG BỘ LAYOUT */
     .admin-wrapper { display: flex; min-height: 100vh; }
     
-    /* Sidebar đồng bộ chuẩn 240px */
     .admin-sidebar-container { 
-        width: 240px; 
+        width: var(--sidebar-width); 
         position: fixed; 
         top: 0; left: 0; bottom: 0; 
-        background-color: #23282d; 
+        background-color: var(--sidebar-bg); 
         z-index: 1000; 
     }
     
     .admin-content { 
         flex: 1; 
-        margin-left: 240px; 
+        margin-left: var(--sidebar-width); 
         padding: 30px; 
+        min-width: 0;
     }
 
-    .wp-card { background: #fff; border: 1px solid #c3c4c7; box-shadow: 0 1px 1px rgba(0,0,0,.04); }
+    /* 3. WP STYLE TABLE & CARD */
+    .wp-card { 
+        background: #fff; 
+        border: 1px solid #c3c4c7; 
+        box-shadow: 0 1px 1px rgba(0,0,0,.04); 
+    }
     
-    /* Hiệu ứng hover chuẩn WP */
-    .row-actions { visibility: hidden; font-size: 13px; margin-top: 4px; }
-    tr:hover .row-actions { visibility: visible !important; }
-    
-    .page-title-link { font-weight: 600; color: #2271b1; text-decoration: none; font-size: 15px; }
+    .table-head-wp { 
+        background-color: #fff; 
+        border-bottom: 2px solid #dcdcde; 
+        color: #1d2327; 
+    }
+
+    .table-head-wp th {
+        font-weight: 600;
+        padding: 12px 10px;
+        font-size: 14px;
+    }
+
+    .page-title-link { 
+        font-weight: 600; 
+        color: var(--wp-blue); 
+        text-decoration: none; 
+        font-size: 14px; 
+        display: block;
+    }
     .page-title-link:hover { color: #135e96; }
-    
-    .table-head-wp { background-color: #f0f0f1; border-bottom: 2px solid #c3c4c7; color: #1d2327; }
+
+    /* Row Actions - Hiện khi hover dòng */
+    .row-actions { 
+        visibility: hidden; 
+        font-size: 13px; 
+        margin-top: 5px; 
+        color: #a7aaad;
+    }
+    tr:hover .row-actions { 
+        visibility: visible !important; 
+    }
+
+    .row-actions a, .row-actions button {
+        color: var(--wp-blue);
+        text-decoration: none;
+    }
+    .row-actions .delete-action { color: #b32d2e !important; }
+
+    /* Badge Trạng thái */
+    .badge-status {
+        font-weight: normal;
+        padding: 5px 10px;
+        border-radius: 2px;
+        font-size: 12px;
+    }
+
+    @media (max-width: 992px) {
+        .admin-sidebar-container { display: none; }
+        .admin-content { margin-left: 0; padding: 15px; }
+    }
 </style>
 </head>
 <body>
@@ -37,10 +102,10 @@
         </div>
 
         <div class="admin-content">
-            <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+            <div class="d-flex justify-content-between align-items-center mb-4">
                 <div class="d-flex align-items-center gap-3">
                     <h2 class="fw-bold h4 m-0 text-dark">Trang tĩnh</h2>
-                    <a href="/admin/add-page" class="btn btn-outline-primary btn-sm fw-bold shadow-sm">Thêm trang mới</a>
+                    <a href="/admin/add-page" class="btn btn-outline-primary btn-sm fw-bold px-3 shadow-sm">Thêm trang mới</a>
                 </div>
             </div>
 
@@ -49,9 +114,9 @@
                     <thead class="table-head-wp">
                         <tr>
                             <th class="ps-3">Tiêu đề</th>
-                            <th>Đường dẫn (Slug)</th>
-                            <th>Ngày tạo</th>
-                            <th class="text-center">Trạng thái</th>
+                            <th width="250">Đường dẫn (Slug)</th>
+                            <th width="150">Ngày tạo</th>
+                            <th class="text-center" width="120">Trạng thái</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -59,36 +124,59 @@
                             <% pages.forEach(p => { %>
                                 <tr>
                                     <td class="ps-3">
-                                        <a href="/admin/edit-page/<%= p._id %>" class="page-title-link"><%= p.title %></a>
+                                        <a href="/admin/edit-page/<%= p._id %>" class="page-title-link">
+                                            <%= p.title %>
+                                        </a>
+                                        
                                         <div class="row-actions">
-                                            <a href="/admin/edit-page/<%= p._id %>" class="text-primary text-decoration-none">Sửa</a>
-                                            <span class="text-muted mx-1">|</span>
+                                            <a href="/admin/edit-page/<%= p._id %>">Sửa</a>
+                                            <span class="mx-1 text-muted opacity-50">|</span>
                                             
-                                            <form action="/admin/delete-page" method="POST" class="d-inline" onsubmit="return confirm('Xóa trang này?')">
+                                            <form action="/admin/delete-page" method="POST" class="d-inline" onsubmit="return confirm('Bạn có chắc muốn xóa trang này?')">
                                                 <input type="hidden" name="pageId" value="<%= p._id %>">
-                                                <button type="submit" class="btn btn-link p-0 text-danger text-decoration-none border-0 bg-transparent" style="font-size: 13px;">Xóa</button>
+                                                <button type="submit" class="btn btn-link p-0 delete-action border-0 bg-transparent" style="font-size: 13px;">Xóa</button>
                                             </form>
-                                            <span class="text-muted mx-1">|</span>
-                                            <a href="/p/<%= p.slug %>" target="_blank" class="text-success text-decoration-none fw-bold">Xem</a>
+                                            
+                                            <span class="mx-1 text-muted opacity-50">|</span>
+                                            <a href="/p/<%= p.slug %>" target="_blank" class="text-success fw-bold">Xem</a>
                                         </div>
                                     </td>
-                                    <td class="text-muted small">/p/<%= p.slug %></td>
-                                    <td class="small text-muted"><%= p.createdAt.toLocaleDateString('vi-VN') %></td>
+                                    
+                                    <td>
+                                        <code class="text-muted small" style="background: #f6f7f7; padding: 2px 5px;">/p/<%= p.slug %></code>
+                                    </td>
+
+                                    <td class="small text-muted">
+                                        <%= p.createdAt.toLocaleDateString('vi-VN') %>
+                                    </td>
+
                                     <td class="text-center">
-                                        <span class="badge <%= p.isActive ? 'bg-success' : 'bg-secondary' %> fw-normal">
-                                            <%= p.isActive ? 'Đang bật' : 'Bản nháp' %>
-                                        </span>
+                                        <% if (p.isActive) { %>
+                                            <span class="badge bg-success badge-status"><i class="fas fa-check-circle me-1"></i> Hiển thị</span>
+                                        <% } else { %>
+                                            <span class="badge bg-secondary badge-status"><i class="fas fa-edit me-1"></i> Bản nháp</span>
+                                        <% } %>
                                     </td>
                                 </tr>
                             <% }) %>
                         <% } else { %>
-                            <tr><td colspan="4" class="text-center py-5 text-muted">Chưa có trang tĩnh nào.</td></tr>
+                            <tr>
+                                <td colspan="4" class="text-center py-5 text-muted">
+                                    <i class="fas fa-copy fa-3x mb-3 opacity-10"></i>
+                                    <p>Chưa có trang tĩnh nào. Hãy tạo trang Chính sách, Giới thiệu... của bạn!</p>
+                                </td>
+                            </tr>
                         <% } %>
                     </tbody>
                 </table>
             </div>
+
+            <div class="mt-3 small text-muted">
+                Tổng số trang: <strong><%= pages ? pages.length : 0 %></strong>
+            </div>
         </div>
     </div>
+    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
