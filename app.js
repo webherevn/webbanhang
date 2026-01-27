@@ -16,6 +16,7 @@ const Setting = require('./models/SettingModel'); // Đưa lên đầu để qu�
 const adminRoutes = require('./routes/admin.routes');
 const shopRoutes = require('./routes/shop.routes');
 
+const Theme = require('./models/ThemeModel');
 // Khởi tạo App
 const app = express();
 
@@ -105,6 +106,19 @@ app.use((req, res, next) => {
         pageTitle: 'Page Not Found', 
         path: '/404'
     });
+});
+
+app.use(async (req, res, next) => {
+    try {
+        let theme = await Theme.findOne({ key: 'theme_settings' });
+        if (!theme) {
+            theme = await Theme.create({ key: 'theme_settings' });
+        }
+        res.locals.theme = theme; // Biến 'theme' giờ có thể dùng ở mọi file .ejs
+        next();
+    } catch (err) {
+        next(err);
+    }
 });
 
 const PORT = process.env.PORT || 3000;

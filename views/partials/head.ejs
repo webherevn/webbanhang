@@ -5,18 +5,25 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <% 
-        // Logic xác định dữ liệu SEO (Ưu tiên post, sau đó đến product, sau đó đến page)
+        // 1. LOGIC SEO & THEME SETTINGS
         let currentItem = (typeof post !== 'undefined') ? post : ((typeof product !== 'undefined') ? product : ((typeof page !== 'undefined') ? page : null));
         
+        // Lấy dữ liệu theme để làm fallback hoặc cấu hình giao diện
+        let siteTheme = (typeof theme !== 'undefined') ? theme : {};
+
         let finalTitle = (currentItem && currentItem.seoTitle) ? currentItem.seoTitle : pageTitle;
-        let finalDesc = (currentItem && currentItem.seoDescription) ? currentItem.seoDescription : "Mô tả mặc định cho website của bạn - Chuyên cung cấp sản phẩm chất lượng.";
-        let finalImage = (currentItem && currentItem.thumbnail) ? currentItem.thumbnail : "/images/default-share.jpg";
-        let domain = "https://webbanhang-es90.onrender.com"; // Thay bằng domain thật của bạn
+        let finalDesc = (currentItem && currentItem.seoDescription) ? currentItem.seoDescription : (siteTheme.topBarText || "Mô tả mặc định cho website của bạn - Chuyên cung cấp sản phẩm chất lượng.");
+        let finalImage = (currentItem && currentItem.thumbnail) ? currentItem.thumbnail : (siteTheme.logo || "/images/default-share.jpg");
+        let domain = "https://webbanhang-es90.onrender.com"; 
     %>
 
     <title><%= finalTitle %> | Shop Online</title>
     <meta name="description" content="<%= finalDesc %>">
     <link rel="canonical" href="<%= domain %><%= typeof path !== 'undefined' ? path : '' %>">
+
+    <% if (siteTheme.favicon) { %>
+        <link rel="icon" type="image/x-icon" href="<%= siteTheme.favicon %>">
+    <% } %>
 
     <meta property="og:type" content="website">
     <meta property="og:url" content="<%= domain %><%= typeof path !== 'undefined' ? path : '' %>">
@@ -44,5 +51,9 @@
         .nav-link:hover { background-color: #343a40; }
         .nav-link.active { background-color: #0d6efd !important; }
         .card { border: none; border-radius: 8px; }
-        /* Tùy chỉnh Snippet Editor cho chuẩn SEO */
+
+        /* Nhúng Custom CSS từ phần Quản trị giao diện */
+        <% if (siteTheme.customCss) { %>
+            <%- siteTheme.customCss %>
+        <% } %>
     </style>
