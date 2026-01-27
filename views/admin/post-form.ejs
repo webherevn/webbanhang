@@ -70,41 +70,42 @@
                             <% } %>
                             <input type="file" name="thumbnail" class="form-control form-control-sm">
                         </div>
-                        <div class="wp-card shadow-sm border-top border-4 border-primary">
-                            <h6 class="fw-bold small mb-3 text-uppercase"><i class="fas fa-search me-2"></i>Phân tích SEO</h6>
+                       <div class="wp-card shadow-sm border-top border-4 border-primary">
+                            <h6 class="fw-bold small mb-3 text-uppercase"><i class="fas fa-rocket me-2"></i>RankMath SEO Analyzer</h6>
                             
                             <div class="mb-3">
-                                <label class="small fw-bold">Từ khóa chính (Focus Keyword)</label>
-                                <input type="text" id="focusKeyword" name="focusKeyword" class="form-control form-control-sm" 
-                                    value="<%= editing ? post.focusKeyword : '' %>" placeholder="Ví dụ: thời trang nam">
+                                <label class="small fw-bold">Từ khóa chính</label>
+                                <input type="text" id="focusKeyword" name="focusKeyword" class="form-control form-control-sm" value="<%= editing ? post.focusKeyword : '' %>">
                             </div>
 
-                            <ul class="list-unstyled small mb-0" id="seo-checklist">
-                                <li class="mb-2 seo-item" data-check="title-keyword">
-                                    <i class="fas fa-circle-notch text-muted me-2"></i>Từ khóa trong tiêu đề
-                                </li>
-                                <li class="mb-2 seo-item" data-check="content-length">
-                                    <i class="fas fa-circle-notch text-muted me-2"></i>Độ dài nội dung (>300 từ)
-                                </li>
-                                <li class="mb-2 seo-item" data-check="desc-keyword">
-                                    <i class="fas fa-circle-notch text-muted me-2"></i>Từ khóa trong mô tả ngắn
-                                </li>
-                                <li class="mb-2 seo-item" data-check="slug-keyword">
-                                    <i class="fas fa-circle-notch text-muted me-2"></i>Từ khóa trong đường dẫn
-                                </li>
-                                <li class="mb-0 seo-item" data-check="img-alt">
-                                    <i class="fas fa-circle-notch text-muted me-2"></i>Ảnh có thẻ Alt từ khóa
-                                </li>
-                            </ul>
+                            <div class="d-flex justify-content-between align-items-center mb-3 p-2 bg-light rounded">
+                                <div>
+                                    <div class="small fw-bold">Điểm SEO: <span id="seo-score-text">0/100</span></div>
+                                    <div class="small fw-bold">Dễ đọc: <span id="readability-score-text">N/A</span></div>
+                                </div>
+                                <div class="text-end">
+                                    <i id="overall-emoji" class="fas fa-meh fa-2x text-muted"></i>
+                                </div>
+                            </div>
 
-                            <div class="mt-3 pt-3 border-top">
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="small fw-bold">Điểm SEO:</span>
-                                    <span id="seo-score-text" class="badge bg-secondary">0/100</span>
-                                </div>
-                                <div class="progress mt-2" style="height: 6px;">
-                                    <div id="seo-progress-bar" class="progress-bar bg-danger" style="width: 0%"></div>
-                                </div>
+                            <div class="seo-group mb-3">
+                                <div class="small fw-bold border-bottom mb-2 pb-1 text-primary">Cơ bản</div>
+                                <ul class="list-unstyled small" id="seo-basics">
+                                    <li class="seo-item" data-check="title-length"><i class="fas fa-circle me-2"></i>Tiêu đề (< 60 ký tự)</li>
+                                    <li class="seo-item" data-check="desc-length"><i class="fas fa-circle me-2"></i>Mô tả (< 155 ký tự)</li>
+                                    <li class="seo-item" data-check="h1-check"><i class="fas fa-circle me-2"></i>Duy nhất 1 thẻ H1</li>
+                                    <li class="seo-item" data-check="keyword-density"><i class="fas fa-circle me-2"></i>Mật độ từ khóa (1-2%)</li>
+                                </ul>
+                            </div>
+
+                            <div class="seo-group mb-3">
+                                <div class="small fw-bold border-bottom mb-2 pb-1 text-primary">Nâng cao</div>
+                                <ul class="list-unstyled small" id="seo-advanced">
+                                    <li class="seo-item" data-check="subheading-keyword"><i class="fas fa-circle me-2"></i>Từ khóa trong H2, H3</li>
+                                    <li class="seo-item" data-check="internal-link"><i class="fas fa-circle me-2"></i>Liên kết nội bộ</li>
+                                    <li class="seo-item" data-check="external-link"><i class="fas fa-circle me-2"></i>Liên kết ngoài</li>
+                                    <li class="seo-item" data-check="img-alt-keyword"><i class="fas fa-circle me-2"></i>Ảnh có Alt chứa từ khóa</li>
+                                </ul>
                             </div>
                         </div>
                     </div>
