@@ -1,40 +1,38 @@
 const Post = require('../../models/PostModel');
 const Product = require('../../models/ProductModel');
 const Setting = require('../../models/SettingModel');
+const Theme = require('../../models/ThemeModel'); // BỔ SUNG: Import model Theme
 
-// 1. TRANG BẢNG TIN (DASHBOARD) - Cập nhật thống kê SEO
+// ==========================================
+// 1. TRANG BẢNG TIN (DASHBOARD)
+// ==========================================
 exports.getDashboard = async (req, res) => {
     try {
-        // Chạy song song các truy vấn để tối ưu hiệu suất
         const [
             seoGoodPosts, seoOkPosts, seoBadPosts,
             seoGoodProds, seoOkProds, seoBadProds,
             totalPosts, totalProducts
         ] = await Promise.all([
-            // Đếm cho Bài viết (Post)
             Post.countDocuments({ seoScore: { $gte: 80 } }),
             Post.countDocuments({ seoScore: { $gte: 50, $lt: 80 } }),
             Post.countDocuments({ seoScore: { $lt: 50 } }),
-            // Đếm cho Sản phẩm (Product)
             Product.countDocuments({ seoScore: { $gte: 80 } }),
             Product.countDocuments({ seoScore: { $gte: 50, $lt: 80 } }),
             Product.countDocuments({ seoScore: { $lt: 50 } }),
-            // Tổng số lượng
             Post.countDocuments(),
             Product.countDocuments()
         ]);
 
-        // Tổng hợp dữ liệu SEO chung cho toàn website
         const seoData = [
-            seoGoodPosts + seoGoodProds, // Tổng Tốt
-            seoOkPosts + seoOkProds,     // Tổng Ổn
-            seoBadPosts + seoBadProds    // Tổng Cần tối ưu
+            seoGoodPosts + seoGoodProds,
+            seoOkPosts + seoOkProds,
+            seoBadPosts + seoBadProds
         ];
 
         res.render('admin/dashboard', {
             pageTitle: 'Bảng tin (Dashboard)',
             path: '/admin',
-            seoData: seoData, // Gửi mảng dữ liệu sang View để vẽ biểu đồ
+            seoData: seoData,
             totalPosts: totalPosts,
             totalProducts: totalProducts
         });
@@ -51,10 +49,65 @@ exports.getDashboard = async (req, res) => {
 };
 
 // ==========================================
-// 2. QUẢN LÝ CẤU HÌNH (SETTINGS) - GIỮ NGUYÊN
+// 2. CẤU HÌNH GIAO DIỆN (CUSTOMIZE) - MỚI BỔ SUNG
 // ==========================================
 
-// Lấy dữ liệu cũ để hiện lên ô nhập
+// Hiển thị trang chỉnh sửa giao diện
+exports.getCustomize = async (req, res) => {
+    try {
+        let theme = await Theme.findOne({ key: 'theme_settings' });
+        if (!theme) {
+            theme = await Theme.create({ key: 'theme_settings' });
+        }
+        res.render('admin/customize', {
+            pageTitle: 'Tùy biến giao diện',
+            path: '/admin/customize',
+            theme: theme
+        });
+    } catch (err) {
+        console.error("Lỗi getCustomize:", err);
+        res.redirect('/admin');
+    }
+};
+
+// Lưu dữ liệu tùy biến giao diện (bao gồm Footer)
+exports.postCustomize = async (req, res) => {
+    try {
+        const {
+            logo, favicon, topBarText, topBarBgColor, 
+            headerBottomHtml, customCss, footerBgColor, 
+            footerTextColor, footerAbout, footerCopyright,
+            contactPhone, contactEmail, address,
+            socialFacebook, socialInstagram, socialTiktok, socialYoutube
+        } = req.body;
+
+        // Xử lý các nút gạt (Checkbox/Switch thường trả về 'on' hoặc undefined)
+        const topBarShow = req.body.topBarShow === 'on';
+        const headerSticky = req.body.headerSticky === 'on';
+
+        await Theme.findOneAndUpdate(
+            { key: 'theme_settings' },
+            {
+                logo, favicon, topBarShow, topBarText, topBarBgColor,
+                headerSticky, headerBottomHtml, customCss,
+                footerBgColor, footerTextColor, footerAbout, footerCopyright,
+                contactPhone, contactEmail, address,
+                socialFacebook, socialInstagram, socialTiktok, socialYoutube
+            },
+            { upsert: true }
+        );
+
+        res.redirect('/admin/customize?status=success');
+    } catch (err) {
+        console.error("Lỗi postCustomize:", err);
+        res.redirect('/admin/customize?status=error');
+    }
+};
+
+// ==========================================
+// 3. QUẢN LÝ CẤU HÌNH SCRIPT (SETTINGS)
+// ==========================================
+
 exports.getSettings = async (req, res) => {
     try {
         let settings = await Setting.findOne({ key: 'global_settings' });
@@ -72,7 +125,6 @@ exports.getSettings = async (req, res) => {
     }
 };
 
-// Lưu dữ liệu mới khi nhấn nút
 exports.postSettings = async (req, res) => {
     try {
         const { headerScripts, bodyScripts, footerScripts } = req.body;

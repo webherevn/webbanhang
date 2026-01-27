@@ -1,11 +1,11 @@
 <%- include('../partials/head.ejs') %>
 <style>
     /* ĐỒNG BỘ LAYOUT VỚI CMS */
-    body { background-color: #f0f0f1; margin: 0; padding: 0; overflow-x: hidden; }
+    body { background-color: #f0f0f1; margin: 0; padding: 0; overflow-x: hidden; font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif; }
     .admin-wrapper { display: flex; min-height: 100vh; }
     
     .admin-sidebar-container {
-        width: 240px; /* Chiều rộng cố định cho sidebar */
+        width: 240px; 
         position: fixed;
         top: 0; left: 0; bottom: 0;
         background-color: #23282d;
@@ -14,13 +14,13 @@
 
     .admin-content {
         flex: 1;
-        margin-left: 240px; /* Phải khớp với width của sidebar */
+        margin-left: 240px; 
         padding: 30px;
         min-width: 0;
     }
 
     .wp-card { background: #fff; border: 1px solid #c3c4c7; box-shadow: 0 1px 1px rgba(0,0,0,.04); padding: 25px; margin-bottom: 25px; }
-    .section-title { border-bottom: 1px solid #f0f0f1; padding-bottom: 10px; margin-bottom: 20px; font-weight: 700; color: #1d2327; }
+    .section-title { border-bottom: 1px solid #f0f0f1; padding-bottom: 10px; margin-bottom: 20px; font-weight: 700; color: #1d2327; text-transform: uppercase; font-size: 13px; letter-spacing: 0.5px; }
     .preview-box { background: #f0f0f1; padding: 15px; border: 1px dashed #c3c4c7; border-radius: 4px; display: inline-block; }
     
     @media (max-width: 992px) {
@@ -38,14 +38,24 @@
 
         <div class="admin-content">
             <div class="container-fluid">
-                <h2 class="fw-bold h4 mb-4 text-dark"><i class="fas fa-paint-brush me-2"></i>Tùy biến giao diện (Theme Settings)</h2>
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="fw-bold h4 mb-0 text-dark"><i class="fas fa-paint-brush me-2"></i>Tùy biến giao diện</h2>
+                    <a href="/" target="_blank" class="btn btn-outline-dark btn-sm"><i class="fas fa-eye me-1"></i> Xem trang chủ</a>
+                </div>
+
+                <% if (typeof status !== 'undefined' || Object.keys(locals.query || {}).includes('status')) { %>
+                    <div class="alert alert-success alert-dismissible fade show shadow-sm border-0 mb-4" role="alert">
+                        <i class="fas fa-check-circle me-2"></i> Đã lưu mọi thay đổi thành công!
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                <% } %>
 
                 <form action="/admin/customize" method="POST" enctype="multipart/form-data">
                     <div class="row">
                         <div class="col-md-9">
                             
-                            <div class="wp-card shadow-sm border-top border-4 border-primary">
-                                <div class="section-title text-uppercase small">Logo & Thương hiệu</div>
+                            <div class="wp-card border-top border-4 border-primary">
+                                <div class="section-title">Logo & Thương hiệu</div>
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
                                         <label class="small fw-bold d-block mb-2">Logo Website</label>
@@ -53,32 +63,27 @@
                                             <img src="<%= theme.logo || '/images/no-logo.png' %>" style="max-height: 60px; max-width: 100%;">
                                         </div>
                                         <input type="file" name="logo" class="form-control form-control-sm">
-                                        <small class="text-muted" style="font-size: 11px;">Kích thước khuyên dùng: 200x60px (.png)</small>
                                     </div>
                                     <div class="col-md-6 mb-3">
-                                        <label class="small fw-bold d-block mb-2">Favicon (Biểu tượng tab)</label>
+                                        <label class="small fw-bold d-block mb-2">Favicon</label>
                                         <div class="preview-box mb-2 w-100 text-center">
                                             <img src="<%= theme.favicon || '/favicon.ico' %>" style="width: 32px; height: 32px;">
                                         </div>
                                         <input type="file" name="favicon" class="form-control form-control-sm">
-                                        <small class="text-muted" style="font-size: 11px;">Kích thước: 32x32px (.ico hoặc .png)</small>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="wp-card shadow-sm border-top border-4 border-info">
-                                <div class="section-title text-uppercase small">Header & Top Bar</div>
-                                
+                            <div class="wp-card border-top border-4 border-info">
+                                <div class="section-title">Header & Top Bar</div>
                                 <div class="form-check form-switch mb-3">
                                     <input class="form-check-input" type="checkbox" name="topBarShow" <%= theme.topBarShow ? 'checked' : '' %>>
                                     <label class="form-check-label fw-bold small">Hiển thị thanh Top Bar</label>
                                 </div>
-
                                 <div class="mb-3">
-                                    <label class="small fw-bold">Nội dung thông báo (Top Bar)</label>
-                                    <input type="text" name="topBarText" class="form-control" value="<%= theme.topBarText %>" placeholder="Ví dụ: Giảm giá 50% tất cả đơn hàng...">
+                                    <label class="small fw-bold">Nội dung Top Bar</label>
+                                    <input type="text" name="topBarText" class="form-control" value="<%= theme.topBarText %>">
                                 </div>
-
                                 <div class="row mb-3">
                                     <div class="col-md-4">
                                         <label class="small fw-bold">Màu nền Top Bar</label>
@@ -87,39 +92,93 @@
                                     <div class="col-md-8 pt-4">
                                         <div class="form-check form-switch">
                                             <input class="form-check-input" type="checkbox" name="headerSticky" <%= theme.headerSticky ? 'checked' : '' %>>
-                                            <label class="form-check-label fw-bold small">Cố định Header khi cuộn trang (Sticky)</label>
+                                            <label class="form-check-label fw-bold small">Cố định Header (Sticky)</label>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="wp-card shadow-sm border-top border-4 border-dark">
-                                <div class="section-title text-uppercase small">Mã tùy chỉnh (Advanced)</div>
+                            <div class="wp-card border-top border-4 border-success">
+                                <div class="section-title">Cấu hình Chân trang (Footer)</div>
+                                <div class="row mb-4">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="small fw-bold">Màu nền Footer</label>
+                                        <input type="color" name="footerBgColor" class="form-control form-control-color w-100" value="<%= theme.footerBgColor || '#f8f9fa' %>">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="small fw-bold">Màu chữ Footer</label>
+                                        <input type="color" name="footerTextColor" class="form-control form-control-color w-100" value="<%= theme.footerTextColor || '#333333' %>">
+                                    </div>
+                                    <div class="col-12 mb-3">
+                                        <label class="small fw-bold">Giới thiệu ngắn (About Us)</label>
+                                        <textarea name="footerAbout" class="form-control" rows="3"><%= theme.footerAbout %></textarea>
+                                    </div>
+                                    <div class="col-12 mb-3">
+                                        <label class="small fw-bold">Dòng bản quyền (Copyright)</label>
+                                        <input type="text" name="footerCopyright" class="form-control" value="<%= theme.footerCopyright %>">
+                                    </div>
+                                </div>
+
+                                <div class="section-title small text-muted">Thông tin liên hệ</div>
+                                <div class="row mb-4">
+                                    <div class="col-md-4 mb-3">
+                                        <label class="small fw-bold">Số điện thoại</label>
+                                        <input type="text" name="contactPhone" class="form-control" value="<%= theme.contactPhone %>">
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label class="small fw-bold">Email</label>
+                                        <input type="email" name="contactEmail" class="form-control" value="<%= theme.contactEmail %>">
+                                    </div>
+                                    <div class="col-md-4 mb-3">
+                                        <label class="small fw-bold">Địa chỉ</label>
+                                        <input type="text" name="address" class="form-control" value="<%= theme.address %>">
+                                    </div>
+                                </div>
+
+                                <div class="section-title small text-muted">Mạng xã hội</div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="small fw-bold"><i class="fab fa-facebook text-primary me-1"></i> Facebook</label>
+                                        <input type="url" name="socialFacebook" class="form-control" value="<%= theme.socialFacebook %>">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="small fw-bold"><i class="fab fa-instagram text-danger me-1"></i> Instagram</label>
+                                        <input type="url" name="socialInstagram" class="form-control" value="<%= theme.socialInstagram %>">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="small fw-bold"><i class="fab fa-tiktok text-dark me-1"></i> TikTok</label>
+                                        <input type="url" name="socialTiktok" class="form-control" value="<%= theme.socialTiktok %>">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="small fw-bold"><i class="fab fa-youtube text-danger me-1"></i> YouTube</label>
+                                        <input type="url" name="socialYoutube" class="form-control" value="<%= theme.socialYoutube %>">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="wp-card border-top border-4 border-dark">
+                                <div class="section-title">Mã tùy chỉnh (Advanced)</div>
                                 <div class="mb-3">
-                                    <label class="small fw-bold">Custom CSS (Tác động toàn web)</label>
-                                    <textarea name="customCss" class="form-control text-primary font-monospace" rows="6" placeholder="body { background: #fff; }"><%= theme.customCss %></textarea>
+                                    <label class="small fw-bold">Custom CSS</label>
+                                    <textarea name="customCss" class="form-control font-monospace small" rows="5"><%= theme.customCss %></textarea>
                                 </div>
                                 <div class="mb-0">
                                     <label class="small fw-bold">Header Bottom HTML</label>
-                                    <textarea name="headerBottomHtml" class="form-control font-monospace" rows="4"><%= theme.headerBottomHtml %></textarea>
+                                    <textarea name="headerBottomHtml" class="form-control font-monospace small" rows="3"><%= theme.headerBottomHtml %></textarea>
                                 </div>
                             </div>
                         </div>
 
                         <div class="col-md-3">
-                            <div class="wp-card shadow-sm">
-                                <div class="postbox-header text-uppercase small fw-bold mb-3 border-bottom pb-2">Trạng thái</div>
-                                <p class="small text-muted mb-3"><i class="fas fa-history me-2"></i>Cập nhật: <br><b><%= theme.updatedAt ? theme.updatedAt.toLocaleString('vi-VN') : 'N/A' %></b></p>
-                                <button type="submit" class="btn btn-primary w-100 fw-bold shadow-sm">
+                            <div class="wp-card sticky-top" style="top: 20px;">
+                                <div class="fw-bold small mb-3 border-bottom pb-2">XUẤT BẢN</div>
+                                <p class="small text-muted mb-3">
+                                    <i class="fas fa-calendar-alt me-2"></i>Cập nhật lần cuối: <br>
+                                    <span class="text-dark fw-bold ms-4"><%= theme.updatedAt ? theme.updatedAt.toLocaleString('vi-VN') : 'Mới' %></span>
+                                </p>
+                                <button type="submit" class="btn btn-primary w-100 fw-bold">
                                     <i class="fas fa-save me-2"></i>LƯU THAY ĐỔI
                                 </button>
-                            </div>
-
-                            <div class="wp-card shadow-sm bg-light">
-                                <h6 class="fw-bold small mb-2">Hướng dẫn:</h6>
-                                <p class="text-muted" style="font-size: 11px;">
-                                    Thay đổi Logo và Favicon sẽ áp dụng ngay lập tức cho trang chủ và tất cả các trang con. Hãy nhấn nút <b>Lưu thay đổi</b> sau mỗi lần chỉnh sửa.
-                                </p>
                             </div>
                         </div>
                     </div>
