@@ -7,6 +7,12 @@ const postSchema = new mongoose.Schema({
     summary: { type: String }, // Mô tả ngắn
     thumbnail: { type: String }, // Ảnh đại diện
     
+// Thêm vào postSchema hoặc productSchema
+    seoTitle: { type: String },
+    seoDescription: { type: String },
+    focusKeyword: { type: String },
+    seoScore: { type: Number, default: 0 },
+
     // Liên kết với chuyên mục bài viết
     category: { 
         type: mongoose.Schema.Types.ObjectId, 

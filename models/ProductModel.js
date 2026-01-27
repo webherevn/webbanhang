@@ -10,6 +10,11 @@ const productSchema = new mongoose.Schema({
   basePrice: { type: Number, required: true },
   thumbnail: { type: String }, 
   images: [{ type: String }],
+  // Thêm vào postSchema hoặc productSchema
+  seoTitle: { type: String },
+  seoDescription: { type: String },
+  focusKeyword: { type: String },
+  seoScore: { type: Number, default: 0 },
   variants: [{
     color: { type: String },
     size: { type: String },
