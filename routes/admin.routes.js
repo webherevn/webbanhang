@@ -81,11 +81,12 @@ router.post('/edit-page', upload.single('thumbnail'), pageController.postEditPag
 router.post('/delete-page', pageController.postDeletePage);
 
 
-// Quản lý giao diện
-router.get('/customize', themeController.getCustomize);
+
+// Quản lý giao diện - CHUYỂN TỪ themeController SANG adminController
+router.get('/customize', adminController.getCustomize); 
 router.post('/customize', upload.fields([
     { name: 'logo', maxCount: 1 },
     { name: 'favicon', maxCount: 1 }
-]), themeController.postCustomize);
+]), adminController.postCustomize);
 
 module.exports = router;
