@@ -51,11 +51,18 @@
     <style>
         :root {
             --primary-font: 'Montserrat', sans-serif;
-        }
+            --sidebar-width: 260px; /* Chiều rộng sidebar cố định */
+            --admin-bg: #f0f0f1;
+            --wp-blue: #2271b1;
+            --sidebar-bg: #23282d;
+            --base-font-size: 14px; /* Font size chuẩn WordPress CMS */
+            }
         body { 
             background-color: #fff; /* Đổi thành trắng cho đúng chất Shop thời trang */
             font-family: var(--primary-font);
+            font-size: var(--base-font-size);
             color: #333;
+            margin: 0; padding: 0;
         }
         
         /* Hiệu ứng Animation cho Hero Section */
@@ -67,7 +74,34 @@
         @keyframes moveUp {
             to { opacity: 1; transform: translateY(0); }
         }
+        /* Sidebar cố định */
+        .admin-sidebar-container {
+            width: var(--sidebar-width);
+            position: fixed;
+            top: 0; left: 0; bottom: 0;
+            background-color: var(--sidebar-bg);
+            z-index: 1000;
+            overflow-y: auto;
+        }
 
+        /* Nội dung chính bên phải */
+        .admin-content {
+            flex: 1;
+            margin-left: var(--sidebar-width); /* Luôn khớp với sidebar */
+            padding: 30px;
+            min-width: 0; /* Tránh vỡ layout trên màn hình nhỏ */
+        }
+
+        /* Đồng bộ Font size cho toàn bộ thẻ trong Admin */
+        .admin-content h2, .admin-content h4 { font-weight: 700; color: #1d2327; }
+        .admin-content label { font-size: 13px; font-weight: 600; margin-bottom: 5px; display: block; }
+        .admin-content .form-control, .admin-content .btn { font-size: 14px; }
+        
+        /* Responsive */
+        @media (max-width: 992px) {
+            .admin-sidebar-container { transform: translateX(-100%); transition: 0.3s; }
+            .admin-content { margin-left: 0; padding: 15px; }
+        }
         /* Tối ưu ảnh sản phẩm cho đều nhau */
         .product-img {
             aspect-ratio: 3/4;
@@ -81,7 +115,7 @@
         .letter-spacing-2 { letter-spacing: 2px; }
 
         /* Giữ lại style admin nếu bạn dùng chung file head */
-        .admin-wrapper { display: flex; }
+        .admin-wrapper { display: flex; min-height: 100vh;}
         .admin-content { flex: 1; padding: 20px; min-height: 100vh; }
 
         <% if (siteTheme.customCss) { %>
