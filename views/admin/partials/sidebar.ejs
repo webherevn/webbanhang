@@ -19,8 +19,8 @@
         </li>
 
         <li class="nav-item">
-            <a class="nav-link text-white py-2 px-3 <%= path === '/admin/blog-categories' ? 'active-wp' : '' %>" href="/admin/blog-categories" style="font-size: 0.9rem; opacity: 0.8;">
-                <i class="fas fa-folder me-2 ms-2"></i>Chuyên mục
+            <a class="nav-link text-white py-2 px-3 <%= path === '/admin/blog-categories' ? 'active-wp' : '' %>" href="/admin/blog-categories" style="font-size: 1rem; opacity: 1;">
+                <i class="fas fa-folder me-2"></i>Chuyên mục
             </a>
         </li>
 
@@ -33,26 +33,28 @@
         </li>
         
         <li class="nav-item">
-            <a class="nav-link text-white py-2 px-3 <%= path === '/admin/categories' ? 'active-wp' : '' %>" href="/admin/categories" style="font-size: 0.9rem; opacity: 0.8;">
-                <i class="fas fa-tags me-2 ms-2"></i>Danh mục Sản Phẩm
+            <a class="nav-link text-white py-2 px-3 <%= path === '/admin/categories' ? 'active-wp' : '' %>" href="/admin/categories" style="font-size: 1rem; opacity: 1;">
+                <i class="fas fa-tags me-2"></i>Danh mục Sản Phẩm
             </a>
         </li>
 
         <li class="nav-item">
-            <a href="/admin/settings" class="nav-link text-white <%= path === '/admin/settings' ? 'active bg-primary' : '' %>">
+            <a href="/admin/settings" class="nav-link text-white <%= path === '/admin/settings' ? 'active-wp bg-primary' : '' %> py-2 px-3">
                 <i class="fas fa-code me-2"></i>
                 <span>Cấu hình Script</span>
             </a>
         </li>
-            <li class="nav-item">
-            <a href="/admin/pages" class="nav-link text-white <%= path === '/admin/pages' ? 'active bg-primary' : '' %>">
+
+        <li class="nav-item">
+            <a href="/admin/pages" class="nav-link text-white <%= path === '/admin/pages' ? 'active-wp bg-primary' : '' %> py-2 px-3">
                 <i class="fas fa-file-alt me-2"></i>
                 <span>Trang</span>
             </a>
         </li>
+
         <li class="nav-item">
-            <a href="/admin/customize" class="nav-link <%= path === '/admin/customize' ? 'active' : '' %> text-white py-2 px-3 d-flex align-items-center mb-1">
-                <div class="sidebar-icon-wrapper me-2 text-center" style="width: 25px;">
+            <a href="/admin/customize" class="nav-link <%= path === '/admin/customize' ? 'active-wp' : '' %> text-white py-2 px-3 d-flex align-items-center mb-1">
+                <div class="sidebar-icon-wrapper me-2 text-center" style="width: 20px;">
                     <i class="fas fa-paint-brush"></i>
                 </div>
                 <span>Giao diện</span>
@@ -75,5 +77,11 @@
 <style>
     .active-wp { background-color: #2271b1 !important; border-left: 4px solid #72aee6; }
     .nav-link:hover { background-color: #32373c; color: #72aee6 !important; }
-    .nav-link { transition: 0.2s; border-left: 4px solid transparent; }
+    .nav-link { 
+        transition: 0.2s; 
+        border-left: 4px solid transparent; 
+        display: flex; 
+        align-items: center;
+    }
+    .nav-link i { width: 20px; text-align: center; } /* Giúp các icon có độ rộng bằng nhau để chữ thẳng hàng */
 </style>
