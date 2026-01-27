@@ -10,13 +10,13 @@ const MongoStore = require('connect-mongo');
 const path = require('path');
 
 // --- IMPORT MODELS ---
-const Setting = require('./models/SettingModel'); // Đưa lên đầu để quản lý
+const Setting = require('./models/SettingModel'); 
+const Theme = require('./models/ThemeModel'); // Đảm bảo model này tồn tại
 
 // Import Routes
 const adminRoutes = require('./routes/admin.routes');
 const shopRoutes = require('./routes/shop.routes');
 
-const Theme = require('./models/ThemeModel');
 // Khởi tạo App
 const app = express();
 
@@ -46,14 +46,12 @@ app.use(session({
   secret: process.env.SESSION_SECRET || 'my secret key fashion shop', 
   resave: false,
   saveUninitialized: false, 
-  
   store: MongoStore.create({
     mongoUrl: process.env.MONGO_URI,
     collectionName: 'sessions_new',
     ttl: 14 * 24 * 60 * 60, 
     autoRemove: 'native'
   }),
-  
   cookie: {
     maxAge: 14 * 24 * 60 * 60 * 1000, 
     secure: process.env.NODE_ENV === 'production', 
@@ -63,69 +61,62 @@ app.use(session({
 }));
 
 // ============================================================
-// 4. BIẾN TOÀN CỤC (NAVBAR, CART, WPCODE)
+// 4. BIẾN TOÀN CỤC (NAVBAR, CART, THEME, SCRIPTS)
+// --- PHẢI NẰM TRƯỚC ROUTES ---
 // ============================================================
-
-// --- ĐOẠN FIX LỖI: Chuyển middleware Script lên trước Routes ---
 app.use(async (req, res, next) => {
     try {
-        let settings = await Setting.findOne({ key: 'global_settings' });
+        // Lấy dữ liệu Scripts và Theme cùng lúc để tối ưu
+        const [settings, theme] = await Promise.all([
+            Setting.findOne({ key: 'global_settings' }),
+            Theme.findOne({ key: 'theme_settings' })
+        ]);
         
-        // Nếu chưa có trong DB, tạo object rỗng để EJS không bị lỗi undefined
-        if (!settings) {
-            settings = { headerScripts: '', bodyScripts: '', footerScripts: '' };
+        // Xử lý Global Scripts
+        res.locals.globalScripts = settings || { headerScripts: '', bodyScripts: '', footerScripts: '' };
+        
+        // Xử lý Theme (Giao diện)
+        if (!theme) {
+            // Nếu chưa có thì tạo object mặc định thay vì create liên tục để tránh lỗi performance
+            res.locals.theme = { key: 'theme_settings', topBarShow: false };
+        } else {
+            res.locals.theme = theme;
         }
-        
-        res.locals.globalScripts = settings; 
-        
-        // Tiện tay xử lý luôn phần Cart cũ của bạn
+
+        // Xử lý Cart & Auth
         if (!req.session.cart) {
             req.session.cart = { items: [], totalQuantity: 0, totalPrice: 0 };
         }
         res.locals.isAuthenticated = req.session.isLoggedIn; 
         res.locals.cart = req.session.cart;
         
+        // Truyền path để active menu
+        res.locals.path = req.path;
+
         next();
     } catch (err) {
-        console.error("❌ Lỗi load scripts:", err);
-        // Backup để web không sập nếu DB lỗi
+        console.error("❌ Lỗi Middleware toàn cục:", err);
         res.locals.globalScripts = { headerScripts: '', bodyScripts: '', footerScripts: '' };
+        res.locals.theme = {};
         next();
     }
 });
 
 // ============================================================
-// 5. ROUTES (Phải nằm SAU middleware biến toàn cục)
+// 5. ROUTES
 // ============================================================
 app.use('/admin', adminRoutes);
 app.use('/', shopRoutes);
 
-// Xử lý 404 (Luôn để ở cuối cùng của các Route)
-app.use((req, res, next) => {
+// Xử lý 404
+app.use(async (req, res, next) => {
+    // Vẫn cần theme cho trang 404
+    const theme = await Theme.findOne({ key: 'theme_settings' });
     res.status(404).render('404', { 
         pageTitle: 'Page Not Found', 
-        path: '/404'
+        path: '/404',
+        theme: theme || {}
     });
-});
-
-app.use(async (req, res, next) => {
-    try {
-        // Tìm cấu hình giao diện
-        let theme = await Theme.findOne({ key: 'theme_settings' });
-        
-        // Nếu chưa có thì tạo mới để tránh lỗi undefined
-        if (!theme) {
-            theme = await Theme.create({ key: 'theme_settings' });
-        }
-        
-        // CHỐT CHẶN: res.locals giúp biến 'theme' luôn có sẵn ở mọi file .ejs
-        res.locals.theme = theme; 
-        next();
-    } catch (err) {
-        console.log("Lỗi Middleware Theme:", err);
-        res.locals.theme = {}; // Tránh sập web nếu lỗi DB
-        next();
-    }
 });
 
 const PORT = process.env.PORT || 3000;

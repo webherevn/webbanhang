@@ -1,87 +1,123 @@
-<div class="w-100 text-white">
-    <div class="p-3 border-bottom border-secondary" style="background-color: #1d2327;">
-        <a href="/" class="text-white text-decoration-none small fw-bold">
-            <i class="fas fa-home me-2"></i>Xem Website
-        </a>
-    </div>
+const express = require('express');
+const mongoose = require('mongoose');
+const dotenv = require('dotenv');
 
-    <ul class="nav flex-column mt-2">
-        <li class="nav-item">
-            <a class="nav-link text-white py-2 px-3 <%= path === '/admin' ? 'active-wp' : '' %>" href="/admin">
-                <i class="fas fa-tachometer-alt me-2"></i>Bảng tin
-            </a>
-        </li>
+// --- QUAN TRỌNG: NẠP BIẾN MÔI TRƯỜNG NGAY LẬP TỨC ---
+dotenv.config(); 
 
-        <li class="nav-item mt-2">
-            <a class="nav-link text-white py-2 px-3 <%= path.includes('post') ? 'active-wp' : '' %>" href="/admin/posts">
-                <i class="fas fa-thumbtack me-2"></i>Bài viết
-            </a>
-        </li>
+const session = require('express-session');
+const MongoStore = require('connect-mongo'); 
+const path = require('path');
 
-        <li class="nav-item">
-            <a class="nav-link text-white py-2 px-3 <%= path === '/admin/blog-categories' ? 'active-wp' : '' %>" href="/admin/blog-categories" style="font-size: 1rem; opacity: 1;">
-                <i class="fas fa-folder me-2"></i>Chuyên mục
-            </a>
-        </li>
+// --- IMPORT MODELS ---
+const Setting = require('./models/SettingModel'); 
+const Theme = require('./models/ThemeModel'); // Đảm bảo model này tồn tại
 
-        <hr class="border-secondary mx-3 my-2">
+// Import Routes
+const adminRoutes = require('./routes/admin.routes');
+const shopRoutes = require('./routes/shop.routes');
 
-        <li class="nav-item">
-            <a class="nav-link text-white py-2 px-3 <%= path.includes('product') ? 'active-wp' : '' %>" href="/admin/products">
-                <i class="fas fa-box me-2"></i>Sản phẩm
-            </a>
-        </li>
+// Khởi tạo App
+const app = express();
+
+// ============================================================
+// 1. CẤU HÌNH RENDER & VIEW
+// ============================================================
+app.set('trust proxy', 1); 
+app.set('view engine', 'ejs');
+app.set('views', 'views');
+
+// Kết nối Database
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log('✅ Connected to MongoDB'))
+  .catch(err => console.error('❌ DB Connection Error:', err));
+
+// ============================================================
+// 2. MIDDLEWARE XỬ LÝ DỮ LIỆU
+// ============================================================
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json()); 
+app.use(express.static(path.join(__dirname, 'public')));
+
+// ============================================================
+// 3. CẤU HÌNH SESSION
+// ============================================================
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'my secret key fashion shop', 
+  resave: false,
+  saveUninitialized: false, 
+  store: MongoStore.create({
+    mongoUrl: process.env.MONGO_URI,
+    collectionName: 'sessions_new',
+    ttl: 14 * 24 * 60 * 60, 
+    autoRemove: 'native'
+  }),
+  cookie: {
+    maxAge: 14 * 24 * 60 * 60 * 1000, 
+    secure: process.env.NODE_ENV === 'production', 
+    httpOnly: true,
+    sameSite: 'lax' 
+  }
+}));
+
+// ============================================================
+// 4. BIẾN TOÀN CỤC (NAVBAR, CART, THEME, SCRIPTS)
+// --- PHẢI NẰM TRƯỚC ROUTES ---
+// ============================================================
+app.use(async (req, res, next) => {
+    try {
+        // Lấy dữ liệu Scripts và Theme cùng lúc để tối ưu
+        const [settings, theme] = await Promise.all([
+            Setting.findOne({ key: 'global_settings' }),
+            Theme.findOne({ key: 'theme_settings' })
+        ]);
         
-        <li class="nav-item">
-            <a class="nav-link text-white py-2 px-3 <%= path === '/admin/categories' ? 'active-wp' : '' %>" href="/admin/categories" style="font-size: 1rem; opacity: 1;">
-                <i class="fas fa-tags me-2"></i>Danh mục Sản Phẩm
-            </a>
-        </li>
+        // Xử lý Global Scripts
+        res.locals.globalScripts = settings || { headerScripts: '', bodyScripts: '', footerScripts: '' };
+        
+        // Xử lý Theme (Giao diện)
+        if (!theme) {
+            // Nếu chưa có thì tạo object mặc định thay vì create liên tục để tránh lỗi performance
+            res.locals.theme = { key: 'theme_settings', topBarShow: false };
+        } else {
+            res.locals.theme = theme;
+        }
 
-        <li class="nav-item">
-            <a href="/admin/settings" class="nav-link text-white <%= path === '/admin/settings' ? 'active-wp bg-primary' : '' %> py-2 px-3">
-                <i class="fas fa-code me-2"></i>
-                <span>Cấu hình Script</span>
-            </a>
-        </li>
+        // Xử lý Cart & Auth
+        if (!req.session.cart) {
+            req.session.cart = { items: [], totalQuantity: 0, totalPrice: 0 };
+        }
+        res.locals.isAuthenticated = req.session.isLoggedIn; 
+        res.locals.cart = req.session.cart;
+        
+        // Truyền path để active menu
+        res.locals.path = req.path;
 
-        <li class="nav-item">
-            <a href="/admin/pages" class="nav-link text-white <%= path === '/admin/pages' ? 'active-wp bg-primary' : '' %> py-2 px-3">
-                <i class="fas fa-file-alt me-2"></i>
-                <span>Trang</span>
-            </a>
-        </li>
-
-        <li class="nav-item">
-            <a href="/admin/customize" class="nav-link <%= path === '/admin/customize' ? 'active-wp' : '' %> text-white py-2 px-3 d-flex align-items-center mb-1">
-                <div class="sidebar-icon-wrapper me-2 text-center" style="width: 20px;">
-                    <i class="fas fa-paint-brush"></i>
-                </div>
-                <span>Giao diện</span>
-            </a>
-        </li>
-
-        <% if (path === '/admin/customize') { %>
-            <ul class="nav flex-column ms-4 small mb-2">
-                <li class="nav-item">
-                    <a href="/admin/customize#logo-section" class="nav-link text-white-50 py-1">Logo & Header</a>
-                </li>
-                <li class="nav-item">
-                    <a href="/admin/customize#footer-section" class="nav-link text-white-50 py-1">Chân trang</a>
-                </li>
-            </ul>
-        <% } %>
-    </ul>
-</div>
-
-<style>
-    .active-wp { background-color: #2271b1 !important; border-left: 4px solid #72aee6; }
-    .nav-link:hover { background-color: #32373c; color: #72aee6 !important; }
-    .nav-link { 
-        transition: 0.2s; 
-        border-left: 4px solid transparent; 
-        display: flex; 
-        align-items: center;
+        next();
+    } catch (err) {
+        console.error("❌ Lỗi Middleware toàn cục:", err);
+        res.locals.globalScripts = { headerScripts: '', bodyScripts: '', footerScripts: '' };
+        res.locals.theme = {};
+        next();
     }
-    .nav-link i { width: 20px; text-align: center; } /* Giúp các icon có độ rộng bằng nhau để chữ thẳng hàng */
-</style>
+});
+
+// ============================================================
+// 5. ROUTES
+// ============================================================
+app.use('/admin', adminRoutes);
+app.use('/', shopRoutes);
+
+// Xử lý 404
+app.use(async (req, res, next) => {
+    // Vẫn cần theme cho trang 404
+    const theme = await Theme.findOne({ key: 'theme_settings' });
+    res.status(404).render('404', { 
+        pageTitle: 'Page Not Found', 
+        path: '/404',
+        theme: theme || {}
+    });
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
