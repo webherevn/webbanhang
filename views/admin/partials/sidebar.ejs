@@ -39,18 +39,36 @@
         </li>
 
         <li class="nav-item">
-    <a href="/admin/settings" class="nav-link text-white <%= path === '/admin/settings' ? 'active bg-primary' : '' %>">
-        <i class="fas fa-code me-2"></i>
-        <span>Cấu hình Script</span>
-    </a>
-</li>
-    <li class="nav-item">
-    <a href="/admin/pages" class="nav-link text-white <%= path === '/admin/pages' ? 'active bg-primary' : '' %>">
-        <i class="fas fa-file-alt me-2"></i>
-        <span>Trang</span>
-    </a>
-</li>
+            <a href="/admin/settings" class="nav-link text-white <%= path === '/admin/settings' ? 'active bg-primary' : '' %>">
+                <i class="fas fa-code me-2"></i>
+                <span>Cấu hình Script</span>
+            </a>
+        </li>
+            <li class="nav-item">
+            <a href="/admin/pages" class="nav-link text-white <%= path === '/admin/pages' ? 'active bg-primary' : '' %>">
+                <i class="fas fa-file-alt me-2"></i>
+                <span>Trang</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a href="/admin/customize" class="nav-link <%= path === '/admin/customize' ? 'active' : '' %> text-white py-2 px-3 d-flex align-items-center mb-1">
+                <div class="sidebar-icon-wrapper me-2 text-center" style="width: 25px;">
+                    <i class="fas fa-paint-brush"></i>
+                </div>
+                <span>Giao diện</span>
+            </a>
+        </li>
 
+        <% if (path === '/admin/customize') { %>
+            <ul class="nav flex-column ms-4 small mb-2">
+                <li class="nav-item">
+                    <a href="/admin/customize#logo-section" class="nav-link text-white-50 py-1">Logo & Header</a>
+                </li>
+                <li class="nav-item">
+                    <a href="/admin/customize#footer-section" class="nav-link text-white-50 py-1">Chân trang</a>
+                </li>
+            </ul>
+        <% } %>
     </ul>
 </div>
 
