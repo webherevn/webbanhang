@@ -1,156 +1,154 @@
 <%- include('../partials/head.ejs') %>
-
 <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.js"></script>
 
 <style>
-    /* KHUNG CHUẨN WORDPRESS CMS */
     body { background-color: #f0f0f1; margin: 0; padding: 0; overflow-x: hidden; }
     .admin-wrapper { display: flex; min-height: 100vh; }
-    
-    .admin-sidebar-container {
-        width: 240px; 
-        position: fixed;
-        top: 0; left: 0; bottom: 0;
-        background-color: #23282d;
-        z-index: 1000;
-    }
-
-    .admin-content {
-        flex: 1;
-        margin-left: 240px; 
-        padding: 20px 30px;
-        min-width: 0;
-    }
-
+    .admin-sidebar-container { width: 240px; position: fixed; top: 0; left: 0; bottom: 0; background-color: #23282d; z-index: 1000; }
+    .admin-content { flex: 1; margin-left: 240px; padding: 30px; }
     .wp-card { background: #fff; border: 1px solid #c3c4c7; box-shadow: 0 1px 1px rgba(0,0,0,.04); padding: 20px; margin-bottom: 20px; }
     .postbox-header { border-bottom: 1px solid #c3c4c7; padding: 10px 0; margin-bottom: 15px; font-weight: 600; }
-    
-    /* TÙY CHỈNH GIAO DIỆN SUMMERNOTE ĐỂ ĐỒNG BỘ WP */
     .note-editor { border: 1px solid #c3c4c7 !important; }
-    .note-toolbar { background: #f0f0f1 !important; border-bottom: 1px solid #c3c4c7 !important; }
-    .note-editable { background: #fff !important; min-height: 350px; }
-
-    @media (max-width: 992px) {
-        .admin-sidebar-container { display: none; }
-        .admin-content { margin-left: 0; }
-    }
+    .seo-item { margin-bottom: 8px; font-size: 13px; }
+    @media (max-width: 992px) { .admin-sidebar-container { display: none; } .admin-content { margin-left: 0; } }
 </style>
 </head>
 <body>
-
     <div class="admin-wrapper">
-        <div class="admin-sidebar-container">
-            <%- include('./partials/sidebar.ejs') %>
-        </div>
+        <div class="admin-sidebar-container"><%- include('./partials/sidebar.ejs') %></div>
 
         <div class="admin-content">
-            <div class="container-fluid">
-                <h2 class="fw-bold mb-4 h4"><%= editing ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm mới' %></h2>
+            <h2 class="fw-bold h4 mb-4 text-dark"><%= editing ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm mới' %></h2>
+            
+            <form action="/admin/<%= editing ? 'edit-product' : 'add-product' %>" method="POST" enctype="multipart/form-data">
+                <div class="row">
+                    <div class="col-md-9">
+                        <div class="mb-4">
+                            <label class="fw-bold small mb-1">Tên sản phẩm</label>
+                            <input type="text" name="name" class="form-control form-control-lg fw-bold shadow-sm" 
+                                   value="<%= editing ? product.name : '' %>" placeholder="Nhập tên sản phẩm..." required>
+                        </div>
 
-                <form action="/admin/<%= editing ? 'edit-product' : 'add-product' %>" method="POST" enctype="multipart/form-data">
-                    <div class="row">
-                        <div class="col-md-9">
-                            <div class="mb-4">
-                                <label class="fw-bold small mb-1">Tên sản phẩm</label>
-                                <input type="text" name="name" class="form-control form-control-lg shadow-sm" 
-                                       value="<%= editing ? product.name : '' %>" placeholder="Nhập tên sản phẩm..." required>
-                            </div>
+                        <div class="wp-card">
+                            <div class="postbox-header text-uppercase small text-muted">Mô tả sản phẩm</div>
+                            <textarea name="description" id="prodDesc"><%= editing ? product.description : '' %></textarea>
+                        </div>
 
-                            <div class="wp-card">
-                                <div class="postbox-header text-uppercase small">Mô tả sản phẩm</div>
-                                <textarea name="description" id="prodDesc"><%= editing ? product.description : '' %></textarea>
-                            </div>
-
-                            <div class="wp-card">
-                                <div class="postbox-header text-uppercase small">Dữ liệu sản phẩm</div>
-                                <div class="row g-3">
-                                    <div class="col-md-6">
-                                        <label class="form-label small fw-bold">Giá gốc (₫)</label>
-                                        <input type="number" name="basePrice" class="form-control" value="<%= editing ? product.basePrice : '' %>" required>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label small fw-bold">Giá khuyến mãi (₫)</label>
-                                        <input type="number" name="salePrice" class="form-control" value="<%= editing ? product.salePrice : '' %>">
-                                    </div>
+                        <div class="wp-card">
+                            <div class="postbox-header text-uppercase small text-muted">Dữ liệu giá</div>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-bold">Giá gốc (₫)</label>
+                                    <input type="number" name="basePrice" class="form-control" value="<%= editing ? product.basePrice : '' %>" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-bold">Giá khuyến mãi (₫)</label>
+                                    <input type="number" name="salePrice" class="form-control" value="<%= editing ? product.salePrice : '' %>">
                                 </div>
                             </div>
                         </div>
 
-                        <div class="col-md-3">
-                            <div class="wp-card">
-                                <div class="postbox-header text-uppercase small">Hành động</div>
-                                <div class="mb-3 small">
-                                    <i class="fas fa-eye me-1 text-muted"></i> Trạng thái: <b>Công khai</b>
-                                </div>
-                                <% if (editing) { %>
-                                    <input type="hidden" name="productId" value="<%= product._id %>">
-                                <% } %>
-                                <button type="submit" class="btn btn-primary w-100 fw-bold">
-                                    <%= editing ? 'Cập nhật' : 'Đăng sản phẩm' %>
-                                </button>
+                        <div class="wp-card shadow-sm border-top border-4 border-info">
+                            <h6 class="fw-bold small mb-3 text-uppercase text-info"><i class="fab fa-google me-2"></i>Xem trước kết quả tìm kiếm</h6>
+                            
+                            <div class="google-preview p-3 mb-4 border rounded bg-white shadow-sm" style="max-width: 600px; font-family: arial, sans-serif;">
+                                <div id="preview-url" class="text-muted small mb-1" style="font-size: 12px;">https://yourdomain.com › san-pham › ...</div>
+                                <div id="preview-title" class="mb-1" style="color: #1a0dab; font-size: 20px; cursor: pointer;">Tiêu đề SEO hiển thị tại đây</div>
+                                <div id="preview-desc" class="text-muted" style="font-size: 14px; line-height: 1.5;">Mô tả Meta xuất hiện ở đây...</div>
                             </div>
 
-                            <div class="wp-card">
-                                <div class="postbox-header text-uppercase small">Danh mục</div>
-                                <select name="category" class="form-select form-select-sm" required>
-                                    <% categories.forEach(cat => { %>
-                                        <option value="<%= cat._id %>" 
-                                            <%= (editing && product.category && product.category.toString() === cat._id.toString()) ? 'selected' : '' %>>
-                                            <%= cat.name %>
-                                        </option>
-                                    <% }) %>
-                                </select>
+                            <div class="mb-3">
+                                <label class="small fw-bold">SEO Title</label>
+                                <input type="text" id="seoTitle" name="seoTitle" class="form-control" value="<%= editing ? product.seoTitle : '' %>" placeholder="Tiêu đề hiển thị trên Google">
+                                <div class="progress mt-1" style="height: 4px;"><div id="seo-title-bar" class="progress-bar" style="width: 0%"></div></div>
                             </div>
-
-                            <div class="wp-card text-center">
-                                <div class="postbox-header text-uppercase small">Ảnh sản phẩm</div>
-                                <% if (editing && product.thumbnail) { %>
-                                    <img src="<%= product.thumbnail %>" class="img-fluid mb-2 border rounded shadow-sm" style="max-height: 150px;">
-                                <% } %>
-                                <input type="file" name="thumbnail" class="form-control form-control-sm">
-                            </div>
-
-                            <div class="wp-card text-center">
-                                <div class="postbox-header text-uppercase small">Album hình ảnh</div>
-                                <input type="file" name="gallery" class="form-control form-control-sm" multiple>
-                                <small class="text-muted mt-2 d-block" style="font-size: 10px;">Có thể chọn nhiều ảnh cùng lúc</small>
+                            <div class="mb-0">
+                                <label class="small fw-bold">Meta Description</label>
+                                <textarea id="seoDescription" name="seoDescription" class="form-control" rows="3" placeholder="Mô tả meta thu hút..."><%= editing ? product.seoDescription : '' %></textarea>
+                                <div class="progress mt-1" style="height: 4px;"><div id="seo-desc-bar" class="progress-bar" style="width: 0%"></div></div>
                             </div>
                         </div>
                     </div>
-                </form>
-            </div>
+
+                    <div class="col-md-3">
+                        <div class="wp-card shadow-sm border-top border-4 border-primary">
+                            <h6 class="fw-bold small mb-3 text-uppercase text-primary"><i class="fas fa-rocket me-2"></i>RankMath SEO</h6>
+                            <div class="mb-3">
+                                <label class="small fw-bold">Từ khóa chính</label>
+                                <input type="text" id="focusKeyword" name="focusKeyword" class="form-control form-control-sm" value="<%= editing ? product.focusKeyword : '' %>">
+                            </div>
+                            <div class="p-2 bg-light rounded mb-3 border text-center">
+                                <div class="small fw-bold">Điểm SEO: <span id="seo-score-text" class="h5">0/100</span></div>
+                                <div class="progress mt-1" style="height: 6px;"><div id="seo-progress-bar" class="progress-bar" style="width: 0%"></div></div>
+                            </div>
+                            <ul class="list-unstyled mb-0 small" id="seo-checklist">
+                                <li class="seo-item" data-check="title-length"><i class="fas fa-circle-notch text-muted me-2"></i>Độ dài tiêu đề</li>
+                                <li class="seo-item" data-check="desc-length"><i class="fas fa-circle-notch text-muted me-2"></i>Độ dài mô tả</li>
+                                <li class="seo-item" data-check="keyword-density"><i class="fas fa-circle-notch text-muted me-2"></i>Mật độ từ khóa</li>
+                                <li class="seo-item" data-check="img-alt-keyword"><i class="fas fa-circle-notch text-muted me-2"></i>Ảnh có thẻ Alt</li>
+                            </ul>
+                        </div>
+
+                        <div class="wp-card shadow-sm">
+                            <div class="postbox-header text-uppercase small">Hành động</div>
+                            <% if (editing) { %>
+                                <input type="hidden" name="productId" value="<%= product._id %>">
+                            <% } %>
+                            <button type="submit" class="btn btn-primary w-100 fw-bold">
+                                <%= editing ? 'Cập nhật' : 'Đăng sản phẩm' %>
+                            </button>
+                            <a href="/admin/products" class="btn btn-link btn-sm w-100 mt-2 text-muted text-decoration-none">Hủy bỏ</a>
+                        </div>
+
+                        <div class="wp-card shadow-sm">
+                            <div class="postbox-header text-uppercase small">Danh mục</div>
+                            <select name="category" class="form-select form-select-sm" required>
+                                <% categories.forEach(cat => { %>
+                                    <option value="<%= cat._id %>" 
+                                        <%= (editing && product.category && product.category.toString() === cat._id.toString()) ? 'selected' : '' %>>
+                                        <%= cat.name %>
+                                    </option>
+                                <% }) %>
+                            </select>
+                        </div>
+
+                        <div class="wp-card shadow-sm text-center">
+                            <div class="postbox-header text-uppercase small">Ảnh đại diện</div>
+                            <% if (editing && product.thumbnail) { %>
+                                <img src="<%= product.thumbnail %>" class="img-fluid mb-2 border rounded shadow-sm" style="max-height: 150px;">
+                            <% } %>
+                            <input type="file" name="thumbnail" class="form-control form-control-sm">
+                        </div>
+
+                        <div class="wp-card shadow-sm text-center">
+                            <div class="postbox-header text-uppercase small">Album hình ảnh</div>
+                            <input type="file" name="gallery" class="form-control form-control-sm" multiple>
+                            <small class="text-muted mt-2 d-block" style="font-size: 10px;">Chọn nhiều ảnh cùng lúc</small>
+                        </div>
+                    </div>
+                </div> </form>
         </div>
     </div>
 
     <script>
         $(document).ready(function() {
             $('#prodDesc').summernote({
-                placeholder: 'Mô tả chi tiết đặc điểm sản phẩm, chất liệu, hướng dẫn chọn size...',
-                tabsize: 2,
                 height: 400,
+                placeholder: 'Mô tả chi tiết sản phẩm...',
                 toolbar: [
                     ['style', ['style']],
-                    ['font', ['bold', 'underline', 'clear', 'italic', 'strikethrough']],
-                    ['fontname', ['fontname']],
-                    ['fontsize', ['fontsize']],
+                    ['font', ['bold', 'underline', 'clear', 'italic']],
                     ['color', ['color']],
                     ['para', ['ul', 'ol', 'paragraph']],
                     ['table', ['table']],
                     ['insert', ['link', 'picture', 'video', 'hr']],
-                    ['view', ['fullscreen', 'codeview', 'help']]
-                ],
-                fontSizes: ['8', '9', '10', '11', '12', '14', '16', '18', '24', '36', '48']
+                    ['view', ['fullscreen', 'codeview']]
+                ]
             });
         });
     </script>
-    <script>
-        $(document).ready(function() {
-            $('#page-editor').summernote({ height: 500 });
-        });
-    </script>
-
     <script src="/js/admin-seo.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
