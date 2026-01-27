@@ -12,7 +12,10 @@ const postSchema = new mongoose.Schema({
     seoDescription: { type: String },
     focusKeyword: { type: String },
     seoScore: { type: Number, default: 0 },
-
+    // Thêm vào Schema của Post và Product
+    seoTitle: { type: String, trim: true },
+    seoDescription: { type: String, trim: true },
+    focusKeyword: { type: String },
     // Liên kết với chuyên mục bài viết
     category: { 
         type: mongoose.Schema.Types.ObjectId, 

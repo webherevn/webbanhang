@@ -85,3 +85,22 @@ $(document).ready(function() {
     $('#page-editor').on('summernote.change', analyzeSEO);
     analyzeSEO();
 });
+
+function updateGooglePreview() {
+    const seoTitle = $('#seoTitle').val() || $('input[name="title"]').val() || "Tiêu đề chưa nhập";
+    const seoDesc = $('#seoDescription').val() || $('textarea[name="summary"]').val() || "Mô tả chưa nhập...";
+
+    $('#preview-title').text(seoTitle);
+    $('#preview-desc').text(seoDesc);
+
+    // Thanh tiến độ cho Tiêu đề (Chuẩn 60 ký tự)
+    const titleWidth = Math.min((seoTitle.length / 60) * 100, 100);
+    $('#seo-title-bar').css('width', titleWidth + '%').addClass(titleWidth > 100 ? 'bg-danger' : 'bg-success');
+
+    // Thanh tiến độ cho Mô tả (Chuẩn 155 ký tự)
+    const descWidth = Math.min((seoDesc.length / 155) * 100, 100);
+    $('#seo-desc-bar').css('width', descWidth + '%').addClass(descWidth > 100 ? 'bg-danger' : 'bg-success');
+}
+
+$('#seoTitle, #seoDescription, input[name="title"]').on('input', updateGooglePreview);
+$(document).ready(updateGooglePreview);

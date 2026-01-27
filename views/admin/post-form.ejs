@@ -40,6 +40,34 @@
                             <label class="fw-bold small mb-2 text-uppercase">Tóm tắt ngắn (Summary)</label>
                             <textarea name="summary" class="form-control" rows="3" placeholder="Viết mô tả ngắn để hiển thị ngoài danh sách..."><%= editing ? post.summary : '' %></textarea>
                         </div>
+
+                        <div class="wp-card shadow-sm border-top border-4 border-info mt-4">
+                            <h6 class="fw-bold small mb-3 text-uppercase text-info">
+                                <i class="fab fa-google me-2"></i>Xem trước kết quả tìm kiếm
+                            </div>
+
+                            <div class="google-preview p-3 mb-4 border rounded bg-white shadow-sm" style="max-width: 600px; font-family: arial, sans-serif;">
+                                <div id="preview-url" class="text-muted small mb-1" style="font-size: 12px;">https://yourdomain.com › p › ...</div>
+                                <div id="preview-title" class="mb-1" style="color: #1a0dab; font-size: 20px; cursor: pointer;">Tiêu đề SEO sẽ hiển thị tại đây</div>
+                                <div id="preview-desc" class="text-muted" style="font-size: 14px; line-height: 1.5;">Mô tả Meta của bạn sẽ xuất hiện ở đây. Hãy viết gì đó thật thu hút để tăng tỷ lệ nhấp chuột nhé!</div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-12 mb-3">
+                                    <label class="small fw-bold">SEO Title (Tiêu đề SEO)</label>
+                                    <input type="text" id="seoTitle" name="seoTitle" class="form-control" 
+                                        value="<%= editing ? post.seoTitle : '' %>" placeholder="Nhập tiêu đề hiển thị trên Google">
+                                    <div class="progress mt-1" style="height: 4px;"><div id="seo-title-bar" class="progress-bar" style="width: 0%"></div></div>
+                                </div>
+                                <div class="col-md-12">
+                                    <label class="small fw-bold">Meta Description (Mô tả Meta)</label>
+                                    <textarea id="seoDescription" name="seoDescription" class="form-control" rows="3" 
+                                            placeholder="Viết mô tả ngắn thu hút khách hàng..."><%= editing ? post.seoDescription : '' %></textarea>
+                                    <div class="progress mt-1" style="height: 4px;"><div id="seo-desc-bar" class="progress-bar" style="width: 0%"></div></div>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
 
                     <div class="col-md-3">
