@@ -10,6 +10,7 @@ const productController = require('../controllers/admin/productController');
 const categoryController = require('../controllers/admin/categoryController');
 const postController = require('../controllers/admin/postController');
 const pageController = require('../controllers/admin/pageController');
+const themeController = require('../controllers/admin/themeController');
 
 // 3. CẤU HÌNH UPLOAD CHO SẢN PHẨM
 const productUpload = upload.fields([
@@ -78,5 +79,13 @@ router.get('/edit-page/:pageId', pageController.getEditPage);
 router.post('/edit-page', upload.single('thumbnail'), pageController.postEditPage);
 
 router.post('/delete-page', pageController.postDeletePage);
+
+
+// Quản lý giao diện
+router.get('/customize', themeController.getCustomize);
+router.post('/customize', upload.fields([
+    { name: 'logo', maxCount: 1 },
+    { name: 'favicon', maxCount: 1 }
+]), themeController.postCustomize);
 
 module.exports = router;
