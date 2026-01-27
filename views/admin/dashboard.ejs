@@ -4,28 +4,28 @@
     body { margin: 0; padding: 0; background-color: #f0f2f5; }
     .admin-wrapper { display: flex; min-height: 100vh; }
     
-    /* Sidebar cố định bên trái */
     .admin-sidebar-container {
         width: 200px;
         position: fixed;
-        top: 0;
-        left: 0;
-        bottom: 0;
+        top: 0; left: 0; bottom: 0;
         background-color: #23282d;
         z-index: 1000;
     }
     
-    /* Nội dung đẩy sang phải */
     .admin-content {
         flex: 1;
-        margin-left: 200px; /* Bằng chiều rộng sidebar */
+        margin-left: 200px;
         padding: 30px;
     }
 
     .card { border: 1px solid #ccd0d4; box-shadow: 0 1px 1px rgba(0,0,0,.04); border-radius: 2px; }
+    /* Bổ sung style cho wp-card để không bị lỗi hiển thị */
+    .wp-card { background: #fff; border: 1px solid #ccd0d4; padding: 20px; margin-bottom: 20px; border-radius: 2px; }
+    
     .wp-badge-primary { border-left: 4px solid #2271b1; }
     .wp-badge-success { border-left: 4px solid #00a32a; }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div class="admin-wrapper">
@@ -44,29 +44,94 @@
                     <div class="col-md-4">
                         <div class="card p-3 wp-badge-primary shadow-sm">
                             <div class="text-muted small fw-bold">BÀI VIẾT</div>
-                            <div class="fs-2 fw-bold">12</div>
+                            <div class="fs-2 fw-bold"><%= totalPosts %></div>
                             <a href="/admin/posts" class="small text-decoration-none">Xem tất cả</a>
                         </div>
                     </div>
                     <div class="col-md-4">
                         <div class="card p-3 wp-badge-success shadow-sm">
                             <div class="text-muted small fw-bold">SẢN PHẨM</div>
-                            <div class="fs-2 fw-bold">45</div>
+                            <div class="fs-2 fw-bold"><%= totalProducts %></div>
                             <a href="/admin/products" class="small text-decoration-none">Xem kho hàng</a>
                         </div>
                     </div>
                 </div>
 
-                <div class="card shadow-sm">
+                <div class="card shadow-sm mb-4">
                     <div class="card-body">
                         <h5 class="fw-bold"><i class="fas fa-magic me-2"></i>Bắt đầu nhanh</h5>
                         <p class="text-secondary">Chào mừng bạn đến với giao diện quản trị mới. Sidebar bên trái giúp bạn quản lý nội dung nhanh chóng như trên WordPress.</p>
                         <hr>
                         <a href="/admin/add-post" class="btn btn-primary btn-sm px-3">Viết bài mới</a>
+                        <a href="/admin/add-product" class="btn btn-outline-dark btn-sm px-3 ms-2">Thêm sản phẩm</a>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="wp-card shadow-sm border-top border-4 border-primary">
+                            <h6 class="fw-bold text-uppercase small mb-3">Thống kê sức khỏe SEO</h6>
+                            <div style="max-width: 250px; margin: 0 auto;">
+                                <canvas id="seoChart"></canvas>
+                            </div>
+                            <div class="mt-3 small text-center">
+                                <div class="mb-1"><span class="badge bg-success me-2">Tốt: <%= seoData[0] %></span></div>
+                                <div class="mb-1"><span class="badge bg-warning me-2 text-dark">Ổn: <%= seoData[1] %></span></div>
+                                <div><span class="badge bg-danger">Cần tối ưu: <%= seoData[2] %></span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-8">
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <div class="wp-card bg-primary text-white text-center shadow-sm py-4">
+                                    <h1 class="display-4 fw-bold"><%= totalPosts %></h1>
+                                    <p class="text-uppercase small mb-0 opacity-75">Bài viết Blog</p>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="wp-card bg-info text-white text-center shadow-sm py-4">
+                                    <h1 class="display-4 fw-bold"><%= totalProducts %></h1>
+                                    <p class="text-uppercase small mb-0 opacity-75">Sản phẩm Shop</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="wp-card shadow-sm">
+                            <h6 class="fw-bold small text-uppercase mb-3">Lối tắt hệ thống</h6>
+                            <div class="list-group list-group-flush small">
+                                <a href="/admin/settings" class="list-group-item list-group-item-action py-2"><i class="fas fa-code me-2"></i>Cấu hình Script Header/Footer</a>
+                                <a href="/admin/pages" class="list-group-item list-group-item-action py-2"><i class="fas fa-file-alt me-2"></i>Quản lý các trang tĩnh</a>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('seoChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Tốt', 'Ổn', 'Cần tối ưu'],
+                    datasets: [{
+                        data: [<%= seoData[0] %>, <%= seoData[1] %>, <%= seoData[2] %>],
+                        backgroundColor: ['#00a32a', '#ffb900', '#d63638'],
+                        borderWidth: 0,
+                        hoverOffset: 10
+                    }]
+                },
+                options: {
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    cutout: '75%'
+                }
+            });
+        });
+    </script>
 </body>
 </html>
