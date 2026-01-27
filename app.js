@@ -110,14 +110,21 @@ app.use((req, res, next) => {
 
 app.use(async (req, res, next) => {
     try {
+        // Tìm cấu hình giao diện
         let theme = await Theme.findOne({ key: 'theme_settings' });
+        
+        // Nếu chưa có thì tạo mới để tránh lỗi undefined
         if (!theme) {
             theme = await Theme.create({ key: 'theme_settings' });
         }
-        res.locals.theme = theme; // Biến 'theme' giờ có thể dùng ở mọi file .ejs
+        
+        // CHỐT CHẶN: res.locals giúp biến 'theme' luôn có sẵn ở mọi file .ejs
+        res.locals.theme = theme; 
         next();
     } catch (err) {
-        next(err);
+        console.log("Lỗi Middleware Theme:", err);
+        res.locals.theme = {}; // Tránh sập web nếu lỗi DB
+        next();
     }
 });
 
