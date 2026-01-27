@@ -1,6 +1,6 @@
-<%- include('./partials/head.ejs') %>
+<%- include('../partials/head.ejs') %>
 
-<% if (theme.topBarShow) { %>
+<% if (theme && theme.topBarShow) { %>
     <div class="top-bar py-2 text-center text-white" 
          style="background-color: <%= theme.topBarBgColor || '#23282d' %>; font-size: 14px; letter-spacing: 0.5px;">
         <div class="container">
@@ -9,10 +9,10 @@
     </div>
 <% } %>
 
-<nav class="navbar navbar-expand-lg navbar-light bg-white <%= theme.headerSticky ? 'sticky-top' : '' %> shadow-sm py-3">
+<nav class="navbar navbar-expand-lg navbar-light bg-white <%= (theme && theme.headerSticky) ? 'sticky-top' : '' %> shadow-sm py-3">
     <div class="container">
         <a class="navbar-brand fw-bold fs-3 text-uppercase tracking-wide" href="/">
-            <% if (theme.logo) { %>
+            <% if (theme && theme.logo) { %>
                 <img src="<%= theme.logo %>" alt="Site Logo" style="max-height: 50px; width: auto;">
             <% } else { %>
                 FASHION<span class="text-danger">.</span>
@@ -35,7 +35,7 @@
                 <a href="#" class="text-dark fs-5"><i class="bi bi-search"></i></a>
                 <a href="/cart" class="text-dark fs-5 position-relative">
                     <i class="bi bi-bag"></i>
-                    <% if (cart && cart.totalQuantity > 0) { %>
+                    <% if (typeof cart !== 'undefined' && cart && cart.totalQuantity > 0) { %>
                         <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem;">
                             <%= cart.totalQuantity %>
                         </span>
@@ -46,7 +46,7 @@
     </div>
 </nav>
 
-<% if (theme.headerBottomHtml) { %>
+<% if (theme && theme.headerBottomHtml) { %>
     <div class="header-bottom-custom border-bottom bg-light">
         <div class="container py-2 text-center">
             <%- theme.headerBottomHtml %>
@@ -103,7 +103,7 @@
         </div>
 
         <div class="row g-4">
-            <% if (products && products.length > 0) { %>
+            <% if (typeof products !== 'undefined' && products && products.length > 0) { %>
                 <% products.forEach(product => { %>
                     <div class="col-6 col-md-3">
                         <div class="product-card h-100 position-relative">
@@ -131,4 +131,4 @@
     </div>
 </section>
 
-<%- include('./partials/footer.ejs') %>
+<%- include('../partials/footer.ejs') %>
