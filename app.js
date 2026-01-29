@@ -13,6 +13,8 @@ const path = require('path');
 const Setting = require('./models/SettingModel'); 
 const Theme = require('./models/ThemeModel'); 
 const Menu = require('./models/MenuModel'); 
+// [MỚI] Import Model để theo dõi lỗi 404
+const Monitor404 = require('./models/Monitor404Model');
 
 // --- IMPORT MIDDLEWARES ---
 // [MỚI] Import Middleware chuyển hướng 301
@@ -80,7 +82,6 @@ app.use(async (req, res, next) => {
         ]);
         
         // 1. Xử lý Global Scripts & Settings
-        // Gán cả cục settings vào biến global để dùng cho Footer (SĐT, Địa chỉ...)
         res.locals.settings = settings || {}; 
         res.locals.globalScripts = settings || { headerScripts: '', bodyScripts: '', footerScripts: '' };
         
@@ -132,8 +133,6 @@ app.use(async (req, res, next) => {
 
 // ============================================================
 // [MỚI] KÍCH HOẠT REDIRECT 301 (SEO)
-// Đặt ở đây để đảm bảo đã qua Static Files và Global Variables
-// nhưng TRƯỚC khi vào Routes chính
 // ============================================================
 app.use(redirectMiddleware);
 
@@ -143,15 +142,33 @@ app.use(redirectMiddleware);
 app.use('/admin', adminRoutes);
 app.use('/', shopRoutes);
 
-// Xử lý 404
-app.use((req, res, next) => {
+// ============================================================
+// [MỚI] XỬ LÝ 404 VÀ GHI LOG MONITOR
+// ============================================================
+app.use(async (req, res, next) => {
+    try {
+        const currentPath = req.path;
+
+        // Chỉ log nếu không phải trang admin và không phải file tĩnh (có dấu chấm)
+        if (!currentPath.startsWith('/admin') && !currentPath.includes('.')) {
+            await Monitor404.findOneAndUpdate(
+                { path: currentPath },
+                { 
+                    $inc: { hits: 1 }, // Tăng số lần gặp lỗi
+                    lastAccessed: new Date() 
+                },
+                { upsert: true, new: true }
+            );
+        }
+    } catch (err) {
+        console.error("❌ Lỗi ghi log 404:", err);
+    }
+
     res.status(404).render('404', { 
-        pageTitle: 'Page Not Found', 
+        pageTitle: 'Trang không tìm thấy', 
         path: '/404'
     });
 });
-
-
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));

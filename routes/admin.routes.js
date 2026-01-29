@@ -121,4 +121,8 @@ router.post('/seo/robots', seoController.postRobotsSettings);
 // 3. Schema Global (Thay thế code cũ)
 router.get('/seo/schema', seoController.getGlobalSchema);
 router.post('/seo/schema', seoController.postGlobalSchema);
+
+router.get('/seo/404-monitor', seoController.getMonitor404);
+router.post('/seo/404-monitor/delete', seoController.postDelete404);
+
 module.exports = router;

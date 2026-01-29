@@ -4,6 +4,7 @@ const Setting = require('../../models/SettingModel');
 const Product = require('../../models/ProductModel');
 const Post = require('../../models/PostModel');
 const Page = require('../../models/PageModel');
+const Monitor404 = require('../../models/Monitor404Model');
 
 // ============================================================
 // 1. QUẢN LÝ REDIRECTS (CHUYỂN HƯỚNG 301)
@@ -255,5 +256,31 @@ exports.generateRobotsText = async (req, res) => {
         res.send(content);
     } catch (err) {
         res.status(500).end();
+    }
+};
+
+// 1. Hiển thị danh sách lỗi 404
+exports.getMonitor404 = async (req, res) => {
+    try {
+        // Lấy các lỗi mới nhất hoặc bị nhiều nhất
+        const logs = await Monitor404.find().sort({ lastAccessed: -1 });
+        
+        res.render('admin/seo/404-monitor', {
+            pageTitle: 'Theo dõi lỗi 404',
+            path: '/admin/seo/404-monitor',
+            logs: logs
+        });
+    } catch (err) {
+        res.redirect('/admin');
+    }
+};
+
+// 2. Xóa log 404
+exports.postDelete404 = async (req, res) => {
+    try {
+        await Monitor404.findByIdAndDelete(req.body.id);
+        res.redirect('/admin/seo/404-monitor');
+    } catch (err) {
+        res.redirect('/admin/seo/404-monitor');
     }
 };
