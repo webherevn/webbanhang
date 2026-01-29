@@ -112,7 +112,8 @@ router.post('/seo/redirects/add', seoController.postAddRedirect);
 router.post('/seo/redirects/delete', seoController.postDeleteRedirect);
 
 // 2. Placeholder cũ
-router.get('/seo/sitemap', (req, res) => res.send('Sitemap - Đang phát triển...'));
+// 4. Sitemap Admin Page
+router.get('/seo/sitemap', seoController.getSitemapPage);
 router.get('/seo/robots', (req, res) => res.send('Robots - Đang phát triển...'));
 
 

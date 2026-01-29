@@ -184,3 +184,32 @@ exports.generateSitemap = async (req, res) => {
         res.status(500).end();
     }
 };
+
+// Hiển thị trang quản lý Sitemap trong Admin
+exports.getSitemapPage = async (req, res) => {
+    try {
+        const domain = "https://webbanhang-es90.onrender.com";
+        
+        // Đếm số lượng link để hiển thị báo cáo nhỏ
+        const [prodCount, postCount, pageCount] = await Promise.all([
+            Product.countDocuments({ isActive: true }),
+            Post.countDocuments({ isActive: true }),
+            Page.countDocuments({ isActive: true })
+        ]);
+
+        res.render('admin/seo/sitemap', {
+            pageTitle: 'Cấu hình Sitemap XML',
+            path: '/admin/seo/sitemap',
+            domain: domain,
+            stats: {
+                total: prodCount + postCount + pageCount + 1, // +1 là trang chủ
+                products: prodCount,
+                posts: postCount,
+                pages: pageCount
+            }
+        });
+    } catch (err) {
+        console.error(err);
+        res.redirect('/admin');
+    }
+};

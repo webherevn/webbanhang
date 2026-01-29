@@ -1,0 +1,90 @@
+<%- include('../../partials/head.ejs') %>
+
+<style>
+    body { background-color: #f0f0f1; }
+    .admin-wrapper { display: flex; min-height: 100vh; }
+    .admin-content { flex: 1; padding: 30px; margin-left: 240px; }
+    .wp-card { background: #fff; padding: 30px; border: 1px solid #c3c4c7; box-shadow: 0 1px 3px rgba(0,0,0,.04); max-width: 900px; }
+    .sitemap-link-box { background: #f6f7f7; border: 1px solid #dcdcde; padding: 15px; font-family: monospace; }
+</style>
+
+<body>
+    <div class="admin-wrapper">
+        <div class="admin-sidebar-container"><%- include('../partials/sidebar.ejs') %></div>
+        
+        <div class="admin-content">
+            <h2 class="fw-bold h4 mb-4">Sitemap XML</h2>
+
+            <div class="wp-card">
+                <div class="d-flex align-items-center mb-4">
+                    <div class="icon-box me-3 text-success h1 mb-0">
+                        <i class="fas fa-sitemap"></i>
+                    </div>
+                    <div>
+                        <h5 class="fw-bold mb-1">Sitemap của bạn đã sẵn sàng!</h5>
+                        <p class="text-muted mb-0">Hệ thống tự động tạo và cập nhật sitemap mỗi khi bạn thay đổi nội dung.</p>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="fw-bold mb-2">Đường dẫn Sitemap của bạn:</label>
+                    <div class="sitemap-link-box d-flex justify-content-between align-items-center">
+                        <a href="<%= domain %>/sitemap.xml" target="_blank" class="text-primary text-decoration-none fw-bold">
+                            <%= domain %>/sitemap.xml
+                        </a>
+                        <button class="btn btn-sm btn-outline-secondary" onclick="copySitemap()">
+                            <i class="fas fa-copy me-1"></i> Copy
+                        </button>
+                    </div>
+                </div>
+
+                <div class="row g-3 mb-4">
+                    <div class="col-md-3">
+                        <div class="border p-3 text-center rounded bg-light">
+                            <div class="h3 fw-bold mb-0 text-primary"><%= stats.total %></div>
+                            <div class="small text-muted">Tổng số link</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="border p-3 text-center rounded">
+                            <div class="h4 fw-bold mb-0"><%= stats.products %></div>
+                            <div class="small text-muted">Sản phẩm</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="border p-3 text-center rounded">
+                            <div class="h4 fw-bold mb-0"><%= stats.posts %></div>
+                            <div class="small text-muted">Bài viết</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="border p-3 text-center rounded">
+                            <div class="h4 fw-bold mb-0"><%= stats.pages %></div>
+                            <div class="small text-muted">Trang tĩnh</div>
+                        </div>
+                    </div>
+                </div>
+
+                <hr>
+
+                <div class="alert alert-info border-0">
+                    <h6 class="fw-bold"><i class="fab fa-google me-2"></i>Hướng dẫn cho Google:</h6>
+                    <ol class="small mb-0">
+                        <li>Truy cập vào <a href="https://search.google.com/search-console" target="_blank" class="fw-bold">Google Search Console</a>.</li>
+                        <li>Chọn website của bạn.</li>
+                        <li>Vào mục <strong>Sitemaps</strong> ở menu bên trái.</li>
+                        <li>Dán đoạn <code>sitemap.xml</code> vào ô "Thêm sitemap mới" và bấm <strong>Gửi</strong>.</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function copySitemap() {
+            const url = "<%= domain %>/sitemap.xml";
+            navigator.clipboard.writeText(url);
+            alert("Đã copy đường dẫn sitemap!");
+        }
+    </script>
+</body>
