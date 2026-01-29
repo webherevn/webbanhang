@@ -25,12 +25,8 @@
         /* Ảnh sản phẩm */
         .product-gallery { position: sticky; top: 20px; }
         .main-img-container {
-            border-radius: 8px;
-            overflow: hidden;
-            border: 1px solid #eee;
-            background: #fff;
-            position: relative;
-            margin-bottom: 10px;
+            border-radius: 8px; overflow: hidden; border: 1px solid #eee; background: #fff;
+            position: relative; margin-bottom: 10px;
         }
         .main-img { width: 100%; height: auto; aspect-ratio: 1/1; object-fit: contain; transition: transform 0.3s ease; }
         .main-img:hover { transform: scale(1.05); }
@@ -45,20 +41,37 @@
 
         /* Thông tin sản phẩm */
         .product-title { font-size: 1.75rem; font-weight: 700; color: #333; }
-        .product-price { font-size: 1.5rem; color: #dc3545; font-weight: bold; }
+        
+        /* CSS Giá Tiền Động */
+        .product-price { font-size: 1.8rem; color: #dc3545; font-weight: bold; background: #fafafa; padding: 10px 15px; display: inline-block; border-radius: 4px; }
         .old-price { font-size: 1.1rem; color: #999; text-decoration: line-through; margin-left: 10px; }
         
-        .quantity-input-group { width: 140px; }
+        /* CSS Nút Biến Thể (Shopee Style) */
+        .variant-label { width: 100px; font-weight: 600; color: #555; font-size: 14px; }
+        .variant-option {
+            min-width: 80px; text-align: center; border: 1px solid #e0e0e0; 
+            background: #fff; color: #333; padding: 6px 15px; margin-right: 8px; margin-bottom: 8px;
+            cursor: pointer; border-radius: 2px; font-size: 14px; transition: all 0.2s; position: relative;
+        }
+        .variant-option:hover { border-color: #dc3545; color: #dc3545; }
+        .variant-option.active { 
+            border-color: #dc3545; color: #dc3545; background-color: #fff5f5; 
+        }
+        .variant-option.active::after {
+            content: ''; position: absolute; bottom: 0; right: 0;
+            width: 0; height: 0; border-style: solid;
+            border-width: 0 0 12px 12px; border-color: transparent transparent #dc3545 transparent;
+        }
+
+        .quantity-input-group { width: 130px; }
         .quantity-input-group input { text-align: center; border-left: 0; border-right: 0; }
         .quantity-btn { border: 1px solid #ced4da; background: #fff; }
         .quantity-btn:hover { background: #f8f9fa; }
 
-        /* Tab Mô tả */
+        /* Tab & Card */
         .nav-tabs .nav-link { color: #555; font-weight: 600; }
         .nav-tabs .nav-link.active { color: #000; border-bottom: 3px solid #000; }
         .description-content img { max-width: 100%; height: auto; }
-
-        /* Card liên quan */
         .card-product { transition: all 0.3s; border: none; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
         .card-product:hover { transform: translateY(-5px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
         .card-product img { height: 250px; object-fit: cover; }
@@ -104,7 +117,7 @@
                 <div class="product-gallery">
                     <div class="main-img-container">
                         <img id="mainImage" src="<%= product.thumbnail %>" class="main-img" alt="<%= product.name %>">
-                        <% if (product.salePrice > 0) { %>
+                        <% if (product.salePrice > 0 && !product.hasVariants) { %>
                             <span class="position-absolute top-0 start-0 bg-danger text-white px-2 py-1 m-2 rounded fw-bold small">
                                 -<%= Math.round(((product.basePrice - product.salePrice) / product.basePrice) * 100) %>%
                             </span>
@@ -114,7 +127,6 @@
                     <% if (product.images && product.images.length > 0) { %>
                         <div class="thumb-list">
                             <img src="<%= product.thumbnail %>" class="thumb-img active" onclick="changeImage(this, '<%= product.thumbnail %>')">
-                            
                             <% product.images.forEach(img => { %>
                                 <img src="<%= img %>" class="thumb-img" onclick="changeImage(this, '<%= img %>')">
                             <% }) %>
@@ -133,13 +145,22 @@
                     <span class="text-muted small border-start ps-2">Đã bán: 120+</span>
                 </div>
 
-                <div class="mb-3">
-                    <% if (product.salePrice > 0) { %>
-                        <span class="product-price"><%= product.salePrice.toLocaleString('vi-VN') %>₫</span>
-                        <span class="old-price"><%= product.basePrice.toLocaleString('vi-VN') %>₫</span>
-                    <% } else { %>
-                        <span class="product-price"><%= product.basePrice.toLocaleString('vi-VN') %>₫</span>
-                    <% } %>
+                <div class="mb-4">
+                    <div class="product-price" id="displayPrice">
+                        <% if (product.hasVariants && product.variants.length > 0) { %>
+                            <% 
+                                const prices = product.variants.map(v => v.price);
+                                const min = Math.min(...prices).toLocaleString('vi-VN');
+                                const max = Math.max(...prices).toLocaleString('vi-VN');
+                            %>
+                            <%= min === max ? min + '₫' : min + '₫ - ' + max + '₫' %>
+                        <% } else { %>
+                            <%= product.salePrice > 0 ? product.salePrice.toLocaleString('vi-VN') : product.basePrice.toLocaleString('vi-VN') %>₫
+                            <% if(product.salePrice > 0) { %>
+                                <span class="old-price" style="font-size: 1rem;"><%= product.basePrice.toLocaleString('vi-VN') %>₫</span>
+                            <% } %>
+                        <% } %>
+                    </div>
                 </div>
 
                 <div class="alert alert-light border mb-4 py-2">
@@ -150,24 +171,52 @@
                     </ul>
                 </div>
 
-                <form action="/cart/add" method="POST">
+                <form action="/cart/add" method="POST" id="addToCartForm">
                     <input type="hidden" name="productId" value="<%= product._id %>">
 
-                    <% if (product.variants && product.variants.length > 0) { %>
-                        <div class="mb-3">
-                            <label class="fw-bold mb-2 small text-uppercase">Phân loại:</label>
-                            <select name="variant" class="form-select">
-                                <% product.variants.forEach(v => { %>
-                                    <option value="<%= v.color %>-<%= v.size %>">
-                                        Màu <%= v.color %> - Size <%= v.size %> (Còn <%= v.quantity %>)
-                                    </option>
+                    <% if (product.hasVariants && product.variants.length > 0) { %>
+                        <input type="hidden" name="selectedColor" id="selectedColor" required>
+                        <input type="hidden" name="selectedSize" id="selectedSize" required>
+                        
+                        <% 
+                            const uniqueColors = [...new Set(product.variants.map(v => v.color))];
+                            const uniqueSizes = [...new Set(product.variants.map(v => v.size))];
+                        %>
+
+                        <div class="mb-3 d-flex align-items-baseline">
+                            <span class="variant-label">Màu sắc</span>
+                            <div class="d-flex flex-wrap">
+                                <% uniqueColors.forEach(color => { %>
+                                    <div class="variant-option btn-color" 
+                                         data-value="<%= color %>"
+                                         onclick="selectOption(this, 'color')">
+                                        <%= color %>
+                                    </div>
                                 <% }) %>
-                            </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-3 d-flex align-items-baseline">
+                            <span class="variant-label">Kích thước</span>
+                            <div class="d-flex flex-wrap">
+                                <% uniqueSizes.forEach(size => { %>
+                                    <div class="variant-option btn-size" 
+                                         data-value="<%= size %>"
+                                         onclick="selectOption(this, 'size')">
+                                        <%= size %>
+                                    </div>
+                                <% }) %>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3 d-flex align-items-center">
+                            <span class="variant-label"></span>
+                            <small class="text-muted" id="stock-status">Vui lòng chọn phân loại</small>
                         </div>
                     <% } %>
 
                     <div class="mb-4 d-flex align-items-center">
-                        <label class="fw-bold me-3 small text-uppercase">Số lượng:</label>
+                        <span class="variant-label text-uppercase small" style="color: #333;">Số lượng</span>
                         <div class="input-group quantity-input-group">
                             <button type="button" class="btn quantity-btn" onclick="updateQty(-1)"><i class="fas fa-minus small"></i></button>
                             <input type="number" id="qtyInput" name="quantity" value="1" min="1" max="50" class="form-control">
@@ -176,8 +225,10 @@
                     </div>
 
                     <div class="d-flex gap-2">
-                        <button type="submit" class="btn btn-dark flex-grow-1 py-3 fw-bold text-uppercase">
-                            <i class="fas fa-shopping-bag me-2"></i> Thêm vào giỏ
+                        <button type="submit" id="btn-add-cart" class="btn btn-dark flex-grow-1 py-3 fw-bold text-uppercase" 
+                                <%= product.hasVariants ? 'disabled' : '' %>>
+                            <i class="fas fa-shopping-bag me-2"></i> 
+                            <%= product.hasVariants ? 'Chọn phân loại hàng' : 'Thêm vào giỏ' %>
                         </button>
                         <button type="button" class="btn btn-outline-danger py-3 px-3">
                             <i class="far fa-heart"></i>
@@ -197,21 +248,16 @@
         <div class="row mt-5">
             <div class="col-12">
                 <ul class="nav nav-tabs mb-4" id="myTab" role="tablist">
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link active" id="desc-tab" data-bs-toggle="tab" data-bs-target="#desc" type="button">Mô tả sản phẩm</button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="policy-tab" data-bs-toggle="tab" data-bs-target="#policy" type="button">Chính sách giao hàng</button>
-                    </li>
+                    <li class="nav-item"><button class="nav-link active" id="desc-tab" data-bs-toggle="tab" data-bs-target="#desc">Mô tả sản phẩm</button></li>
+                    <li class="nav-item"><button class="nav-link" id="policy-tab" data-bs-toggle="tab" data-bs-target="#policy">Chính sách giao hàng</button></li>
                 </ul>
-                <div class="tab-content bg-white p-4 border rounded shadow-sm" id="myTabContent">
-                    <div class="tab-pane fade show active description-content" id="desc" role="tabpanel">
+                <div class="tab-content bg-white p-4 border rounded shadow-sm">
+                    <div class="tab-pane fade show active description-content" id="desc">
                         <%- product.description ? product.description : '<p class="text-muted text-center">Đang cập nhật...</p>' %>
                     </div>
-                    <div class="tab-pane fade" id="policy" role="tabpanel">
+                    <div class="tab-pane fade" id="policy">
                         <p><strong>1. Thời gian giao hàng:</strong><br>Nội thành: 1-2 ngày. Ngoại thành: 3-5 ngày.</p>
                         <p><strong>2. Phí vận chuyển:</strong><br>Đồng giá 30k toàn quốc. Freeship đơn từ 500k.</p>
-                        <p><strong>3. Kiểm hàng:</strong><br>Được kiểm tra hàng trước khi thanh toán.</p>
                     </div>
                 </div>
             </div>
@@ -224,13 +270,9 @@
                     <% relatedProducts.forEach(relProd => { %>
                         <div class="col">
                             <div class="card h-100 card-product">
-                                <a href="/products/<%= relProd.slug %>">
-                                    <img src="<%= relProd.thumbnail %>" class="card-img-top" alt="<%= relProd.name %>">
-                                </a>
+                                <a href="/products/<%= relProd.slug %>"><img src="<%= relProd.thumbnail %>" class="card-img-top"></a>
                                 <div class="card-body text-center">
-                                    <h6 class="card-title text-truncate">
-                                        <a href="/products/<%= relProd.slug %>" class="text-decoration-none text-dark"><%= relProd.name %></a>
-                                    </h6>
+                                    <h6 class="card-title text-truncate"><a href="/products/<%= relProd.slug %>" class="text-decoration-none text-dark"><%= relProd.name %></a></h6>
                                     <div class="fw-bold text-danger"><%= relProd.basePrice.toLocaleString('vi-VN') %>₫</div>
                                 </div>
                             </div>
@@ -244,22 +286,74 @@
     <%- include('../partials/footer.ejs') %>
 
     <script>
-        // Đổi ảnh khi click vào thumbnail
+        // 1. Đổi ảnh Thumbnail
         function changeImage(element, src) {
             document.getElementById('mainImage').src = src;
-            
-            // Xử lý active class
             document.querySelectorAll('.thumb-img').forEach(img => img.classList.remove('active'));
             element.classList.add('active');
         }
 
-        // Tăng giảm số lượng
+        // 2. Tăng giảm số lượng
         function updateQty(change) {
             const input = document.getElementById('qtyInput');
             let newVal = parseInt(input.value) + change;
             if (newVal < 1) newVal = 1;
             if (newVal > 50) newVal = 50;
             input.value = newVal;
+        }
+
+        // 3. XỬ LÝ BIẾN THỂ & GIÁ ĐỘNG
+        const variantsData = <%- JSON.stringify(product.variants || []) %>;
+        const hasVariants = <%= product.hasVariants %>;
+
+        function selectOption(element, type) {
+            // Xóa active ở các nút cùng nhóm
+            if (type === 'color') document.querySelectorAll('.btn-color').forEach(el => el.classList.remove('active'));
+            if (type === 'size') document.querySelectorAll('.btn-size').forEach(el => el.classList.remove('active'));
+            
+            // Active nút vừa bấm
+            element.classList.add('active');
+
+            // Lưu giá trị vào input ẩn
+            if (type === 'color') document.getElementById('selectedColor').value = element.getAttribute('data-value');
+            if (type === 'size') document.getElementById('selectedSize').value = element.getAttribute('data-value');
+
+            // Gọi hàm check giá
+            updatePrice();
+        }
+
+        function updatePrice() {
+            if (!hasVariants) return;
+
+            const color = document.getElementById('selectedColor').value;
+            const size = document.getElementById('selectedSize').value;
+            const priceEl = document.getElementById('displayPrice');
+            const stockEl = document.getElementById('stock-status');
+            const btnCart = document.getElementById('btn-add-cart');
+
+            if (color && size) {
+                // Tìm biến thể khớp trong mảng JSON
+                const found = variantsData.find(v => v.color === color && v.size === size);
+
+                if (found) {
+                    // Cập nhật giá
+                    priceEl.innerHTML = found.price.toLocaleString('vi-VN') + '₫';
+                    
+                    if (found.stock > 0) {
+                        stockEl.innerHTML = `Kho: <span class="text-dark fw-bold">${found.stock}</span> sản phẩm`;
+                        btnCart.disabled = false;
+                        btnCart.innerHTML = '<i class="fas fa-shopping-bag me-2"></i> Thêm vào giỏ';
+                    } else {
+                        stockEl.innerHTML = '<span class="text-danger">Hết hàng</span>';
+                        btnCart.disabled = true;
+                        btnCart.innerText = 'Đã hết hàng';
+                    }
+                } else {
+                    priceEl.innerText = '---';
+                    stockEl.innerHTML = '<span class="text-danger">Phiên bản này không tồn tại</span>';
+                    btnCart.disabled = true;
+                }
+            }
         }
     </script>
 </body>
