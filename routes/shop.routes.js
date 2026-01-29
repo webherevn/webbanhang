@@ -6,7 +6,7 @@ const shopController = require('../controllers/shop/shopController');
 const cartController = require('../controllers/shop/cartController'); 
 const checkoutController = require('../controllers/shop/checkoutController'); 
 const blogController = require('../controllers/shop/blogController');
-
+const seoController = require('../controllers/admin/seoController');
 // ============================================================
 // 1. TRANG CHỦ & SẢN PHẨM (GIỮ NGUYÊN)
 // ============================================================
@@ -48,4 +48,6 @@ router.get('/blog/:slug', blogController.getPostsByCategory);
 // Xem chi tiết trang tĩnh (Ví dụ: /p/gioi-thieu)
 router.get('/p/:slug', shopController.getPageDetail);
 
+// Sitemap XML - Luôn nằm ở gốc website
+router.get('/sitemap.xml', seoController.generateSitemap);
 module.exports = router;

@@ -1,10 +1,15 @@
+// --- IMPORT MODELS ---
 const Redirect = require('../../models/RedirectModel');
 const Setting = require('../../models/SettingModel');
+const Product = require('../../models/ProductModel');
+const Post = require('../../models/PostModel');
+const Page = require('../../models/PageModel');
+
 // ============================================================
-// QUẢN LÝ REDIRECTS (CHUYỂN HƯỚNG)
+// 1. QUẢN LÝ REDIRECTS (CHUYỂN HƯỚNG 301)
 // ============================================================
 
-// 1. Hiển thị danh sách Redirects
+// Hiển thị danh sách Redirects
 exports.getRedirects = async (req, res) => {
     try {
         const redirects = await Redirect.find().sort({ createdAt: -1 });
@@ -15,12 +20,12 @@ exports.getRedirects = async (req, res) => {
             redirects: redirects
         });
     } catch (err) {
-        console.error(err);
+        console.error("❌ Lỗi Get Redirects:", err);
         res.redirect('/admin');
     }
 };
 
-// 2. Thêm Redirect Mới
+// Thêm Redirect Mới
 exports.postAddRedirect = async (req, res) => {
     try {
         let { fromPath, toPath } = req.body;
@@ -43,7 +48,7 @@ exports.postAddRedirect = async (req, res) => {
     }
 };
 
-// 3. Xóa Redirect
+// Xóa Redirect
 exports.postDeleteRedirect = async (req, res) => {
     try {
         const { id } = req.body;
@@ -76,7 +81,7 @@ exports.getGlobalSchema = async (req, res) => {
         });
     } catch (err) {
         console.error("❌ Lỗi Get Global Schema:", err);
-        res.redirect('/admin'); // Đây là lý do bạn bị văng về trang admin khi có lỗi
+        res.redirect('/admin');
     }
 };
 
@@ -103,5 +108,79 @@ exports.postGlobalSchema = async (req, res) => {
     } catch (err) {
         console.error("❌ Lỗi Post Global Schema:", err);
         res.status(500).send("Lỗi cập nhật Schema");
+    }
+};
+
+// ============================================================
+// 3. TẠO SITEMAP XML TỰ ĐỘNG (DYNAMICS SITEMAP)
+// ============================================================
+
+exports.generateSitemap = async (req, res) => {
+    try {
+        // Thay domain của bạn vào đây
+        const domain = "https://webbanhang-es90.onrender.com";
+        
+        // 1. Lấy dữ liệu từ Database (Chỉ lấy slug và updatedAt)
+        // Dùng lean() để truy vấn nhanh hơn vì chỉ cần đọc dữ liệu
+        const [products, posts, pages] = await Promise.all([
+            Product.find({ isActive: true }).select('slug updatedAt').lean(),
+            Post.find({ isActive: true }).select('slug updatedAt').lean(),
+            Page.find({ isActive: true }).select('slug updatedAt').lean()
+        ]);
+
+        // 2. Khởi tạo cấu trúc XML chuẩn của Google
+        let xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`;
+
+        // --- Trang chủ ---
+        xml += `
+  <url>
+    <loc>${domain}/</loc>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>`;
+
+        // --- Danh sách Sản phẩm ---
+        products.forEach(p => {
+            xml += `
+  <url>
+    <loc>${domain}/products/${p.slug}</loc>
+    <lastmod>${p.updatedAt.toISOString()}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>`;
+        });
+
+        // --- Danh sách Bài viết (Blog) ---
+        posts.forEach(post => {
+            xml += `
+  <url>
+    <loc>${domain}/blog/${post.slug}</loc>
+    <lastmod>${post.updatedAt.toISOString()}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>`;
+        });
+
+        // --- Danh sách Trang tĩnh ---
+        pages.forEach(pg => {
+            xml += `
+  <url>
+    <loc>${domain}/p/${pg.slug}</loc>
+    <lastmod>${pg.updatedAt.toISOString()}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.5</priority>
+  </url>`;
+        });
+
+        xml += `\n</urlset>`;
+
+        // 3. Thiết lập Header để trình duyệt và Google hiểu đây là file XML
+        res.header('Content-Type', 'application/xml');
+        res.status(200).send(xml);
+
+    } catch (err) {
+        console.error("❌ Lỗi tạo Sitemap XML:", err);
+        res.status(500).end();
     }
 };
