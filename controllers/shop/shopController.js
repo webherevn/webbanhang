@@ -1,8 +1,6 @@
 const Product = require('../../models/ProductModel'); 
 const Category = require('../../models/CategoryModel');
 const Page = require('../../models/PageModel');
-// BỔ SUNG: Import model Theme để lấy cấu hình giao diện (Logo, Topbar...)
-// Lưu ý: Đảm bảo tên file model này chính xác là ThemeModel.js hoặc Theme.js
 const Theme = require('../../models/ThemeModel'); 
 
 // ============================================================
@@ -10,17 +8,16 @@ const Theme = require('../../models/ThemeModel');
 // ============================================================
 exports.getHomepage = async (req, res) => {
   try {
-    // Lấy dữ liệu theme và sản phẩm song song để tối ưu tốc độ
     const [theme, products] = await Promise.all([
       Theme.findOne(),
-      Product.find().sort({ createdAt: -1 })
+      Product.find().sort({ createdAt: -1 }).limit(12) // Nên limit số lượng sp trang chủ
     ]);
 
     res.render('shop/home', { 
       pageTitle: 'Trang chủ - Fashion Shop',
       path: '/',
       products: products,
-      theme: theme // TRUYỀN BIẾN THEME VÀO ĐÂY
+      theme: theme
     });
   } catch (err) {
     console.log("❌ Lỗi trang chủ:", err);
@@ -29,18 +26,19 @@ exports.getHomepage = async (req, res) => {
 };
 
 // ============================================================
-// 2. XEM SẢN PHẨM THEO DANH MỤC
+// 2. XEM SẢN PHẨM THEO DANH MỤC (ĐÃ SỬA LỖI)
 // ============================================================
 exports.getCategoryProducts = async (req, res) => {
     try {
         const slug = req.params.slug;
         
-        // Tìm Danh mục và Theme
+        // 1. Tìm Danh mục và Theme
         const [category, theme] = await Promise.all([
-            Category.findOne({ slug: slug.trim() }),
+            Category.findOne({ slug: slug }), // Bỏ .trim() nếu không chắc chắn, slug thường không có space
             Theme.findOne()
         ]);
         
+        // 2. Nếu không thấy danh mục -> 404
         if (!category) {
             console.log("❌ Không tìm thấy danh mục:", slug);
             return res.status(404).render('404', { 
@@ -50,19 +48,20 @@ exports.getCategoryProducts = async (req, res) => {
             });
         }
 
-        const products = await Product.find({ category: slug }).sort({ createdAt: -1 });
+        // 3. Tìm sản phẩm dựa trên ID của danh mục (QUAN TRỌNG: SỬA category._id)
+        const products = await Product.find({ category: category._id }).sort({ createdAt: -1 });
 
-        res.render('shop/category-products', { 
+        res.render('shop/category-products', { // Đảm bảo tên file view này đúng với file bạn tạo
             pageTitle: category.name,
-            path: '/category',
+            path: '/category', // Có thể để active menu
             category: category,
             products: products,
-            theme: theme // TRUYỀN BIẾN THEME VÀO ĐÂY
+            theme: theme 
         });
 
     } catch (err) {
         console.log("❌ Lỗi xem danh mục:", err);
-        res.status(500).render('404', { pageTitle: 'Lỗi', path: '/404' });
+        res.status(500).render('404', { pageTitle: 'Lỗi hệ thống', path: '/404' });
     }
 };
 
@@ -72,7 +71,7 @@ exports.getCategoryProducts = async (req, res) => {
 exports.getProductDetail = async (req, res) => {
     try {
         const slug = req.params.slug;
-        const theme = await Theme.findOne(); // Lấy theme
+        const theme = await Theme.findOne(); 
 
         const product = await Product.findOne({ slug: slug });
 
@@ -94,12 +93,12 @@ exports.getProductDetail = async (req, res) => {
             path: '/products',
             product: product,
             relatedProducts: relatedProducts,
-            theme: theme // TRUYỀN BIẾN THEME VÀO ĐÂY
+            theme: theme 
         });
 
     } catch (err) {
-        console.error("❌ LỖI CHI TIẾT SẢN PHẨM:", err);
-        res.status(500).send(`<h1>LỖI SERVER:</h1><p>${err.message}</p>`);
+        console.error("❌ Lỗi chi tiết sản phẩm:", err);
+        res.status(500).render('404', { pageTitle: 'Lỗi', path: '/404' });
     }
 };
 
@@ -117,7 +116,7 @@ exports.getProducts = async (req, res) => {
             pageTitle: 'Tất cả sản phẩm',
             path: '/products',
             products: products,
-            theme: theme // TRUYỀN BIẾN THEME VÀO ĐÂY
+            theme: theme 
         });
     } catch (err) {
         console.log("❌ Lỗi lấy danh sách sản phẩm:", err);
@@ -148,7 +147,7 @@ exports.getPageDetail = async (req, res) => {
             pageTitle: page.title,
             path: '/pages',
             page: page,
-            theme: theme // TRUYỀN BIẾN THEME VÀO ĐÂY
+            theme: theme 
         });
     } catch (err) {
         console.error("Lỗi hiển thị trang tĩnh:", err);
