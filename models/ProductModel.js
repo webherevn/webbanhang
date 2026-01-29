@@ -42,7 +42,7 @@ const productSchema = new mongoose.Schema({
   seoScore: { type: Number, default: 0 },
   views: { type: Number, default: 0 }, // Đếm lượt xem sản phẩm
 // [MỚI] CUSTOM SCHEMA CHO TỪNG SẢN PHẨM
-    customSchema: { type: String, default: '' } // Lưu chuỗi JSON-LD
+    customSchema: { type: String, default: '' },// Lưu chuỗi JSON-LD
   // --- 6. TRẠNG THÁI ---
   isActive: { type: Boolean, default: true } // Ẩn/Hiện sản phẩm
 }, { timestamps: true });
