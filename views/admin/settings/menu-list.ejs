@@ -1,0 +1,76 @@
+<%- include('../../partials/head.ejs') %>
+<style>
+    /* CSS hệ thống admin của bạn */
+    body { background-color: #f0f0f1; }
+    .admin-wrapper { display: flex; min-height: 100vh; }
+    .admin-content { flex: 1; padding: 30px; margin-left: 240px; }
+    .wp-card { background: #fff; padding: 20px; border: 1px solid #c3c4c7; margin-bottom: 20px; }
+</style>
+
+<body>
+    <div class="admin-wrapper">
+        <div class="admin-sidebar-container"><%- include('../../partials/sidebar.ejs') %></div>
+        
+        <div class="admin-content">
+            <h2 class="fw-bold h4 mb-4">Cấu hình Menu hiển thị</h2>
+
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="wp-card">
+                        <h6 class="fw-bold border-bottom pb-2 mb-3">Thêm liên kết mới</h6>
+                        <form action="/admin/settings/menu/add" method="POST">
+                            <div class="mb-3">
+                                <label class="small fw-bold">Tên hiển thị</label>
+                                <input type="text" name="name" class="form-control" placeholder="Ví dụ: Sản phẩm" required>
+                            </div>
+                            <div class="mb-3">
+                                <label class="small fw-bold">Đường dẫn (Link)</label>
+                                <input type="text" name="link" class="form-control" placeholder="Ví dụ: /products" required>
+                                <small class="text-muted" style="font-size: 11px;">Nhập "/" cho trang chủ.</small>
+                            </div>
+                            <div class="mb-3">
+                                <label class="small fw-bold">Thứ tự</label>
+                                <input type="number" name="order" class="form-control" value="0">
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Thêm vào Menu</button>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="col-md-8">
+                    <div class="wp-card">
+                        <table class="table table-bordered table-hover small">
+                            <thead class="table-light">
+                                <tr>
+                                    <th width="50">STT</th>
+                                    <th>Tên Menu</th>
+                                    <th>Đường dẫn</th>
+                                    <th width="80">Hành động</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% if (menus.length > 0) { %>
+                                    <% menus.forEach(menu => { %>
+                                        <tr>
+                                            <td class="text-center"><%= menu.order %></td>
+                                            <td class="fw-bold"><%= menu.name %></td>
+                                            <td class="text-muted"><%= menu.link %></td>
+                                            <td class="text-center">
+                                                <form action="/admin/settings/menu/delete" method="POST" onsubmit="return confirm('Xóa menu này?')">
+                                                    <input type="hidden" name="id" value="<%= menu._id %>">
+                                                    <button class="btn btn-sm btn-danger p-0 px-2"><i class="fas fa-trash-alt"></i></button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    <% }) %>
+                                <% } else { %>
+                                    <tr><td colspan="4" class="text-center py-4">Chưa có menu nào.</td></tr>
+                                <% } %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>

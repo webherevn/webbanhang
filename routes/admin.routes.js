@@ -11,7 +11,7 @@ const categoryController = require('../controllers/admin/categoryController');
 const postController = require('../controllers/admin/postController');
 const pageController = require('../controllers/admin/pageController');
 const themeController = require('../controllers/admin/themeController');
-
+const settingController = require('../controllers/settingController');
 
 // 3. CẤU HÌNH UPLOAD CHO SẢN PHẨM
 const productUpload = upload.fields([
@@ -89,5 +89,10 @@ router.post('/customize', upload.fields([
     { name: 'logo', maxCount: 1 },
     { name: 'favicon', maxCount: 1 }
 ]), adminController.postCustomize);
+
+//menu 
+router.get('/settings/menu', settingController.getMenuSettings);
+router.post('/settings/menu/add', settingController.postAddMenu);
+router.post('/settings/menu/delete', settingController.postDeleteMenu);
 
 module.exports = router;
