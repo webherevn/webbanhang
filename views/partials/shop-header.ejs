@@ -1,14 +1,11 @@
 <% 
-  // Đảm bảo biến theme luôn tồn tại để không gây lỗi
   if (typeof theme === 'undefined') { var theme = {}; } 
 %>
 
 <% if (theme.topBarShow) { %>
     <div class="top-bar py-2 text-center text-white" 
          style="background-color: <%= theme.topBarBgColor || '#23282d' %>; font-size: 14px; letter-spacing: 0.5px;">
-        <div class="container">
-            <%- theme.topBarText %>
-        </div>
+        <div class="container"><%- theme.topBarText %></div>
     </div>
 <% } %>
 
@@ -35,19 +32,23 @@
                         <% if (level1.children && level1.children.length > 0) { %>
                             
                             <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="<%= level1.link %>" data-bs-toggle="dropdown">
+                                <a class="nav-link dropdown-toggle" href="<%= level1.link %>" 
+                                   id="navbarDropdown<%= level1._id %>" 
+                                   role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                     <%= level1.name %>
                                 </a>
-                                <ul class="dropdown-menu">
+                                
+                                <ul class="dropdown-menu" aria-labelledby="navbarDropdown<%= level1._id %>">
                                     <% level1.children.forEach(level2 => { %>
                                         
                                         <% if (level2.children && level2.children.length > 0) { %>
                                             
-                                            <li class="dropdown-item-has-child">
+                                            <li class="dropdown-item-has-child position-relative">
                                                 <a class="dropdown-item" href="<%= level2.link %>">
                                                     <%= level2.name %>
                                                 </a>
-                                                <ul class="dropdown-submenu shadow">
+                                                
+                                                <ul class="dropdown-submenu">
                                                     <% level2.children.forEach(level3 => { %>
                                                         <li>
                                                             <a class="dropdown-item" href="<%= level3.link %>">
@@ -65,23 +66,20 @@
                                     <% }) %>
                                 </ul>
                             </li>
-
+                        
                         <% } else { %>
-                            
                             <li class="nav-item">
                                 <a class="nav-link <%= (typeof currentPath !== 'undefined' && currentPath === level1.link) ? 'active text-danger' : '' %>" 
                                    href="<%= level1.link %>">
                                     <%= level1.name %>
                                 </a>
                             </li>
-
                         <% } %>
+
                     <% }) %>
-                
                 <% } else { %>
-                    <li class="nav-item"><a class="nav-link <%= path === '/' ? 'active' : '' %>" href="/">Trang chủ</a></li>
-                    <li class="nav-item"><a class="nav-link <%= path === '/products' ? 'active' : '' %>" href="/products">Sản phẩm</a></li>
-                    <li class="nav-item"><a class="nav-link <%= path === '/blog' ? 'active' : '' %>" href="/blog">Tin tức</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/">Trang chủ</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/products">Sản phẩm</a></li>
                 <% } %>
             </ul>
             <div class="d-flex align-items-center gap-3">
@@ -101,8 +99,6 @@
 
 <% if (theme.headerBottomHtml) { %>
     <div class="header-bottom-custom border-bottom bg-light">
-        <div class="container py-2 text-center">
-            <%- theme.headerBottomHtml %>
-        </div>
+        <div class="container py-2 text-center"><%- theme.headerBottomHtml %></div>
     </div>
 <% } %>
