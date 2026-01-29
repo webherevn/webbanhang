@@ -284,3 +284,28 @@ exports.postDelete404 = async (req, res) => {
         res.redirect('/admin/seo/404-monitor');
     }
 };
+
+// ============================================================
+// 5. SOCIAL SEO (OPEN GRAPH) - [QUAN TRỌNG: ĐÂY LÀ PHẦN THIẾU GÂY LỖI]
+// ============================================================
+exports.getSocialSettings = async (req, res) => {
+    try {
+        let settings = await Setting.findOne({ key: 'global_settings' });
+        if (!settings) settings = await new Setting({ key: 'global_settings' }).save();
+        res.render('admin/seo/social', {
+            pageTitle: 'Cấu hình Mạng xã hội',
+            path: '/admin/seo/social',
+            settings: settings
+        });
+    } catch (err) { res.redirect('/admin'); }
+};
+
+exports.postSocialSettings = async (req, res) => {
+    try {
+        const { facebookAppId, websiteDescription } = req.body;
+        const updateData = { facebookAppId, websiteDescription };
+        if (req.file) { updateData.defaultOgImage = req.file.path; }
+        await Setting.findOneAndUpdate({ key: 'global_settings' }, updateData, { upsert: true });
+        res.redirect('/admin/seo/social');
+    } catch (err) { res.status(500).send("Lỗi lưu Social"); }
+};
