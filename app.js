@@ -68,10 +68,11 @@ app.use(session({
 app.use(async (req, res, next) => {
     try {
         // [TỐI ƯU] Lấy Settings, Theme và Menu cùng lúc (Parallel Fetching)
-        const [settings, theme, menus] = await Promise.all([
+        // LƯU Ý: Thêm .lean() vào Menu để lấy object thuần, giúp xử lý đệ quy
+        const [settings, theme, rawMenus] = await Promise.all([
             Setting.findOne({ key: 'global_settings' }),
             Theme.findOne({ key: 'theme_settings' }),
-            Menu.find({ isActive: true }).sort({ order: 1 }) // Lấy menu đang bật, sắp xếp theo thứ tự
+            Menu.find({ isActive: true }).sort({ order: 1 }).lean() 
         ]);
         
         // 1. Xử lý Global Scripts
@@ -84,8 +85,26 @@ app.use(async (req, res, next) => {
             res.locals.theme = theme;
         }
 
-        // 3. Xử lý Menu Động (MỚI THÊM)
-        res.locals.mainMenu = menus || []; 
+        // 3. Xử lý Menu Động (BIẾN ĐỔI TỪ PHẲNG SANG CÂY)
+        // Hàm đệ quy để tìm con của từng menu
+        const buildMenuTree = (items, parentId = null) => {
+            return items
+                .filter(item => {
+                    // So sánh ID cha (xử lý trường hợp null hoặc string/ObjectId)
+                    const itemParent = item.parent ? String(item.parent) : null;
+                    const targetParent = parentId ? String(parentId) : null;
+                    return itemParent === targetParent;
+                })
+                .map(item => ({
+                    ...item,
+                    // Tiếp tục tìm con của item này (Đệ quy)
+                    children: buildMenuTree(items, item._id) 
+                }));
+        };
+
+        // Tạo cây menu bắt đầu từ gốc (parent = null)
+        const menuTree = rawMenus ? buildMenuTree(rawMenus, null) : [];
+        res.locals.mainMenu = menuTree; 
 
         // 4. Xử lý Cart & Auth
         if (!req.session.cart) {
@@ -96,7 +115,7 @@ app.use(async (req, res, next) => {
         
         // 5. Truyền path hiện tại để active menu và highlight
         res.locals.path = req.path;
-        res.locals.currentPath = req.path; // Thêm biến này cho chắc chắn khớp với shop-header
+        res.locals.currentPath = req.path; 
 
         next();
     } catch (err) {
@@ -116,18 +135,14 @@ app.use('/admin', adminRoutes);
 app.use('/', shopRoutes);
 
 // Xử lý 404
-app.use(async (req, res, next) => {
-    // Vẫn cần theme cho trang 404
-    const theme = await Theme.findOne({ key: 'theme_settings' });
-    
-    // Cần truyền mainMenu rỗng hoặc lấy lại nếu muốn trang 404 vẫn hiện menu
-    const menus = await Menu.find({ isActive: true }).sort({ order: 1 });
+app.use((req, res, next) => {
+    // Không cần query lại DB vì Middleware bên trên đã chạy và gán res.locals rồi
+    // res.locals.theme và res.locals.mainMenu đã có sẵn
 
     res.status(404).render('404', { 
         pageTitle: 'Page Not Found', 
-        path: '/404',
-        theme: theme || {},
-        mainMenu: menus || [] // Đảm bảo trang 404 không lỗi menu
+        path: '/404'
+        // theme và mainMenu tự động được kế thừa từ res.locals
     });
 });
 
