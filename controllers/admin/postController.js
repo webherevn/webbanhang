@@ -2,9 +2,9 @@ const Post = require('../../models/PostModel');
 const BlogCategory = require('../../models/BlogCategoryModel');
 const slugify = require('slugify');
 
-// ==========================================
-// 1. QUẢN LÝ CHUYÊN MỤC (GIỮ NGUYÊN)
-// ==========================================
+// ============================================================
+// 1. QUẢN LÝ CHUYÊN MỤC (GIỮ NGUYÊN TOÀN BỘ LOGIC CŨ)
+// ============================================================
 exports.getBlogCategories = async (req, res) => {
     try {
         const categories = await BlogCategory.find().sort({ createdAt: -1 });
@@ -61,9 +61,9 @@ exports.getEditBlogCategory = async (req, res) => {
     } catch (err) { res.redirect('/admin/blog-categories'); }
 };
 
-// ==========================================
-// 2. QUẢN LÝ BÀI VIẾT (CẬP NHẬT SEO & SOCIAL & SCHEMA)
-// ==========================================
+// ============================================================
+// 2. QUẢN LÝ BÀI VIẾT (CẬP NHẬT SEO, SOCIAL & SCHEMA)
+// ============================================================
 
 exports.getPosts = async (req, res) => {
     try {
@@ -84,7 +84,7 @@ exports.getAddPost = async (req, res) => {
             path: '/admin/add-post',
             categories: categories,
             editing: false,
-            post: {} // Đảm bảo object rỗng cho EJS
+            post: {} // Đảm bảo object rỗng để không lỗi EJS
         });
     } catch (err) { res.redirect('/admin/posts'); }
 };
@@ -95,18 +95,18 @@ exports.postAddPost = async (req, res) => {
         const { 
             title, content, summary, categoryId, 
             seoTitle, seoDescription, focusKeyword, customSchema,
-            ogTitle, ogDescription // [MỚI] Các trường Social
+            ogTitle, ogDescription 
         } = req.body;
         
+        // Xử lý upload đa file (Thumbnail & OG Image)
         let thumbnail = 'https://via.placeholder.com/300';
         let ogImage = '';
-
-        // Xử lý upload ảnh
         if (req.files) {
             if (req.files['thumbnail']) thumbnail = req.files['thumbnail'][0].path;
             if (req.files['ogImage']) ogImage = req.files['ogImage'][0].path;
         }
 
+        // Tạo Slug duy nhất
         let postSlug = slugify(title, { lower: true, strict: true });
         let originalSlug = postSlug;
         let count = 1;
@@ -120,15 +120,15 @@ exports.postAddPost = async (req, res) => {
             slug: postSlug, 
             content, 
             summary, 
-            thumbnail, 
-            ogImage, // [MỚI]
+            thumbnail,
+            ogImage, 
             category: categoryId,
             seoTitle,
             seoDescription,
             focusKeyword,
-            customSchema, // [MỚI]
-            ogTitle,      // [MỚI]
-            ogDescription // [MỚI]
+            customSchema,
+            ogTitle,
+            ogDescription
         });
 
         res.redirect('/admin/posts');
@@ -161,31 +161,33 @@ exports.postEditPost = async (req, res) => {
         const { 
             postId, title, content, summary, categoryId, 
             seoTitle, seoDescription, focusKeyword, customSchema,
-            ogTitle, ogDescription // [MỚI]
+            ogTitle, ogDescription 
         } = req.body;
 
         const post = await Post.findById(postId);
         if (!post) return res.redirect('/admin/posts');
 
+        // Giữ nguyên các trường cơ bản
         post.title = title;
         post.content = content;
         post.summary = summary;
         post.category = categoryId;
         
-        // Cập nhật các trường SEO & Social & Schema
+        // Cập nhật các trường SEO, Social & Schema mới
         post.seoTitle = seoTitle;
         post.seoDescription = seoDescription;
         post.focusKeyword = focusKeyword;
-        post.customSchema = customSchema; // [MỚI]
-        post.ogTitle = ogTitle;           // [MỚI]
-        post.ogDescription = ogDescription; // [MỚI]
+        post.customSchema = customSchema;
+        post.ogTitle = ogTitle;
+        post.ogDescription = ogDescription;
         
+        // Cập nhật Slug (nếu bạn muốn slug thay đổi theo tiêu đề mới)
         post.slug = slugify(title, { lower: true, strict: true });
 
-        // Cập nhật ảnh (nếu có upload mới)
+        // Cập nhật Ảnh (Chỉ thay đổi nếu có upload mới)
         if (req.files) {
             if (req.files['thumbnail']) post.thumbnail = req.files['thumbnail'][0].path;
-            if (req.files['ogImage']) post.ogImage = req.files['ogImage'][0].path; // [MỚI]
+            if (req.files['ogImage']) post.ogImage = req.files['ogImage'][0].path;
         }
 
         await post.save();
