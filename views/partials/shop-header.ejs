@@ -1,4 +1,5 @@
 <% 
+  // Khởi tạo biến theme để tránh lỗi nếu chưa có
   if (typeof theme === 'undefined') { var theme = {}; } 
 %>
 
@@ -11,6 +12,7 @@
 
 <nav class="navbar navbar-expand-lg navbar-light bg-white <%= theme.headerSticky ? 'sticky-top' : '' %> shadow-sm py-3">
     <div class="container">
+        
         <a class="navbar-brand fw-bold fs-3 text-uppercase tracking-wide" href="/">
             <% if (theme.logo) { %>
                 <img src="<%= theme.logo %>" alt="Site Logo" style="max-height: 50px; width: auto;">
@@ -24,8 +26,8 @@
         </button>
 
         <div class="collapse navbar-collapse" id="navbarNav">
-            
             <ul class="navbar-nav mx-auto mb-2 mb-lg-0 fw-semibold">
+                
                 <% if (typeof mainMenu !== 'undefined' && mainMenu.length > 0) { %>
                     <% mainMenu.forEach(level1 => { %>
                         
@@ -33,18 +35,20 @@
                             
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle" href="<%= level1.link %>" 
-                                   id="navbarDropdown<%= level1._id %>" 
-                                   role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                   id="menu-<%= level1._id %>" 
+                                   role="button" 
+                                   data-bs-toggle="dropdown" 
+                                   aria-expanded="false">
                                     <%= level1.name %>
                                 </a>
                                 
-                                <ul class="dropdown-menu" aria-labelledby="navbarDropdown<%= level1._id %>">
+                                <ul class="dropdown-menu" aria-labelledby="menu-<%= level1._id %>">
                                     <% level1.children.forEach(level2 => { %>
                                         
                                         <% if (level2.children && level2.children.length > 0) { %>
                                             
                                             <li class="dropdown-item-has-child position-relative">
-                                                <a class="dropdown-item" href="<%= level2.link %>">
+                                                <a class="dropdown-item d-flex justify-content-between align-items-center" href="<%= level2.link %>">
                                                     <%= level2.name %>
                                                 </a>
                                                 
@@ -58,7 +62,7 @@
                                                     <% }) %>
                                                 </ul>
                                             </li>
-
+                                        
                                         <% } else { %>
                                             <li><a class="dropdown-item" href="<%= level2.link %>"><%= level2.name %></a></li>
                                         <% } %>
@@ -82,6 +86,7 @@
                     <li class="nav-item"><a class="nav-link" href="/products">Sản phẩm</a></li>
                 <% } %>
             </ul>
+
             <div class="d-flex align-items-center gap-3">
                 <a href="#" class="text-dark fs-5"><i class="bi bi-search"></i></a>
                 <a href="/cart" class="text-dark fs-5 position-relative">
