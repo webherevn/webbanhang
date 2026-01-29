@@ -12,6 +12,7 @@ const postController = require('../controllers/admin/postController');
 const pageController = require('../controllers/admin/pageController');
 const themeController = require('../controllers/admin/themeController');
 
+
 // 3. CẤU HÌNH UPLOAD CHO SẢN PHẨM
 const productUpload = upload.fields([
     { name: 'thumbnail', maxCount: 1 }, 
@@ -32,7 +33,7 @@ router.post('/add-product', productUpload, productController.postAddProduct);
 router.get('/edit-product/:productId', productController.getEditProduct);
 router.post('/edit-product', productUpload, productController.postEditProduct);
 router.post('/delete-product', productController.postDeleteProduct);
-
+router.post('/delete-product-image', productController.deleteProductImage);
 // ============================================================
 // C. QUẢN LÝ DANH MỤC SP
 // ============================================================

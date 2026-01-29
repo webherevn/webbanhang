@@ -49,9 +49,56 @@
                         </div>
 
                         <div class="wp-card">
-                            <div class="postbox-header">Mô tả chi tiết</div>
-                            <textarea name="description" id="prodDesc"><%= editing ? product.description : '' %></textarea>
-                        </div>
+                                <div class="postbox-header">Thư viện ảnh</div>
+                                
+                                <% if (editing && product.gallery && product.gallery.length > 0) { %>
+                                    <div class="d-flex flex-wrap gap-2 mb-3" id="gallery-container">
+                                        <% product.gallery.forEach(img => { %>
+                                            <div class="position-relative gallery-item" style="width: 60px; height: 60px;">
+                                                <img src="<%= img %>" class="w-100 h-100 object-fit-cover border rounded shadow-sm">
+                                                
+                                                <button type="button" 
+                                                        class="btn btn-danger btn-sm p-0 position-absolute top-0 end-0 rounded-circle d-flex align-items-center justify-content-center"
+                                                        style="width: 18px; height: 18px; transform: translate(30%, -30%); font-size: 10px;"
+                                                        onclick="deleteGalleryImage(this, '<%= product._id %>', '<%= img %>')">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            </div>
+                                        <% }) %>
+                                    </div>
+                                <% } %>
+
+                                <input type="file" name="gallery" class="form-control form-control-sm" multiple>
+                                <div class="small text-muted mt-2 lh-sm" style="font-size: 11px;">
+                                    <i class="fas fa-info-circle me-1"></i> Giữ Ctrl để chọn nhiều ảnh.
+                                </div>
+                            </div>
+
+                            <script>
+                                // Hàm xóa ảnh Gallery bằng AJAX
+                                function deleteGalleryImage(btn, productId, imageUrl) {
+                                    if (!confirm('Bạn có chắc muốn xóa ảnh này?')) return;
+
+                                    // Gửi yêu cầu xóa về server
+                                    fetch('/admin/delete-product-image', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json'
+                                        },
+                                        body: JSON.stringify({ productId: productId, imageUrl: imageUrl })
+                                    })
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        if (data.success) {
+                                            // Nếu xóa thành công, xóa element ảnh đó trên giao diện ngay lập tức
+                                            btn.closest('.gallery-item').remove();
+                                        } else {
+                                            alert('Có lỗi xảy ra, không thể xóa ảnh.');
+                                        }
+                                    })
+                                    .catch(err => console.error(err));
+                                }
+                            </script>
 
                         <div class="wp-card border-top border-4 border-warning">
                             <div class="postbox-header d-flex justify-content-between align-items-center mb-2">

@@ -205,3 +205,24 @@ exports.postDeleteProduct = async (req, res) => {
         res.redirect('/admin/products');
     } catch (err) { res.redirect('/admin/products'); }
 };
+
+// Thêm hàm này vào cuối file Controller
+exports.deleteProductImage = async (req, res) => {
+    try {
+        const { productId, imageUrl } = req.body;
+        
+        // Tìm sản phẩm và xóa đường dẫn ảnh khỏi mảng gallery
+        await Product.findByIdAndUpdate(productId, {
+            $pull: { gallery: imageUrl } 
+        });
+
+        // (Tùy chọn) Code xóa file vật lý trên server nếu cần:
+        // const fs = require('fs');
+        // fs.unlink(path.join(__dirname, '..', imageUrl), err => {});
+
+        res.json({ success: true });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false });
+    }
+};
