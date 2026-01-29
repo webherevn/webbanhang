@@ -17,7 +17,7 @@
     const isSettingsActive = path.includes('/admin/customize') || 
                              path.includes('/admin/settings');
 
-    // 5. SEO
+    // 5. SEO (Kiểm tra bao quát thư mục seo)
     const isSeoActive = path.includes('/admin/seo');
 %>
 
@@ -61,8 +61,7 @@
                     <li class="nav-item">
                         <a class="nav-link text-white-50 py-2 px-3 ps-5 <%= path === '/admin/blog-categories' ? 'text-white fw-bold' : '' %>" href="/admin/blog-categories">Chuyên mục</a>
                     </li>
-                   
-                </ul>
+                    </ul>
             </div>
         </li>
 
@@ -133,7 +132,6 @@
                     <li class="nav-item">
                         <a class="nav-link text-white-50 py-2 px-3 ps-5 <%= path === '/admin/settings/menu' ? 'text-white fw-bold' : '' %>" href="/admin/settings/menu">Quản lý Menu</a>
                     </li>
-                
                     <li class="nav-item">
                         <a class="nav-link text-white-50 py-2 px-3 ps-5 <%= path === '/admin/settings/index' ? 'text-white fw-bold' : '' %>" href="/admin/settings/index">Index (Google)</a>
                     </li>
@@ -157,6 +155,18 @@
                     </li>
                     <li class="nav-item">
                         <a class="nav-link text-white-50 py-2 px-3 ps-5 <%= path === '/admin/seo/robots' ? 'text-white fw-bold' : '' %>" href="/admin/seo/robots">Robots.txt</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white-50 py-2 px-3 ps-5 <%= path === '/admin/seo/redirects' ? 'text-white fw-bold' : '' %>" href="/admin/seo/redirects">Chuyển hướng (Redirects)</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white-50 py-2 px-3 ps-5 <%= path === '/admin/seo/schema' ? 'text-white fw-bold' : '' %>" href="/admin/seo/schema">Schema (Dữ liệu cấu trúc)</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white-50 py-2 px-3 ps-5 <%= path === '/admin/seo/404-monitor' ? 'text-white fw-bold' : '' %>" href="/admin/seo/404-monitor">Theo dõi lỗi 404</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white-50 py-2 px-3 ps-5 <%= path === '/admin/seo/social' ? 'text-white fw-bold' : '' %>" href="/admin/seo/social">Mạng xã hội (Open Graph)</a>
                     </li>
                 </ul>
             </div>
