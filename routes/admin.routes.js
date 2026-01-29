@@ -12,7 +12,7 @@ const postController = require('../controllers/admin/postController');
 const pageController = require('../controllers/admin/pageController');
 const themeController = require('../controllers/admin/themeController');
 const settingController = require('../controllers/admin/settingController');
-
+const seoController = require('../controllers/admin/seoController');
 
 // 3. CẤU HÌNH UPLOAD CHO SẢN PHẨM
 const productUpload = upload.fields([
@@ -102,4 +102,16 @@ router.post('/settings/menu/delete', settingController.postDeleteMenu);
 // 2. Cấu hình Index Google - [ĐÂY LÀ PHẦN QUAN TRỌNG ĐỂ HẾT LỖI 404]
 router.get('/settings/index', settingController.getIndexSettings);
 router.post('/settings/index', settingController.postIndexSettings);
+
+// ============================================================
+// H. SEO (SITEMAP / ROBOTS / REDIRECTS)
+// ============================================================
+// 1. Chuyển hướng
+router.get('/seo/redirects', seoController.getRedirects);
+router.post('/seo/redirects/add', seoController.postAddRedirect);
+router.post('/seo/redirects/delete', seoController.postDeleteRedirect);
+
+// 2. Placeholder cũ
+router.get('/seo/sitemap', (req, res) => res.send('Sitemap - Đang phát triển...'));
+router.get('/seo/robots', (req, res) => res.send('Robots - Đang phát triển...'));
 module.exports = router;

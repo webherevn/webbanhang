@@ -12,7 +12,11 @@ const path = require('path');
 // --- IMPORT MODELS ---
 const Setting = require('./models/SettingModel'); 
 const Theme = require('./models/ThemeModel'); 
-const Menu = require('./models/MenuModel'); // Model Menu
+const Menu = require('./models/MenuModel'); 
+
+// --- IMPORT MIDDLEWARES ---
+// [MỚI] Import Middleware chuyển hướng 301
+const redirectMiddleware = require('./middleware/redirectMiddleware');
 
 // Import Routes
 const adminRoutes = require('./routes/admin.routes');
@@ -34,10 +38,11 @@ mongoose.connect(process.env.MONGO_URI)
   .catch(err => console.error('❌ DB Connection Error:', err));
 
 // ============================================================
-// 2. MIDDLEWARE XỬ LÝ DỮ LIỆU
+// 2. MIDDLEWARE XỬ LÝ DỮ LIỆU & STATIC FILES
 // ============================================================
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json()); 
+// Static file được nạp ở đây, nên redirectMiddleware đặt ở dưới sẽ không chặn ảnh/css
 app.use(express.static(path.join(__dirname, 'public')));
 
 // ============================================================
@@ -68,14 +73,15 @@ app.use(session({
 app.use(async (req, res, next) => {
     try {
         // [TỐI ƯU] Lấy Settings, Theme và Menu cùng lúc (Parallel Fetching)
-        // LƯU Ý: Thêm .lean() vào Menu để lấy object thuần, giúp xử lý đệ quy
         const [settings, theme, rawMenus] = await Promise.all([
             Setting.findOne({ key: 'global_settings' }),
             Theme.findOne({ key: 'theme_settings' }),
             Menu.find({ isActive: true }).sort({ order: 1 }).lean() 
         ]);
         
-        // 1. Xử lý Global Scripts
+        // 1. Xử lý Global Scripts & Settings
+        // Gán cả cục settings vào biến global để dùng cho Footer (SĐT, Địa chỉ...)
+        res.locals.settings = settings || {}; 
         res.locals.globalScripts = settings || { headerScripts: '', bodyScripts: '', footerScripts: '' };
         
         // 2. Xử lý Theme (Giao diện)
@@ -86,23 +92,19 @@ app.use(async (req, res, next) => {
         }
 
         // 3. Xử lý Menu Động (BIẾN ĐỔI TỪ PHẲNG SANG CÂY)
-        // Hàm đệ quy để tìm con của từng menu
         const buildMenuTree = (items, parentId = null) => {
             return items
                 .filter(item => {
-                    // So sánh ID cha (xử lý trường hợp null hoặc string/ObjectId)
                     const itemParent = item.parent ? String(item.parent) : null;
                     const targetParent = parentId ? String(parentId) : null;
                     return itemParent === targetParent;
                 })
                 .map(item => ({
                     ...item,
-                    // Tiếp tục tìm con của item này (Đệ quy)
                     children: buildMenuTree(items, item._id) 
                 }));
         };
 
-        // Tạo cây menu bắt đầu từ gốc (parent = null)
         const menuTree = rawMenus ? buildMenuTree(rawMenus, null) : [];
         res.locals.mainMenu = menuTree; 
 
@@ -113,20 +115,27 @@ app.use(async (req, res, next) => {
         res.locals.isAuthenticated = req.session.isLoggedIn; 
         res.locals.cart = req.session.cart;
         
-        // 5. Truyền path hiện tại để active menu và highlight
+        // 5. Truyền path hiện tại
         res.locals.path = req.path;
         res.locals.currentPath = req.path; 
 
         next();
     } catch (err) {
         console.error("❌ Lỗi Middleware toàn cục:", err);
-        // Fallback an toàn nếu lỗi DB
         res.locals.globalScripts = { headerScripts: '', bodyScripts: '', footerScripts: '' };
+        res.locals.settings = {};
         res.locals.theme = {};
         res.locals.mainMenu = []; 
         next();
     }
 });
+
+// ============================================================
+// [MỚI] KÍCH HOẠT REDIRECT 301 (SEO)
+// Đặt ở đây để đảm bảo đã qua Static Files và Global Variables
+// nhưng TRƯỚC khi vào Routes chính
+// ============================================================
+app.use(redirectMiddleware);
 
 // ============================================================
 // 5. ROUTES
@@ -136,13 +145,9 @@ app.use('/', shopRoutes);
 
 // Xử lý 404
 app.use((req, res, next) => {
-    // Không cần query lại DB vì Middleware bên trên đã chạy và gán res.locals rồi
-    // res.locals.theme và res.locals.mainMenu đã có sẵn
-
     res.status(404).render('404', { 
         pageTitle: 'Page Not Found', 
         path: '/404'
-        // theme và mainMenu tự động được kế thừa từ res.locals
     });
 });
 
