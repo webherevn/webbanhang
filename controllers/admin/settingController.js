@@ -93,3 +93,34 @@ exports.postDeleteMenu = async (req, res) => {
         res.status(500).send("Lỗi xóa Menu: " + err.message);
     }
 };
+
+// ... (Các đoạn code cũ giữ nguyên)
+
+// [MỚI] 4. Cập nhật Menu (Sửa tên, link, thứ tự, cha con)
+exports.postUpdateMenu = async (req, res) => {
+    try {
+        const { id, name, link, order, parent } = req.body;
+        
+        const updateData = {
+            name: name,
+            link: link,
+            order: Number(order) || 0
+        };
+
+        // Logic Parent:
+        // 1. Nếu chọn "Là Menu Gốc" -> parent = null
+        // 2. Không được chọn chính nó làm cha của nó (để tránh lỗi vòng lặp)
+        if (parent && parent !== "" && parent !== id) {
+            updateData.parent = parent;
+        } else {
+            updateData.parent = null;
+        }
+
+        await Menu.findByIdAndUpdate(id, updateData);
+        
+        res.redirect('/admin/settings/menu');
+    } catch (err) {
+        console.error("❌ Lỗi cập nhật menu:", err);
+        res.status(500).send("Lỗi cập nhật: " + err.message);
+    }
+};

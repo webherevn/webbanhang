@@ -13,6 +13,7 @@ const pageController = require('../controllers/admin/pageController');
 const themeController = require('../controllers/admin/themeController');
 const settingController = require('../controllers/admin/settingController');
 
+
 // 3. CẤU HÌNH UPLOAD CHO SẢN PHẨM
 const productUpload = upload.fields([
     { name: 'thumbnail', maxCount: 1 }, 
@@ -42,6 +43,8 @@ router.post('/categories', upload.single('image'), categoryController.postAddCat
 router.post('/delete-category', categoryController.postDeleteCategory); 
 router.get('/edit-category/:categoryId', categoryController.getEditCategory);
 router.post('/edit-category', upload.single('image'), categoryController.postEditCategory);
+// [MỚI] Thêm dòng này vào
+router.post('/settings/menu/update', settingController.postUpdateMenu);
 
 // ============================================================
 // D. QUẢN LÝ BLOG (CMS)

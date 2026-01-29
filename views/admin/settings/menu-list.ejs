@@ -1,15 +1,15 @@
 <%- include('../../partials/head.ejs') %>
 <style>
-    /* CSS hệ thống admin của bạn */
     body { background-color: #f0f0f1; }
     .admin-wrapper { display: flex; min-height: 100vh; }
     .admin-content { flex: 1; padding: 30px; margin-left: 240px; }
-    .wp-card { background: #fff; padding: 20px; border: 1px solid #c3c4c7; margin-bottom: 20px; }
+    .wp-card { background: #fff; padding: 20px; border: 1px solid #c3c4c7; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,.1); }
+    .table td { vertical-align: middle; }
 </style>
 
 <body>
     <div class="admin-wrapper">
-        <div class="admin-sidebar-container"><%- include('../partials/sidebar.ejs') %></div>
+        <div class="admin-sidebar-container"><%- include('../../partials/sidebar.ejs') %></div>
         
         <div class="admin-content">
             <h2 class="fw-bold h4 mb-4">Cấu hình Menu hiển thị</h2>
@@ -21,38 +21,27 @@
                         <form action="/admin/settings/menu/add" method="POST">
                             <div class="mb-3">
                                 <label class="small fw-bold">Tên hiển thị</label>
-                                <input type="text" name="name" class="form-control" placeholder="Ví dụ: Sản phẩm" required>
+                                <input type="text" name="name" class="form-control" required>
                             </div>
-                            
                             <div class="mb-3">
-                                <label class="small fw-bold">Menu Cha (Nếu có)</label>
+                                <label class="small fw-bold">Menu Cha</label>
                                 <select name="parent" class="form-select">
-                                    <option value="">-- Là Menu Gốc (Cấp 1) --</option>
-                                    
-                                    <% if (typeof parentOptions !== 'undefined' && parentOptions.length > 0) { %>
+                                    <option value="">-- Menu Gốc --</option>
+                                    <% if (typeof parentOptions !== 'undefined') { %>
                                         <% parentOptions.forEach(p => { %>
                                             <option value="<%= p._id %>">
-                                                <% if(p.level === 1) { %>
-                                                    📂 <%= p.name %> (Cấp 1)
-                                                <% } else { %>
-                                                    &nbsp;&nbsp;&nbsp;&nbsp; ↳ <%= p.name %> (Cấp 2)
-                                                <% } %>
+                                                <%= p.level === 1 ? '📂 ' + p.name : '↳ ' + p.name %>
                                             </option>
                                         <% }) %>
                                     <% } %>
                                 </select>
-                                <div class="form-text text-muted small" style="font-size: 11px;">
-                                    * Chọn Cấp 1 để tạo con (Cấp 2).<br>
-                                    * Chọn Cấp 2 để tạo cháu (Cấp 3).
-                                </div>
                             </div>
                             <div class="mb-3">
-                                <label class="small fw-bold">Đường dẫn (Link)</label>
-                                <input type="text" name="link" class="form-control" placeholder="Ví dụ: /products" required>
-                                <small class="text-muted" style="font-size: 11px;">Nhập "/" cho trang chủ.</small>
+                                <label class="small fw-bold">Link</label>
+                                <input type="text" name="link" class="form-control" required>
                             </div>
                             <div class="mb-3">
-                                <label class="small fw-bold">Thứ tự</label>
+                                <label class="small fw-bold">Thứ tự (Nhỏ xếp trước)</label>
                                 <input type="number" name="order" class="form-control" value="0">
                             </div>
                             <button type="submit" class="btn btn-primary w-100">Thêm vào Menu</button>
@@ -65,18 +54,17 @@
                         <table class="table table-bordered table-hover small">
                             <thead class="table-light">
                                 <tr>
-                                    <th width="50">STT</th>
+                                    <th width="50" class="text-center">Thứ tự</th>
                                     <th>Tên Menu</th>
                                     <th>Đường dẫn</th>
-                                    <th width="80">Hành động</th>
+                                    <th width="100" class="text-center">Hành động</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <% if (menus.length > 0) { %>
                                     <% menus.forEach(menu => { %>
                                         <tr>
-                                            <td class="text-center"><%= menu.order %></td>
-                                            
+                                            <td class="text-center fw-bold"><%= menu.order %></td>
                                             <td>
                                                 <% if (menu.parent) { %>
                                                     <div class="text-muted fst-italic" style="font-size: 11px;">
@@ -88,12 +76,24 @@
                                                     <span class="fw-bold text-primary"><%= menu.name %></span>
                                                 <% } %>
                                             </td>
-                                            <td class="text-muted"><%= menu.link %></td>
+                                            <td class="text-muted text-truncate" style="max-width: 150px;"><%= menu.link %></td>
                                             <td class="text-center">
-                                                <form action="/admin/settings/menu/delete" method="POST" onsubmit="return confirm('Xóa menu này?')">
-                                                    <input type="hidden" name="id" value="<%= menu._id %>">
-                                                    <button class="btn btn-sm btn-danger p-0 px-2"><i class="fas fa-trash-alt"></i></button>
-                                                </form>
+                                                <div class="d-flex justify-content-center gap-2">
+                                                    <button class="btn btn-sm btn-warning text-white p-1 px-2 btn-edit" 
+                                                            data-bs-toggle="modal" data-bs-target="#editMenuModal"
+                                                            data-id="<%= menu._id %>"
+                                                            data-name="<%= menu.name %>"
+                                                            data-link="<%= menu.link %>"
+                                                            data-order="<%= menu.order %>"
+                                                            data-parent="<%= menu.parent ? menu.parent._id : '' %>">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
+
+                                                    <form action="/admin/settings/menu/delete" method="POST" onsubmit="return confirm('Xóa menu này?')">
+                                                        <input type="hidden" name="id" value="<%= menu._id %>">
+                                                        <button class="btn btn-sm btn-danger p-1 px-2"><i class="fas fa-trash-alt"></i></button>
+                                                    </form>
+                                                </div>
                                             </td>
                                         </tr>
                                     <% }) %>
@@ -107,4 +107,74 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="editMenuModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form action="/admin/settings/menu/update" method="POST">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bold">Chỉnh sửa Menu</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" name="id" id="edit-id">
+                        
+                        <div class="mb-3">
+                            <label class="small fw-bold">Tên hiển thị</label>
+                            <input type="text" name="name" id="edit-name" class="form-control" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="small fw-bold">Menu Cha</label>
+                            <select name="parent" id="edit-parent" class="form-select">
+                                <option value="">-- Là Menu Gốc --</option>
+                                <% if (typeof parentOptions !== 'undefined') { %>
+                                    <% parentOptions.forEach(p => { %>
+                                        <option value="<%= p._id %>">
+                                            <%= p.level === 1 ? '📂 ' + p.name : '↳ ' + p.name %>
+                                        </option>
+                                    <% }) %>
+                                <% } %>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="small fw-bold">Đường dẫn (Link)</label>
+                            <input type="text" name="link" id="edit-link" class="form-control" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="small fw-bold">Thứ tự</label>
+                            <input type="number" name="order" id="edit-order" class="form-control">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                        <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('.btn-edit').click(function() {
+                // Lấy dữ liệu từ nút bấm
+                const id = $(this).data('id');
+                const name = $(this).data('name');
+                const link = $(this).data('link');
+                const order = $(this).data('order');
+                const parent = $(this).data('parent');
+
+                // Điền vào form trong Modal
+                $('#edit-id').val(id);
+                $('#edit-name').val(name);
+                $('#edit-link').val(link);
+                $('#edit-order').val(order);
+                $('#edit-parent').val(parent);
+            });
+        });
+    </script>
 </body>
