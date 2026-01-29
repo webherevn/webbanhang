@@ -1,10 +1,28 @@
 <% 
-    // Logic kiểm tra xem đang ở mục Cài đặt nào không để mở sẵn menu
+    // --- LOGIC KIỂM TRA ACTIVE (ĐỂ MỞ SẴN MENU CON) ---
+    
+    // 1. Bài viết
+    const isPostsActive = path.includes('/admin/posts') || 
+                          path.includes('/admin/blog-categories') || 
+                          path.includes('/admin/tags');
+
+    // 2. Sản phẩm
+    const isProductsActive = path.includes('/admin/products') || 
+                             path.includes('/admin/categories');
+
+    // 3. Trang
+    const isPagesActive = path.includes('/admin/pages');
+
+    // 4. Cài đặt
     const isSettingsActive = path.includes('/admin/customize') || 
                              path.includes('/admin/settings');
+
+    // 5. SEO
+    const isSeoActive = path.includes('/admin/seo');
 %>
 
 <div class="w-100 text-white sidebar-container">
+    
     <div class="p-3 border-bottom border-secondary site-title-block">
         <a href="/" class="text-white text-decoration-none fw-bold d-flex align-items-center">
             <i class="fas fa-home me-2"></i>
@@ -24,84 +42,126 @@
         <hr class="border-secondary mx-3 my-2 opacity-25">
 
         <li class="nav-item">
-            <a class="nav-link text-white py-2 px-3 <%= path.includes('/admin/posts') ? 'active-wp' : '' %>" href="/admin/posts">
-                <div class="icon-w"><i class="fas fa-thumbtack"></i></div>
-                <span>Bài viết</span>
+            <a class="nav-link text-white py-2 px-3 d-flex justify-content-between align-items-center <%= isPostsActive ? 'active-wp-parent' : '' %>" 
+               href="#submenuPosts" data-bs-toggle="collapse" role="button" aria-expanded="<%= isPostsActive %>">
+                <div class="d-flex align-items-center">
+                    <div class="icon-w"><i class="fas fa-thumbtack"></i></div>
+                    <span>Bài viết</span>
+                </div>
+                <i class="fas fa-chevron-down small chevron-icon"></i>
             </a>
+            <div class="collapse <%= isPostsActive ? 'show' : '' %>" id="submenuPosts">
+                <ul class="nav flex-column bg-dark-soft pb-2">
+                    <li class="nav-item">
+                        <a class="nav-link text-white-50 py-2 px-3 ps-5 <%= path === '/admin/posts' ? 'text-white fw-bold' : '' %>" href="/admin/posts">Tất cả bài viết</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white-50 py-2 px-3 ps-5 <%= path === '/admin/posts/add' ? 'text-white fw-bold' : '' %>" href="/admin/posts/add">Thêm bài viết</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white-50 py-2 px-3 ps-5 <%= path === '/admin/blog-categories' ? 'text-white fw-bold' : '' %>" href="/admin/blog-categories">Chuyên mục</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white-50 py-2 px-3 ps-5 <%= path === '/admin/tags' ? 'text-white fw-bold' : '' %>" href="/admin/tags">Thẻ (Tag)</a>
+                    </li>
+                </ul>
+            </div>
         </li>
 
         <li class="nav-item">
-            <a class="nav-link text-white py-2 px-3 <%= path === '/admin/blog-categories' ? 'active-wp' : '' %>" href="/admin/blog-categories">
-                <div class="icon-w"><i class="fas fa-folder"></i></div>
-                <span>Chuyên mục</span>
+            <a class="nav-link text-white py-2 px-3 d-flex justify-content-between align-items-center <%= isProductsActive ? 'active-wp-parent' : '' %>" 
+               href="#submenuProducts" data-bs-toggle="collapse" role="button" aria-expanded="<%= isProductsActive %>">
+                <div class="d-flex align-items-center">
+                    <div class="icon-w"><i class="fas fa-box"></i></div>
+                    <span>Sản phẩm</span>
+                </div>
+                <i class="fas fa-chevron-down small chevron-icon"></i>
             </a>
+            <div class="collapse <%= isProductsActive ? 'show' : '' %>" id="submenuProducts">
+                <ul class="nav flex-column bg-dark-soft pb-2">
+                    <li class="nav-item">
+                        <a class="nav-link text-white-50 py-2 px-3 ps-5 <%= path === '/admin/products' ? 'text-white fw-bold' : '' %>" href="/admin/products">Tất cả sản phẩm</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white-50 py-2 px-3 ps-5 <%= path === '/admin/products/add' ? 'text-white fw-bold' : '' %>" href="/admin/products/add">Thêm sản phẩm</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white-50 py-2 px-3 ps-5 <%= path === '/admin/categories' ? 'text-white fw-bold' : '' %>" href="/admin/categories">Danh mục</a>
+                    </li>
+                </ul>
+            </div>
         </li>
 
         <hr class="border-secondary mx-3 my-2 opacity-25">
 
         <li class="nav-item">
-            <a class="nav-link text-white py-2 px-3 <%= path === '/admin/products' || path.includes('/admin/products/') ? 'active-wp' : '' %>" href="/admin/products">
-                <div class="icon-w"><i class="fas fa-box"></i></div>
-                <span>Sản phẩm</span>
+            <a class="nav-link text-white py-2 px-3 d-flex justify-content-between align-items-center <%= isPagesActive ? 'active-wp-parent' : '' %>" 
+               href="#submenuPages" data-bs-toggle="collapse" role="button" aria-expanded="<%= isPagesActive %>">
+                <div class="d-flex align-items-center">
+                    <div class="icon-w"><i class="fas fa-file-alt"></i></div>
+                    <span>Trang</span>
+                </div>
+                <i class="fas fa-chevron-down small chevron-icon"></i>
             </a>
-        </li>
-
-        <li class="nav-item">
-            <a class="nav-link text-white py-2 px-3 <%= path === '/admin/categories' ? 'active-wp' : '' %>" href="/admin/categories">
-                <div class="icon-w"><i class="fas fa-tags"></i></div>
-                <span>Danh mục SP</span>
-            </a>
-        </li>
-
-        <hr class="border-secondary mx-3 my-2 opacity-25">
-
-        <li class="nav-item">
-            <a class="nav-link text-white py-2 px-3 <%= path.includes('/admin/pages') ? 'active-wp' : '' %>" href="/admin/pages">
-                <div class="icon-w"><i class="fas fa-file-alt"></i></div>
-                <span>Trang</span>
-            </a>
+            <div class="collapse <%= isPagesActive ? 'show' : '' %>" id="submenuPages">
+                <ul class="nav flex-column bg-dark-soft pb-2">
+                    <li class="nav-item">
+                        <a class="nav-link text-white-50 py-2 px-3 ps-5 <%= path === '/admin/pages' ? 'text-white fw-bold' : '' %>" href="/admin/pages">Tất cả trang</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white-50 py-2 px-3 ps-5 <%= path === '/admin/pages/add' ? 'text-white fw-bold' : '' %>" href="/admin/pages/add">Thêm trang</a>
+                    </li>
+                </ul>
+            </div>
         </li>
 
         <li class="nav-item">
             <a class="nav-link text-white py-2 px-3 d-flex justify-content-between align-items-center <%= isSettingsActive ? 'active-wp-parent' : '' %>" 
-               href="#submenuSettings" 
-               data-bs-toggle="collapse" 
-               role="button" 
-               aria-expanded="<%= isSettingsActive %>">
+               href="#submenuSettings" data-bs-toggle="collapse" role="button" aria-expanded="<%= isSettingsActive %>">
                 <div class="d-flex align-items-center">
                     <div class="icon-w"><i class="fas fa-cog"></i></div>
                     <span>Cài đặt</span>
                 </div>
-                <i class="fas fa-chevron-down small" style="font-size: 10px;"></i>
+                <i class="fas fa-chevron-down small chevron-icon"></i>
             </a>
-
             <div class="collapse <%= isSettingsActive ? 'show' : '' %>" id="submenuSettings">
                 <ul class="nav flex-column bg-dark-soft pb-2">
-                    
                     <li class="nav-item">
-                        <a class="nav-link text-white-50 py-2 px-3 ps-5 <%= path === '/admin/customize' ? 'text-white fw-bold' : '' %>" href="/admin/customize">
-                            <span>Giao diện</span>
-                        </a>
+                        <a class="nav-link text-white-50 py-2 px-3 ps-5 <%= path === '/admin/customize' ? 'text-white fw-bold' : '' %>" href="/admin/customize">Giao diện</a>
                     </li>
-
                     <li class="nav-item">
-                        <a class="nav-link text-white-50 py-2 px-3 ps-5 <%= path === '/admin/settings' ? 'text-white fw-bold' : '' %>" href="/admin/settings">
-                            <span>Cấu hình Script</span>
-                        </a>
+                        <a class="nav-link text-white-50 py-2 px-3 ps-5 <%= path === '/admin/settings' ? 'text-white fw-bold' : '' %>" href="/admin/settings">Cấu hình Scripts</a>
                     </li>
-
                     <li class="nav-item">
-                        <a class="nav-link text-white-50 py-2 px-3 ps-5 <%= path === '/admin/settings/menu' ? 'text-white fw-bold' : '' %>" href="/admin/settings/menu">
-                            <span>Quản lý Menu</span>
-                        </a>
+                        <a class="nav-link text-white-50 py-2 px-3 ps-5 <%= path === '/admin/settings/menu' ? 'text-white fw-bold' : '' %>" href="/admin/settings/menu">Quản lý Menu</a>
                     </li>
-
                     <li class="nav-item">
-                        <a class="nav-link text-white-50 py-2 px-3 ps-5 <%= path === '/admin/settings/general' ? 'text-white fw-bold' : '' %>" href="/admin/settings/general">
-                            <span>Cài đặt chung</span>
-                        </a>
+                        <a class="nav-link text-white-50 py-2 px-3 ps-5 <%= path === '/admin/settings/general' ? 'text-white fw-bold' : '' %>" href="/admin/settings/general">Cài đặt chung</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white-50 py-2 px-3 ps-5 <%= path === '/admin/settings/index' ? 'text-white fw-bold' : '' %>" href="/admin/settings/index">Index (Google)</a>
+                    </li>
+                </ul>
+            </div>
+        </li>
 
+        <li class="nav-item">
+            <a class="nav-link text-white py-2 px-3 d-flex justify-content-between align-items-center <%= isSeoActive ? 'active-wp-parent' : '' %>" 
+               href="#submenuSeo" data-bs-toggle="collapse" role="button" aria-expanded="<%= isSeoActive %>">
+                <div class="d-flex align-items-center">
+                    <div class="icon-w"><i class="fab fa-google"></i></div>
+                    <span>SEO</span>
+                </div>
+                <i class="fas fa-chevron-down small chevron-icon"></i>
+            </a>
+            <div class="collapse <%= isSeoActive ? 'show' : '' %>" id="submenuSeo">
+                <ul class="nav flex-column bg-dark-soft pb-2">
+                    <li class="nav-item">
+                        <a class="nav-link text-white-50 py-2 px-3 ps-5 <%= path === '/admin/seo/sitemap' ? 'text-white fw-bold' : '' %>" href="/admin/seo/sitemap">Sitemap XML</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white-50 py-2 px-3 ps-5 <%= path === '/admin/seo/robots' ? 'text-white fw-bold' : '' %>" href="/admin/seo/robots">Robots.txt</a>
+                    </li>
                 </ul>
             </div>
         </li>
@@ -113,7 +173,7 @@
     /* 1. Cấu hình chung cho Sidebar */
     .sidebar-container {
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
-        font-size: 14px; /* Chuẩn kích thước chữ WP Admin */
+        font-size: 14px; 
         background-color: #1d2327;
         min-height: 100vh;
     }
@@ -122,30 +182,42 @@
     .wp-nav .nav-link {
         color: #f0f0f1;
         transition: all 0.2s ease;
-        border-left: 4px solid transparent; /* Tạo border ẩn để khi active thì hiện */
+        border-left: 4px solid transparent; 
         display: flex;
         align-items: center;
+        cursor: pointer;
     }
 
-    /* 3. Canh chỉnh Icon icon-w để chữ luôn thẳng hàng */
+    /* 3. Icon cột trái */
     .icon-w {
         width: 25px; 
         text-align: center;
         margin-right: 8px;
         opacity: 0.8;
     }
+    
+    /* 4. Mũi tên xổ xuống bên phải */
+    .chevron-icon {
+        opacity: 0.5;
+        transition: transform 0.2s;
+    }
+    .nav-link[aria-expanded="true"] .chevron-icon {
+        transform: rotate(180deg);
+        opacity: 1;
+    }
 
-    /* 4. Hiệu ứng Hover */
+    /* 5. Hiệu ứng Hover */
     .wp-nav .nav-link:hover {
         background-color: #13171b;
         color: #72aee6 !important;
     }
-    .wp-nav .nav-link:hover .icon-w {
+    .wp-nav .nav-link:hover .icon-w,
+    .wp-nav .nav-link:hover .chevron-icon {
         opacity: 1;
         color: #72aee6;
     }
 
-    /* 5. Trạng thái Active (Đang chọn) */
+    /* 6. Active Item (Menu đang chọn) */
     .active-wp {
         background-color: #2271b1 !important;
         border-left-color: #72aee6 !important;
@@ -153,30 +225,32 @@
         font-weight: 600;
     }
     
-    /* Active cho mục cha (Khi mục con đang mở) */
+    /* 7. Active Parent (Menu cha khi con đang mở) */
     .active-wp-parent {
-        background-color: #2c3338 !important; /* Màu xám đậm hơn chút */
+        background-color: #2c3338 !important; 
         color: #fff !important;
         font-weight: 600;
+        border-left-color: #72aee6 !important;
     }
 
-    /* 6. Style cho Menu con (Submenu) */
+    /* 8. Style cho Menu con (Submenu) */
     .bg-dark-soft {
-        background-color: #101519; /* Nền tối hơn cho menu con */
+        background-color: #101519; 
+        box-shadow: inset 0 4px 4px -4px rgba(0,0,0,0.3); /* Bóng đổ nhẹ bên trong */
     }
     .bg-dark-soft .nav-link {
-        font-size: 13px; /* Menu con chữ nhỏ hơn 1 xíu */
-        border-left: none; /* Không cần border trái cho menu con */
+        font-size: 13px; 
+        border-left: none; 
     }
     .bg-dark-soft .nav-link:hover {
         color: #fff !important;
         background-color: transparent;
     }
     .bg-dark-soft .nav-link.text-white {
-        color: #fff !important; /* Màu trắng sáng cho item con đang active */
+        color: #fff !important; 
     }
     
-    /* 7. Phần Header Sidebar */
+    /* Header Sidebar */
     .site-title-block {
         background-color: #1d2327;
     }
