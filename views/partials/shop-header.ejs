@@ -1,5 +1,4 @@
 <% 
-  // Khởi tạo biến theme để tránh lỗi nếu chưa có
   if (typeof theme === 'undefined') { var theme = {}; } 
 %>
 
@@ -12,7 +11,6 @@
 
 <nav class="navbar navbar-expand-lg navbar-light bg-white <%= theme.headerSticky ? 'sticky-top' : '' %> shadow-sm py-3">
     <div class="container">
-        
         <a class="navbar-brand fw-bold fs-3 text-uppercase tracking-wide" href="/">
             <% if (theme.logo) { %>
                 <img src="<%= theme.logo %>" alt="Site Logo" style="max-height: 50px; width: auto;">
@@ -33,7 +31,7 @@
                         
                         <% if (level1.children && level1.children.length > 0) { %>
                             
-                            <li class="nav-item dropdown">
+                            <li class="nav-item dropdown position-relative">
                                 <a class="nav-link dropdown-toggle" href="<%= level1.link %>" 
                                    id="menu-<%= level1._id %>" 
                                    role="button" 
@@ -42,7 +40,7 @@
                                     <%= level1.name %>
                                 </a>
                                 
-                                <ul class="dropdown-menu" aria-labelledby="menu-<%= level1._id %>">
+                                <ul class="dropdown-menu shadow" aria-labelledby="menu-<%= level1._id %>">
                                     <% level1.children.forEach(level2 => { %>
                                         
                                         <% if (level2.children && level2.children.length > 0) { %>
@@ -52,7 +50,8 @@
                                                     <%= level2.name %>
                                                 </a>
                                                 
-                                                <ul class="dropdown-submenu">
+                                                <ul class="dropdown-submenu shadow" 
+                                                    style="position: absolute; left: 100%; top: 0; margin-top: -5px; display: none; min-width: 200px; background: #fff; list-style: none; padding: 0.5rem 0; border: 1px solid rgba(0,0,0,.15); border-radius: 0.25rem;">
                                                     <% level2.children.forEach(level3 => { %>
                                                         <li>
                                                             <a class="dropdown-item" href="<%= level3.link %>">
@@ -62,7 +61,7 @@
                                                     <% }) %>
                                                 </ul>
                                             </li>
-                                        
+
                                         <% } else { %>
                                             <li><a class="dropdown-item" href="<%= level2.link %>"><%= level2.name %></a></li>
                                         <% } %>
