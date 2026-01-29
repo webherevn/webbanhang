@@ -49,57 +49,17 @@
                         </div>
 
                         <div class="wp-card">
-                                <div class="postbox-header">Thư viện ảnh</div>
-                                
-                                <% if (editing && product.gallery && product.gallery.length > 0) { %>
-                                    <div class="d-flex flex-wrap gap-2 mb-3" id="gallery-container">
-                                        <% product.gallery.forEach(img => { %>
-                                            <div class="position-relative gallery-item" style="width: 60px; height: 60px;">
-                                                <img src="<%= img %>" class="w-100 h-100 object-fit-cover border rounded shadow-sm">
-                                                
-                                                <button type="button" 
-                                                        class="btn btn-danger btn-sm p-0 position-absolute top-0 end-0 rounded-circle d-flex align-items-center justify-content-center"
-                                                        style="width: 18px; height: 18px; transform: translate(30%, -30%); font-size: 10px;"
-                                                        onclick="deleteGalleryImage(this, '<%= product._id %>', '<%= img %>')">
-                                                    <i class="fas fa-times"></i>
-                                                </button>
-                                            </div>
-                                        <% }) %>
-                                    </div>
-                                <% } %>
+                            <div class="postbox-header">Mô tả chi tiết</div>
+                            <textarea name="description" id="prodDesc"><%= editing ? product.description : '' %></textarea>
+                        </div>
 
-                                <input type="file" name="gallery" class="form-control form-control-sm" multiple>
-                                <div class="small text-muted mt-2 lh-sm" style="font-size: 11px;">
-                                    <i class="fas fa-info-circle me-1"></i> Giữ Ctrl để chọn nhiều ảnh.
-                                </div>
+                        <div class="wp-card">
+                            <div class="postbox-header">Chính sách giao hàng</div>
+                            <textarea name="shippingPolicy" id="shipDesc"><%= editing ? product.shippingPolicy : '' %></textarea>
+                            <div class="small text-muted mt-2">
+                                <i class="fas fa-info-circle me-1"></i> Nhập thông tin về phí ship, thời gian giao hàng, đổi trả... (Để trống sẽ hiện mặc định).
                             </div>
-
-                            <script>
-                                // Hàm xóa ảnh Gallery bằng AJAX
-                                function deleteGalleryImage(btn, productId, imageUrl) {
-                                    if (!confirm('Bạn có chắc muốn xóa ảnh này?')) return;
-
-                                    // Gửi yêu cầu xóa về server
-                                    fetch('/admin/delete-product-image', {
-                                        method: 'POST',
-                                        headers: {
-                                            'Content-Type': 'application/json'
-                                        },
-                                        body: JSON.stringify({ productId: productId, imageUrl: imageUrl })
-                                    })
-                                    .then(response => response.json())
-                                    .then(data => {
-                                        if (data.success) {
-                                            // Nếu xóa thành công, xóa element ảnh đó trên giao diện ngay lập tức
-                                            btn.closest('.gallery-item').remove();
-                                        } else {
-                                            alert('Có lỗi xảy ra, không thể xóa ảnh.');
-                                        }
-                                    })
-                                    .catch(err => console.error(err));
-                                }
-                            </script>
-
+                        </div>
                         <div class="wp-card border-top border-4 border-warning">
                             <div class="postbox-header d-flex justify-content-between align-items-center mb-2">
                                 <span><i class="fas fa-tags me-2 text-warning"></i>Phân loại hàng</span>
@@ -230,9 +190,30 @@
                             <% if (editing && product.thumbnail) { %> <div class="mb-2 border p-1 bg-light"><img src="<%= product.thumbnail %>" class="img-fluid" style="max-height: 150px;"></div> <% } %>
                             <input type="file" name="thumbnail" class="form-control form-control-sm">
                         </div>
+                        
                         <div class="wp-card">
                             <div class="postbox-header">Thư viện ảnh</div>
+                            <% if (editing && product.gallery && product.gallery.length > 0) { %>
+                                <div class="d-flex flex-wrap gap-2 mb-3" id="gallery-container">
+                                    <% product.gallery.forEach(img => { %>
+                                        <div class="position-relative gallery-item" style="width: 60px; height: 60px;">
+                                            <img src="<%= img %>" class="w-100 h-100 object-fit-cover border rounded shadow-sm">
+                                            
+                                            <button type="button" 
+                                                    class="btn btn-danger btn-sm p-0 position-absolute top-0 end-0 rounded-circle d-flex align-items-center justify-content-center"
+                                                    style="width: 18px; height: 18px; transform: translate(30%, -30%); font-size: 10px;"
+                                                    onclick="deleteGalleryImage(this, '<%= product._id %>', '<%= img %>')">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </div>
+                                    <% }) %>
+                                </div>
+                            <% } %>
+
                             <input type="file" name="gallery" class="form-control form-control-sm" multiple>
+                            <div class="small text-muted mt-2 lh-sm" style="font-size: 11px;">
+                                <i class="fas fa-info-circle me-1"></i> Giữ Ctrl để chọn nhiều ảnh.
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -242,7 +223,19 @@
 
     <script>
         $(document).ready(function() {
+            // 1. Editor cho Mô tả
             $('#prodDesc').summernote({ height: 400 });
+
+            // 2. Editor cho Chính sách giao hàng (MỚI)
+            $('#shipDesc').summernote({ 
+                height: 200,
+                placeholder: 'Nhập chính sách giao hàng riêng cho sản phẩm này...',
+                toolbar: [
+                    ['style', ['bold', 'italic', 'underline', 'clear']],
+                    ['para', ['ul', 'ol', 'paragraph']],
+                    ['insert', ['link']]
+                ]
+            });
 
             $('#toggleVariants').change(function() {
                 if(this.checked) {
@@ -261,8 +254,8 @@
             const sizes = $('#inputSizes').val().split(',').map(s => s.trim()).filter(s => s);
             const tbody = $('#variantTableBody');
             
-            // Nếu không phải chế độ thêm (append) thì xóa bảng cũ
             if (!isAppend) {
+                if(!confirm('Bạn có chắc muốn xóa hết dữ liệu trong bảng và tạo lại từ đầu?')) return;
                 tbody.empty();
             }
 
@@ -276,7 +269,6 @@
 
             finalColors.forEach(color => {
                 finalSizes.forEach(size => {
-                    // KIỂM TRA TRÙNG LẶP NẾU ĐANG Ở CHẾ ĐỘ APPEND
                     if (isAppend) {
                         let isExist = false;
                         $('#variantTableBody tr').each(function() {
@@ -284,10 +276,10 @@
                             const existingSize = $(this).find('input[name="variant_size[]"]').val();
                             if (existingColor === color && existingSize === size) {
                                 isExist = true;
-                                return false; // break loop
+                                return false; 
                             }
                         });
-                        if (isExist) return; // Bỏ qua nếu đã có
+                        if (isExist) return; 
                     }
 
                     const sku = `SP-${slugify(color).toUpperCase()}-${slugify(size).toUpperCase()}-${Math.floor(Math.random()*1000)}`;
@@ -299,7 +291,7 @@
                             <td><input type="number" name="variant_stock[]" class="form-control form-control-sm variant-stock" value="10"></td>
                             <td><input type="text" name="variant_sku[]" value="${sku}" class="form-control form-control-sm text-center"></td>
                             <td class="text-center">
-                                <button type="button" class="btn btn-sm text-danger btn-delete-row border" onclick="this.closest('tr').remove()" title="Xóa dòng này">
+                                <button type="button" class="btn-delete-row" onclick="this.closest('tr').remove()" title="Xóa dòng này">
                                     <i class="fas fa-trash-alt"></i>
                                 </button>
                             </td>
@@ -311,7 +303,6 @@
 
             $('#emptyVariantMsg').addClass('d-none');
             
-            // Xóa input sau khi thêm để tránh nhầm lẫn
             if(isAppend) {
                 $('#inputColors').val('');
                 $('#inputSizes').val('');
@@ -327,6 +318,26 @@
             const stock = $('#bulkStock').val();
             if (price) $('.variant-price').val(price);
             if (stock) $('.variant-stock').val(stock);
+        }
+
+        // HÀM XÓA ẢNH GALLERY BẰNG AJAX
+        function deleteGalleryImage(btn, productId, imageUrl) {
+            if (!confirm('Bạn có chắc muốn xóa ảnh này?')) return;
+
+            fetch('/admin/delete-product-image', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ productId: productId, imageUrl: imageUrl })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    btn.closest('.gallery-item').remove();
+                } else {
+                    alert('Có lỗi xảy ra, không thể xóa ảnh.');
+                }
+            })
+            .catch(err => console.error(err));
         }
     </script>
     <script src="/js/admin-seo.js"></script>

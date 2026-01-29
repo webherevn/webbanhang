@@ -36,11 +36,11 @@ exports.getAddProduct = async (req, res) => {
     }
 };
 
-// 3. Hàm xử lý lưu sản phẩm (CÓ VARIANTS & SEO)
+// 3. Hàm xử lý lưu sản phẩm (CÓ VARIANTS & SEO & SHIPPING POLICY)
 exports.postAddProduct = async (req, res) => {
     try {
         const { 
-            name, basePrice, salePrice, category, description, 
+            name, basePrice, salePrice, category, description, shippingPolicy, // <--- CẬP NHẬT: Thêm shippingPolicy
             seoTitle, seoDescription, focusKeyword, 
             hasVariants, variant_color, variant_size, variant_price, variant_stock, variant_sku 
         } = req.body;
@@ -62,6 +62,7 @@ exports.postAddProduct = async (req, res) => {
             salePrice: Number(salePrice || 0),
             category,
             description,
+            shippingPolicy, // <--- CẬP NHẬT: Lưu vào object
             seoTitle,
             seoDescription,
             focusKeyword,
@@ -130,11 +131,11 @@ exports.getEditProduct = async (req, res) => {
     } catch (err) { res.redirect('/admin/products'); }
 };
 
-// 5. Hàm lưu sửa sản phẩm (CÓ VARIANTS & SEO)
+// 5. Hàm lưu sửa sản phẩm (CÓ VARIANTS & SEO & SHIPPING POLICY)
 exports.postEditProduct = async (req, res) => {
     try {
         const { 
-            productId, name, basePrice, salePrice, category, description, 
+            productId, name, basePrice, salePrice, category, description, shippingPolicy, // <--- CẬP NHẬT: Thêm shippingPolicy
             seoTitle, seoDescription, focusKeyword,
             hasVariants, variant_color, variant_size, variant_price, variant_stock, variant_sku
         } = req.body;
@@ -146,6 +147,7 @@ exports.postEditProduct = async (req, res) => {
         product.name = name;
         product.category = category;
         product.description = description;
+        product.shippingPolicy = shippingPolicy; // <--- CẬP NHẬT: Lưu vào database
         product.basePrice = Number(basePrice);
         product.salePrice = Number(salePrice || 0);
         product.hasVariants = hasVariants === 'on';

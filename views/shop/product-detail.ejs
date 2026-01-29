@@ -46,7 +46,7 @@
         .product-price { font-size: 1.8rem; color: #dc3545; font-weight: bold; background: #fafafa; padding: 10px 15px; display: inline-block; border-radius: 4px; }
         .old-price { font-size: 1.1rem; color: #999; text-decoration: line-through; margin-left: 10px; }
         
-        /* CSS Nút Biến Thể (Shopee Style) - MỚI CẬP NHẬT */
+        /* CSS Nút Biến Thể (Shopee Style) */
         .variant-label { width: 100px; font-weight: 600; color: #555; font-size: 14px; }
         .variant-option {
             min-width: 80px; text-align: center; border: 1px solid #e0e0e0; 
@@ -76,6 +76,24 @@
         .card-product:hover { transform: translateY(-5px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
         .card-product img { height: 250px; object-fit: cover; }
     </style>
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org/",
+      "@type": "Product",
+      "name": "<%= product.name %>",
+      "image": ["<%= product.thumbnail %>"],
+      "description": "<%= product.description ? product.description.substring(0, 160).replace(/<[^>]*>?/gm, '') : '' %>",
+      "sku": "<%= product._id %>",
+      "offers": {
+        "@type": "Offer",
+        "url": "https://webbanhang-es90.onrender.com/products/<%= product.slug %>",
+        "priceCurrency": "VND",
+        "price": "<%= product.salePrice > 0 ? product.salePrice : product.basePrice %>",
+        "availability": "https://schema.org/InStock"
+      }
+    }
+    </script>
 </head>
 <body>
 
@@ -246,11 +264,18 @@
                     <div class="tab-pane fade show active description-content" id="desc">
                         <%- product.description ? product.description : '<p class="text-muted text-center">Đang cập nhật...</p>' %>
                     </div>
+                    
                     <div class="tab-pane fade" id="policy">
-                        <p><strong>1. Thời gian giao hàng:</strong><br>Nội thành: 1-2 ngày. Ngoại thành: 3-5 ngày.</p>
-                        <p><strong>2. Phí vận chuyển:</strong><br>Đồng giá 30k toàn quốc. Freeship đơn từ 500k.</p>
+                        <% if (product.shippingPolicy && product.shippingPolicy.trim() !== '') { %>
+                            <div class="description-content">
+                                <%- product.shippingPolicy %>
+                            </div>
+                        <% } else { %>
+                            <p><strong>1. Thời gian giao hàng:</strong><br>Nội thành: 1-2 ngày. Ngoại thành: 3-5 ngày.</p>
+                            <p><strong>2. Phí vận chuyển:</strong><br>Đồng giá 30k toàn quốc. Freeship đơn từ 500k.</p>
+                        <% } %>
                     </div>
-                </div>
+                    </div>
             </div>
         </div>
 
@@ -298,18 +323,14 @@
         const hasVariants = <%= product.hasVariants %>;
 
         function selectOption(element, type) {
-            // Xóa active ở các nút cùng nhóm
             if (type === 'color') document.querySelectorAll('.btn-color').forEach(el => el.classList.remove('active'));
             if (type === 'size') document.querySelectorAll('.btn-size').forEach(el => el.classList.remove('active'));
             
-            // Active nút vừa bấm
             element.classList.add('active');
 
-            // Lưu giá trị vào input ẩn
             if (type === 'color') document.getElementById('selectedColor').value = element.getAttribute('data-value');
             if (type === 'size') document.getElementById('selectedSize').value = element.getAttribute('data-value');
 
-            // Gọi hàm check giá
             updatePrice();
         }
 
@@ -324,11 +345,9 @@
             const btnText = document.getElementById('btn-text');
 
             if (color && size) {
-                // Tìm biến thể khớp trong mảng JSON
                 const found = variantsData.find(v => v.color === color && v.size === size);
 
                 if (found) {
-                    // Cập nhật giá
                     priceEl.innerHTML = found.price.toLocaleString('vi-VN') + '₫';
                     
                     if (found.stock > 0) {

@@ -6,6 +6,10 @@ const productSchema = new mongoose.Schema({
   slug: { type: String, unique: true, index: true }, // Slug duy nhất cho SEO
   description: { type: String },
   
+  // --- THÊM MỚI: CHÍNH SÁCH GIAO HÀNG ---
+  shippingPolicy: { type: String }, // Lưu nội dung HTML chính sách giao hàng riêng
+  // --------------------------------------
+
   // Liên kết sang bảng Category để lấy dữ liệu danh mục chuẩn xác hơn
   category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: true },
 
