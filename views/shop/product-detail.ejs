@@ -46,7 +46,7 @@
         .product-price { font-size: 1.8rem; color: #dc3545; font-weight: bold; background: #fafafa; padding: 10px 15px; display: inline-block; border-radius: 4px; }
         .old-price { font-size: 1.1rem; color: #999; text-decoration: line-through; margin-left: 10px; }
         
-        /* CSS Nút Biến Thể (Shopee Style) */
+        /* CSS Nút Biến Thể (Shopee Style) - MỚI CẬP NHẬT */
         .variant-label { width: 100px; font-weight: 600; color: #555; font-size: 14px; }
         .variant-option {
             min-width: 80px; text-align: center; border: 1px solid #e0e0e0; 
@@ -76,24 +76,6 @@
         .card-product:hover { transform: translateY(-5px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
         .card-product img { height: 250px; object-fit: cover; }
     </style>
-
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org/",
-      "@type": "Product",
-      "name": "<%= product.name %>",
-      "image": ["<%= product.thumbnail %>"],
-      "description": "<%= product.description ? product.description.substring(0, 160).replace(/<[^>]*>?/gm, '') : '' %>",
-      "sku": "<%= product._id %>",
-      "offers": {
-        "@type": "Offer",
-        "url": "https://webbanhang-es90.onrender.com/products/<%= product.slug %>",
-        "priceCurrency": "VND",
-        "price": "<%= product.salePrice > 0 ? product.salePrice : product.basePrice %>",
-        "availability": "https://schema.org/InStock"
-      }
-    }
-    </script>
 </head>
 <body>
 
@@ -124,11 +106,20 @@
                         <% } %>
                     </div>
                     
-                    <% if (product.images && product.images.length > 0) { %>
+                    <% 
+                        // Logic hiển thị ảnh: Hỗ trợ cả tên biến cũ 'images' và mới 'gallery'
+                        let album = [];
+                        if (product.gallery && product.gallery.length > 0) album = product.gallery;
+                        else if (product.images && product.images.length > 0) album = product.images;
+                    %>
+
+                    <% if (album.length > 0) { %>
                         <div class="thumb-list">
                             <img src="<%= product.thumbnail %>" class="thumb-img active" onclick="changeImage(this, '<%= product.thumbnail %>')">
-                            <% product.images.forEach(img => { %>
-                                <img src="<%= img %>" class="thumb-img" onclick="changeImage(this, '<%= img %>')">
+                            <% album.forEach(img => { %>
+                                <% if (img !== product.thumbnail) { %>
+                                    <img src="<%= img %>" class="thumb-img" onclick="changeImage(this, '<%= img %>')">
+                                <% } %>
                             <% }) %>
                         </div>
                     <% } %>
@@ -228,7 +219,7 @@
                         <button type="submit" id="btn-add-cart" class="btn btn-dark flex-grow-1 py-3 fw-bold text-uppercase" 
                                 <%= product.hasVariants ? 'disabled' : '' %>>
                             <i class="fas fa-shopping-bag me-2"></i> 
-                            <%= product.hasVariants ? 'Chọn phân loại hàng' : 'Thêm vào giỏ' %>
+                            <span id="btn-text"><%= product.hasVariants ? 'Chọn phân loại hàng' : 'Thêm vào giỏ' %></span>
                         </button>
                         <button type="button" class="btn btn-outline-danger py-3 px-3">
                             <i class="far fa-heart"></i>
@@ -330,6 +321,7 @@
             const priceEl = document.getElementById('displayPrice');
             const stockEl = document.getElementById('stock-status');
             const btnCart = document.getElementById('btn-add-cart');
+            const btnText = document.getElementById('btn-text');
 
             if (color && size) {
                 // Tìm biến thể khớp trong mảng JSON
@@ -341,17 +333,19 @@
                     
                     if (found.stock > 0) {
                         stockEl.innerHTML = `Kho: <span class="text-dark fw-bold">${found.stock}</span> sản phẩm`;
+                        stockEl.classList.remove('text-danger');
                         btnCart.disabled = false;
-                        btnCart.innerHTML = '<i class="fas fa-shopping-bag me-2"></i> Thêm vào giỏ';
+                        btnText.innerText = 'Thêm vào giỏ';
                     } else {
                         stockEl.innerHTML = '<span class="text-danger">Hết hàng</span>';
                         btnCart.disabled = true;
-                        btnCart.innerText = 'Đã hết hàng';
+                        btnText.innerText = 'Đã hết hàng';
                     }
                 } else {
                     priceEl.innerText = '---';
                     stockEl.innerHTML = '<span class="text-danger">Phiên bản này không tồn tại</span>';
                     btnCart.disabled = true;
+                    btnText.innerText = 'Không khả dụng';
                 }
             }
         }
