@@ -1,5 +1,11 @@
 // Lưu ý: Vì file này nằm trong controllers/admin/ nên phải lùi 2 cấp mới ra được models
 const Menu = require('../../models/MenuModel');
+// [MỚI] Import thêm Setting Model để xử lý cấu hình chung và Index
+const Setting = require('../../models/SettingModel');
+
+// ============================================================
+// PHẦN 1: QUẢN LÝ MENU (GIỮ NGUYÊN)
+// ============================================================
 
 // 1. Hiển thị trang quản lý Menu
 exports.getMenuSettings = async (req, res) => {
@@ -94,9 +100,7 @@ exports.postDeleteMenu = async (req, res) => {
     }
 };
 
-// ... (Các đoạn code cũ giữ nguyên)
-
-// [MỚI] 4. Cập nhật Menu (Sửa tên, link, thứ tự, cha con)
+// 4. Cập nhật Menu (Sửa tên, link, thứ tự, cha con)
 exports.postUpdateMenu = async (req, res) => {
     try {
         const { id, name, link, order, parent } = req.body;
@@ -122,5 +126,92 @@ exports.postUpdateMenu = async (req, res) => {
     } catch (err) {
         console.error("❌ Lỗi cập nhật menu:", err);
         res.status(500).send("Lỗi cập nhật: " + err.message);
+    }
+};
+
+
+// ============================================================
+// PHẦN 2: CẤU HÌNH INDEX GOOGLE & CÀI ĐẶT CHUNG (MỚI THÊM)
+// ============================================================
+
+// 5. Hiển thị trang cấu hình Index Google
+exports.getIndexSettings = async (req, res) => {
+    try {
+        let settings = await Setting.findOne({ key: 'global_settings' });
+        
+        // Nếu chưa có thì tạo mới (để tránh lỗi null)
+        if (!settings) {
+            settings = await new Setting({ key: 'global_settings' }).save();
+        }
+
+        res.render('admin/settings/index-google', {
+            pageTitle: 'Cấu hình Index Google',
+            path: '/admin/settings/index',
+            settings: settings
+        });
+    } catch (err) {
+        console.log(err);
+        res.redirect('/admin');
+    }
+};
+
+// 6. Lưu cấu hình Index Google
+exports.postIndexSettings = async (req, res) => {
+    try {
+        // Checkbox: Nếu tick thì req.body.enableIndexing = 'on', không tick thì undefined
+        const enableIndexing = req.body.enableIndexing === 'on';
+
+        await Setting.findOneAndUpdate(
+            { key: 'global_settings' },
+            { enableIndexing: enableIndexing },
+            { new: true, upsert: true }
+        );
+
+        res.redirect('/admin/settings/index');
+    } catch (err) {
+        console.log("Lỗi lưu Index:", err);
+        res.status(500).send("Lỗi server");
+    }
+};
+
+// 7. Hiển thị Cài đặt chung (Script Header/Footer...)
+// (Thêm hàm này để link trong sidebar hoạt động)
+exports.getGeneralSettings = async (req, res) => {
+    try {
+        let settings = await Setting.findOne({ key: 'global_settings' });
+        if (!settings) {
+            settings = await new Setting({ key: 'global_settings' }).save();
+        }
+
+        res.render('admin/settings/general', {
+            pageTitle: 'Cài đặt chung (Scripts)',
+            path: '/admin/settings/general',
+            settings: settings
+        });
+    } catch (err) {
+        console.log(err);
+        res.redirect('/admin');
+    }
+};
+
+// 8. Lưu Cài đặt chung
+exports.postGeneralSettings = async (req, res) => {
+    try {
+        const { headerScripts, bodyScripts, footerScripts } = req.body;
+
+        await Setting.findOneAndUpdate(
+            { key: 'global_settings' },
+            { 
+                headerScripts, 
+                bodyScripts, 
+                footerScripts 
+            },
+            { new: true, upsert: true }
+        );
+
+        res.redirect('/admin/settings/general');
+    } catch (err) {
+        console.log("Lỗi lưu Script:", err);
+        res.status(500).send("Lỗi server");
     }
 };

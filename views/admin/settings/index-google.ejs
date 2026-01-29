@@ -1,0 +1,48 @@
+<%- include('../../partials/head.ejs') %>
+
+<style>
+    body { background-color: #f0f0f1; }
+    .admin-wrapper { display: flex; min-height: 100vh; }
+    .admin-content { flex: 1; padding: 30px; margin-left: 240px; }
+    .wp-card { background: #fff; padding: 30px; border: 1px solid #c3c4c7; box-shadow: 0 1px 3px rgba(0,0,0,.04); max-width: 800px; }
+</style>
+
+<body>
+    <div class="admin-wrapper">
+        <div class="admin-sidebar-container"><%- include('../../partials/sidebar.ejs') %></div>
+        
+        <div class="admin-content">
+            <h2 class="fw-bold h4 mb-4">Mức độ hiển thị với công cụ tìm kiếm</h2>
+
+            <div class="wp-card">
+                <form action="/admin/settings/index" method="POST">
+                    
+                    <div class="mb-4">
+                        <label class="fw-bold mb-2">Trạng thái Index</label>
+                        
+                        <div class="form-check">
+                            <input type="checkbox" 
+                                   class="form-check-input" 
+                                   id="indexingCheck" 
+                                   name="enableIndexing" 
+                                   <%= settings.enableIndexing ? 'checked' : '' %>>
+                            
+                            <label class="form-check-label" for="indexingCheck">
+                                Cho phép các công cụ tìm kiếm (Google, Bing...) đánh chỉ mục website này.
+                            </label>
+                        </div>
+                        
+                        <div class="alert alert-warning mt-3 small">
+                            <i class="fas fa-exclamation-triangle me-1"></i>
+                            <strong>Lưu ý:</strong> Nếu bạn bỏ tick mục này, website sẽ thêm thẻ <code>noindex</code>. 
+                            Website của bạn sẽ <strong>biến mất khỏi Google</strong>. Chỉ nên dùng khi đang xây dựng hoặc bảo trì web.
+                        </div>
+                    </div>
+
+                    <hr>
+                    <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>

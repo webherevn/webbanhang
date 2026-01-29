@@ -3,7 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
+<% if (typeof globalScripts !== 'undefined' && globalScripts.enableIndexing) { %>
+        <meta name="robots" content="index, follow">
+        <meta name="googlebot" content="index, follow">
+    <% } else { %>
+        <meta name="robots" content="noindex, nofollow">
+        <meta name="googlebot" content="noindex, nofollow">
+    <% } %>
+    ```
     <% 
         // 1. LOGIC SEO & THEME SETTINGS
         let currentItem = (typeof post !== 'undefined') ? post : ((typeof product !== 'undefined') ? product : ((typeof page !== 'undefined') ? page : null));
