@@ -1,7 +1,7 @@
 // Lưu ý: Vì file này nằm trong controllers/admin/ nên phải lùi 2 cấp mới ra được models
 const Menu = require('../../models/MenuModel');
 
-// 1. Hiển thị trang quản lý Menu (Đã nâng cấp để hỗ trợ chọn Cha/Con)
+// 1. Hiển thị trang quản lý Menu
 exports.getMenuSettings = async (req, res) => {
     try {
         // --- PHẦN 1: Lấy danh sách hiển thị bảng ---
@@ -10,9 +10,6 @@ exports.getMenuSettings = async (req, res) => {
             .sort({ order: 1 }); 
 
         // --- PHẦN 2: Chuẩn bị dữ liệu cho Dropdown "Chọn Menu Cha" ---
-        // Logic: Chỉ cho phép chọn Menu Cấp 1 hoặc Cấp 2 làm cha (để tạo ra tối đa Cấp 3)
-        
-        // Lấy tất cả menu gốc (Cấp 1)
         const rootMenus = await Menu.find({ parent: null }).sort({ order: 1 }).lean();
         
         const parentOptions = []; // Mảng chứa danh sách options đã sắp xếp
@@ -35,7 +32,6 @@ exports.getMenuSettings = async (req, res) => {
                     name: child.name, 
                     level: 2 
                 });
-                // Không tìm con của Cấp 2 nữa, vì Cấp 3 không được phép làm cha
             }
         }
 
@@ -44,17 +40,17 @@ exports.getMenuSettings = async (req, res) => {
             pageTitle: 'Cấu hình Menu',
             path: '/admin/settings/menu',
             menus: menus,
-            parentOptions: parentOptions // Truyền biến này sang View để tạo dropdown
+            parentOptions: parentOptions
         });
 
     } catch (err) { 
-        console.error("Lỗi lấy danh sách menu:", err);
-        // Render trang rỗng hoặc chuyển hướng để không bị treo
-        res.redirect('/admin');
+        // [DEBUG] In lỗi ra console và màn hình thay vì redirect
+        console.error("❌ LỖI GET MENU:", err);
+        res.status(500).send("Lỗi hiển thị Menu: " + err.message);
     }
 };
 
-// 2. Thêm Menu mới (Đã hỗ trợ lưu Parent)
+// 2. Thêm Menu mới
 exports.postAddMenu = async (req, res) => {
     try {
         const { name, link, order, parent } = req.body;
@@ -62,21 +58,22 @@ exports.postAddMenu = async (req, res) => {
         const menuData = {
             name,
             link,
-            order: Number(order) || 0 // Đảm bảo order là số
+            order: Number(order) || 0
         };
 
         // Nếu người dùng chọn parent (và không phải chuỗi rỗng) thì lưu ID cha
         if (parent && parent !== "") {
             menuData.parent = parent;
         } else {
-            menuData.parent = null; // Là menu gốc (Cấp 1)
+            menuData.parent = null;
         }
 
         await Menu.create(menuData);
         res.redirect('/admin/settings/menu');
     } catch (err) { 
-        console.error("Lỗi thêm menu:", err);
-        res.redirect('/admin/settings/menu');
+        // [DEBUG] In lỗi ra màn hình
+        console.error("❌ LỖI ADD MENU:", err);
+        res.status(500).send("Lỗi thêm Menu: " + err.message);
     }
 };
 
@@ -85,16 +82,14 @@ exports.postDeleteMenu = async (req, res) => {
     try {
         const menuId = req.body.id;
         
-        // (Tùy chọn nâng cao): Trước khi xóa cha, nên xóa các con hoặc đưa con về cấp 1
-        // Hiện tại xóa đơn giản:
         await Menu.findByIdAndDelete(menuId);
-        
-        // Xóa luôn các menu con của nó (để tránh menu con bị mồ côi) - Tùy chọn
+        // Xóa luôn các menu con của nó (để tránh menu con bị mồ côi)
         await Menu.deleteMany({ parent: menuId });
 
         res.redirect('/admin/settings/menu');
     } catch (err) { 
-        console.error("Lỗi xóa menu:", err);
-        res.redirect('/admin/settings/menu');
+        // [DEBUG] In lỗi ra màn hình
+        console.error("❌ LỖI DELETE MENU:", err);
+        res.status(500).send("Lỗi xóa Menu: " + err.message);
     }
 };
