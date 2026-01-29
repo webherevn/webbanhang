@@ -71,6 +71,23 @@
                 </li>
             </ul>
         <% } %>
+        
+
+            <li class="nav-item">
+                <a class="nav-link d-flex align-items-center py-2 px-3 text-decoration-none <%= path === '/admin/settings/menu' ? 'active bg-primary text-white rounded' : 'text-white-50' %>" 
+                href="/admin/settings/menu">
+                    <i class="fas fa-bars fa-fw me-2"></i>
+                    <span>Quản lý Menu</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a class="nav-link d-flex align-items-center py-2 px-3 text-decoration-none <%= path === '/admin/settings/general' ? 'active bg-primary text-white rounded' : 'text-white-50' %>" 
+                href="/admin/settings/general">
+                    <i class="fas fa-cog fa-fw me-2"></i>
+                    <span>Cài đặt chung</span>
+                </a>
+            </li>
     </ul>
 </div>
 
