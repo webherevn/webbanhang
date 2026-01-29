@@ -21,48 +21,36 @@
         overflow-x: hidden;
     }
 
-    /* 2. ĐỒNG BỘ LAYOUT */
+    /* 2. LAYOUT ADMIN */
     .admin-wrapper { display: flex; min-height: 100vh; }
-    
     .admin-sidebar-container { 
-        width: var(--sidebar-width); 
-        position: fixed; 
-        top: 0; left: 0; bottom: 0; 
-        background-color: var(--sidebar-bg); 
-        z-index: 1000; 
+        width: var(--sidebar-width); position: fixed; top: 0; left: 0; bottom: 0; 
+        background-color: var(--sidebar-bg); z-index: 1000; 
     }
-
     .admin-content { 
-        flex: 1; 
-        margin-left: var(--sidebar-width); 
-        padding: 30px; 
-        min-width: 0;
+        flex: 1; margin-left: var(--sidebar-width); padding: 30px; min-width: 0;
     }
 
-    /* 3. ĐỒNG BỘ CARD & COMPONENT */
+    /* 3. CARD & COMPONENT STYLE */
     .wp-card { 
-        background: #fff; 
-        border: 1px solid #c3c4c7; 
-        box-shadow: 0 1px 1px rgba(0,0,0,.04); 
-        padding: 20px; 
-        margin-bottom: 20px; 
+        background: #fff; border: 1px solid #c3c4c7; box-shadow: 0 1px 1px rgba(0,0,0,.04); 
+        padding: 20px; margin-bottom: 20px; 
     }
-
     .postbox-header { 
-        border-bottom: 1px solid #f0f0f1; 
-        padding-bottom: 10px; 
-        margin-bottom: 15px; 
-        font-weight: 700; 
-        color: #1d2327;
-        text-transform: uppercase;
-        font-size: 13px;
-        letter-spacing: 0.5px;
+        border-bottom: 1px solid #f0f0f1; padding-bottom: 10px; margin-bottom: 15px; 
+        font-weight: 700; color: #1d2327; text-transform: uppercase; font-size: 13px; letter-spacing: 0.5px;
     }
-
+    
     /* SEO Preview */
     .google-preview #preview-title { color: #1a0dab; font-size: 20px; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .seo-item { margin-bottom: 8px; font-size: 13px; display: flex; align-items: center; }
     
+    /* Variants Table Style */
+    .variant-box { background: #f8f9fa; border: 1px dashed #c3c4c7; padding: 15px; border-radius: 4px; }
+    .table-variants th { background-color: #e9ecef; font-size: 12px; text-align: center; vertical-align: middle; }
+    .table-variants td { vertical-align: middle; padding: 5px; }
+    .table-variants input { text-align: center; font-size: 13px; }
+
     .note-editor { border: 1px solid #c3c4c7 !important; border-radius: 0 !important; }
     .form-label { font-weight: 600; font-size: 13px; color: #1d2327; }
 
@@ -86,6 +74,10 @@
                 </div>
                 
                 <form action="/admin/<%= editing ? 'edit-product' : 'add-product' %>" method="POST" enctype="multipart/form-data">
+                    <% if (editing) { %>
+                        <input type="hidden" name="productId" value="<%= product._id %>">
+                    <% } %>
+
                     <div class="row">
                         <div class="col-md-9">
                             <div class="mb-4">
@@ -96,20 +88,83 @@
                             </div>
 
                             <div class="wp-card">
-                                <div class="postbox-header">Mô tả sản phẩm</div>
+                                <div class="postbox-header">Mô tả chi tiết</div>
                                 <textarea name="description" id="prodDesc"><%= editing ? product.description : '' %></textarea>
                             </div>
 
-                            <div class="wp-card">
-                                <div class="postbox-header">Dữ liệu giá & Kho hàng</div>
-                                <div class="row g-3">
-                                    <div class="col-md-6">
-                                        <label class="form-label">Giá gốc (₫)</label>
-                                        <input type="number" name="basePrice" class="form-control" value="<%= editing ? product.basePrice : '' %>" required>
+                            <div class="wp-card border-top border-4 border-warning">
+                                <div class="postbox-header d-flex justify-content-between align-items-center mb-2">
+                                    <span><i class="fas fa-tags me-2 text-warning"></i>Phân loại hàng (Màu sắc, Size)</span>
+                                    <div class="form-check form-switch m-0">
+                                        <input class="form-check-input" type="checkbox" id="toggleVariants" name="hasVariants" 
+                                            <%= (editing && product.hasVariants) ? 'checked' : '' %>>
+                                        <label class="form-check-label small fw-bold" for="toggleVariants">Bật phân loại</label>
                                     </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label">Giá khuyến mãi (₫)</label>
-                                        <input type="number" name="salePrice" class="form-control" value="<%= editing ? product.salePrice : '' %>">
+                                </div>
+
+                                <div id="variantSection" class="<%= (editing && product.hasVariants) ? '' : 'd-none' %>">
+                                    <div class="variant-box mb-3">
+                                        <div class="row g-3">
+                                            <div class="col-md-5">
+                                                <label class="small fw-bold text-muted">Nhóm 1: Màu sắc (Cách nhau dấu phẩy)</label>
+                                                <input type="text" id="inputColors" class="form-control form-control-sm" placeholder="VD: Đỏ, Xanh, Vàng...">
+                                            </div>
+                                            <div class="col-md-5">
+                                                <label class="small fw-bold text-muted">Nhóm 2: Kích thước (Cách nhau dấu phẩy)</label>
+                                                <input type="text" id="inputSizes" class="form-control form-control-sm" placeholder="VD: S, M, L, XL...">
+                                            </div>
+                                            <div class="col-md-2 d-flex align-items-end">
+                                                <button type="button" class="btn btn-warning btn-sm fw-bold w-100 shadow-sm" onclick="generateTable()">
+                                                    <i class="fas fa-bolt me-1"></i> Tạo bảng
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="table-responsive bg-white border rounded">
+                                        <table class="table table-bordered table-variants mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th>Màu sắc</th>
+                                                    <th>Size</th>
+                                                    <th width="140">Giá bán (₫)</th>
+                                                    <th width="100">Kho</th>
+                                                    <th width="100">SKU</th>
+                                                    <th width="40"><i class="fas fa-trash text-muted"></i></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="variantTableBody">
+                                                <% if (editing && product.hasVariants && product.variants.length > 0) { %>
+                                                    <% product.variants.forEach((v) => { %>
+                                                        <tr>
+                                                            <td><input type="text" name="variant_color[]" value="<%= v.color %>" class="form-control form-control-sm bg-light" readonly></td>
+                                                            <td><input type="text" name="variant_size[]" value="<%= v.size %>" class="form-control form-control-sm bg-light" readonly></td>
+                                                            <td><input type="number" name="variant_price[]" value="<%= v.price %>" class="form-control form-control-sm" required></td>
+                                                            <td><input type="number" name="variant_stock[]" value="<%= v.stock %>" class="form-control form-control-sm"></td>
+                                                            <td><input type="text" name="variant_sku[]" value="<%= v.sku %>" class="form-control form-control-sm"></td>
+                                                            <td><button type="button" class="btn btn-link text-danger p-0" onclick="this.closest('tr').remove()"><i class="fas fa-times"></i></button></td>
+                                                        </tr>
+                                                    <% }) %>
+                                                <% } %>
+                                            </tbody>
+                                        </table>
+                                        <div id="emptyVariantMsg" class="text-center text-muted py-4 small <%= (editing && product.variants.length > 0) ? 'd-none' : '' %>">
+                                            <i class="fas fa-box-open fa-2x mb-2 opacity-25"></i><br>
+                                            Chưa có biến thể nào. Hãy nhập Màu/Size ở trên và bấm "Tạo bảng".
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div id="simplePriceSection" class="<%= (editing && product.hasVariants) ? 'd-none' : '' %>">
+                                    <div class="row g-3 mt-1">
+                                        <div class="col-md-6">
+                                            <label class="form-label">Giá gốc (₫)</label>
+                                            <input type="number" name="basePrice" class="form-control" value="<%= editing ? product.basePrice : '' %>">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">Giá khuyến mãi (₫)</label>
+                                            <input type="number" name="salePrice" class="form-control" value="<%= editing ? product.salePrice : '' %>">
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -158,9 +213,6 @@
 
                             <div class="wp-card sticky-top" style="top: 20px;">
                                 <div class="postbox-header">Đăng sản phẩm</div>
-                                <% if (editing) { %>
-                                    <input type="hidden" name="productId" value="<%= product._id %>">
-                                <% } %>
                                 <button type="submit" class="btn btn-primary w-100 fw-bold shadow-sm">
                                     <i class="fas fa-save me-2"></i><%= editing ? 'Cập nhật' : 'Đăng ngay' %>
                                 </button>
@@ -210,15 +262,62 @@
                 placeholder: 'Nhập mô tả chi tiết sản phẩm tại đây...',
                 toolbar: [
                     ['style', ['style']],
-                    ['font', ['bold', 'underline', 'clear', 'italic']],
+                    ['font', ['bold', 'underline', 'clear']],
                     ['color', ['color']],
                     ['para', ['ul', 'ol', 'paragraph']],
                     ['table', ['table']],
-                    ['insert', ['link', 'picture', 'video', 'hr']],
+                    ['insert', ['link', 'picture', 'video']],
                     ['view', ['fullscreen', 'codeview']]
                 ]
             });
+
+            // Ẩn hiện vùng biến thể
+            $('#toggleVariants').change(function() {
+                if(this.checked) {
+                    $('#variantSection').removeClass('d-none');
+                    $('#simplePriceSection').addClass('d-none');
+                } else {
+                    $('#variantSection').addClass('d-none');
+                    $('#simplePriceSection').removeClass('d-none');
+                }
+            });
         });
+
+        // Hàm sinh bảng giá tự động
+        function generateTable() {
+            const colors = $('#inputColors').val().split(',').map(s => s.trim()).filter(s => s);
+            const sizes = $('#inputSizes').val().split(',').map(s => s.trim()).filter(s => s);
+            const tbody = $('#variantTableBody');
+            
+            tbody.empty(); // Xóa cũ tạo mới
+
+            if (colors.length === 0 && sizes.length === 0) {
+                alert("Vui lòng nhập ít nhất một màu hoặc một size!");
+                return;
+            }
+
+            const finalColors = colors.length > 0 ? colors : ['Mặc định'];
+            const finalSizes = sizes.length > 0 ? sizes : ['Free'];
+
+            finalColors.forEach(color => {
+                finalSizes.forEach(size => {
+                    const sku = `SP-${color.substring(0,2).toUpperCase()}-${size.substring(0,2).toUpperCase()}-${Math.floor(Math.random()*1000)}`;
+                    const row = `
+                        <tr>
+                            <td><input type="text" name="variant_color[]" value="${color}" class="form-control form-control-sm bg-light text-center" readonly></td>
+                            <td><input type="text" name="variant_size[]" value="${size}" class="form-control form-control-sm bg-light text-center" readonly></td>
+                            <td><input type="number" name="variant_price[]" class="form-control form-control-sm" required></td>
+                            <td><input type="number" name="variant_stock[]" class="form-control form-control-sm" value="10"></td>
+                            <td><input type="text" name="variant_sku[]" value="${sku}" class="form-control form-control-sm text-center"></td>
+                            <td><button type="button" class="btn btn-link text-danger p-0" onclick="this.closest('tr').remove()"><i class="fas fa-times"></i></button></td>
+                        </tr>
+                    `;
+                    tbody.append(row);
+                });
+            });
+
+            $('#emptyVariantMsg').addClass('d-none');
+        }
     </script>
     <script src="/js/admin-seo.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
