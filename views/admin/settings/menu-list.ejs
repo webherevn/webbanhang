@@ -23,6 +23,29 @@
                                 <label class="small fw-bold">Tên hiển thị</label>
                                 <input type="text" name="name" class="form-control" placeholder="Ví dụ: Sản phẩm" required>
                             </div>
+                            
+                            <div class="mb-3">
+                                <label class="small fw-bold">Menu Cha (Nếu có)</label>
+                                <select name="parent" class="form-select">
+                                    <option value="">-- Là Menu Gốc (Cấp 1) --</option>
+                                    
+                                    <% if (typeof parentOptions !== 'undefined' && parentOptions.length > 0) { %>
+                                        <% parentOptions.forEach(p => { %>
+                                            <option value="<%= p._id %>">
+                                                <% if(p.level === 1) { %>
+                                                    📂 <%= p.name %> (Cấp 1)
+                                                <% } else { %>
+                                                    &nbsp;&nbsp;&nbsp;&nbsp; ↳ <%= p.name %> (Cấp 2)
+                                                <% } %>
+                                            </option>
+                                        <% }) %>
+                                    <% } %>
+                                </select>
+                                <div class="form-text text-muted small" style="font-size: 11px;">
+                                    * Chọn Cấp 1 để tạo con (Cấp 2).<br>
+                                    * Chọn Cấp 2 để tạo cháu (Cấp 3).
+                                </div>
+                            </div>
                             <div class="mb-3">
                                 <label class="small fw-bold">Đường dẫn (Link)</label>
                                 <input type="text" name="link" class="form-control" placeholder="Ví dụ: /products" required>
@@ -53,7 +76,18 @@
                                     <% menus.forEach(menu => { %>
                                         <tr>
                                             <td class="text-center"><%= menu.order %></td>
-                                            <td class="fw-bold"><%= menu.name %></td>
+                                            
+                                            <td>
+                                                <% if (menu.parent) { %>
+                                                    <div class="text-muted fst-italic" style="font-size: 11px;">
+                                                        <i class="fas fa-level-up-alt fa-rotate-90 me-1"></i>
+                                                        Con của: <%= menu.parent.name %>
+                                                    </div>
+                                                    <span class="fw-bold ps-3"><%= menu.name %></span>
+                                                <% } else { %>
+                                                    <span class="fw-bold text-primary"><%= menu.name %></span>
+                                                <% } %>
+                                            </td>
                                             <td class="text-muted"><%= menu.link %></td>
                                             <td class="text-center">
                                                 <form action="/admin/settings/menu/delete" method="POST" onsubmit="return confirm('Xóa menu này?')">

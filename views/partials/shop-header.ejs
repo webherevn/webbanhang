@@ -27,16 +27,57 @@
         </button>
 
         <div class="collapse navbar-collapse" id="navbarNav">
+            
             <ul class="navbar-nav mx-auto mb-2 mb-lg-0 fw-semibold">
                 <% if (typeof mainMenu !== 'undefined' && mainMenu.length > 0) { %>
-                    <% mainMenu.forEach(item => { %>
-                        <li class="nav-item">
-                            <a class="nav-link <%= (typeof currentPath !== 'undefined' && currentPath === item.link) ? 'active text-danger' : '' %>" 
-                               href="<%= item.link %>">
-                                <%= item.name %>
-                            </a>
-                        </li>
+                    <% mainMenu.forEach(level1 => { %>
+                        
+                        <% if (level1.children && level1.children.length > 0) { %>
+                            
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="<%= level1.link %>" data-bs-toggle="dropdown">
+                                    <%= level1.name %>
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <% level1.children.forEach(level2 => { %>
+                                        
+                                        <% if (level2.children && level2.children.length > 0) { %>
+                                            
+                                            <li class="dropdown-item-has-child">
+                                                <a class="dropdown-item" href="<%= level2.link %>">
+                                                    <%= level2.name %>
+                                                </a>
+                                                <ul class="dropdown-submenu shadow">
+                                                    <% level2.children.forEach(level3 => { %>
+                                                        <li>
+                                                            <a class="dropdown-item" href="<%= level3.link %>">
+                                                                <%= level3.name %>
+                                                            </a>
+                                                        </li>
+                                                    <% }) %>
+                                                </ul>
+                                            </li>
+
+                                        <% } else { %>
+                                            <li><a class="dropdown-item" href="<%= level2.link %>"><%= level2.name %></a></li>
+                                        <% } %>
+
+                                    <% }) %>
+                                </ul>
+                            </li>
+
+                        <% } else { %>
+                            
+                            <li class="nav-item">
+                                <a class="nav-link <%= (typeof currentPath !== 'undefined' && currentPath === level1.link) ? 'active text-danger' : '' %>" 
+                                   href="<%= level1.link %>">
+                                    <%= level1.name %>
+                                </a>
+                            </li>
+
+                        <% } %>
                     <% }) %>
+                
                 <% } else { %>
                     <li class="nav-item"><a class="nav-link <%= path === '/' ? 'active' : '' %>" href="/">Trang chủ</a></li>
                     <li class="nav-item"><a class="nav-link <%= path === '/products' ? 'active' : '' %>" href="/products">Sản phẩm</a></li>
