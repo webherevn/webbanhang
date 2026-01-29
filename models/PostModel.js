@@ -25,7 +25,9 @@ const postSchema = new mongoose.Schema({
     
     author: { type: String, default: 'Admin' },
     views: { type: Number, default: 0 },
-    isActive: { type: Boolean, default: true }
+    isActive: { type: Boolean, default: true },
+    // [MỚI] CUSTOM SCHEMA CHO TỪNG SẢN PHẨM
+    customSchema: { type: String, default: '' } // Lưu chuỗi JSON-LD
 }, { timestamps: true });
 
 module.exports = mongoose.model('Post', postSchema);

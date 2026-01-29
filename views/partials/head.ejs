@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<% if (typeof globalScripts !== 'undefined' && globalScripts.enableIndexing) { %>
+    
+    <% if (typeof settings !== 'undefined' && settings.enableIndexing) { %>
         <meta name="robots" content="index, follow">
         <meta name="googlebot" content="index, follow">
     <% } else { %>
@@ -12,15 +13,16 @@
     <% } %>
    
     <% 
-        // 1. LOGIC SEO & THEME SETTINGS
+        // 2. LOGIC SEO & THEME SETTINGS
         let currentItem = (typeof post !== 'undefined') ? post : ((typeof product !== 'undefined') ? product : ((typeof page !== 'undefined') ? page : null));
         let siteTheme = (typeof theme !== 'undefined' && theme) ? theme : {};
+        let siteSettings = (typeof settings !== 'undefined') ? settings : {};
 
-        let finalTitle = (currentItem && currentItem.seoTitle) ? currentItem.seoTitle : (typeof pageTitle !== 'undefined' ? pageTitle : "Fashion Store");
+        let finalTitle = (currentItem && currentItem.seoTitle) ? currentItem.seoTitle : (typeof pageTitle !== 'undefined' ? pageTitle : (siteSettings.websiteName || "Fashion Store"));
         
         let rawDesc = (currentItem && currentItem.seoDescription) ? currentItem.seoDescription : 
                       ((currentItem && currentItem.summary) ? currentItem.summary : 
-                      (siteTheme.topBarText || "Chuyên cung cấp sản phẩm thời trang cao cấp."));
+                      (siteSettings.websiteDescription || "Chuyên cung cấp sản phẩm thời trang cao cấp."));
         
         let finalDesc = rawDesc.replace(/<[^>]*>?/gm, '').substring(0, 160);
         let finalImage = (currentItem && currentItem.thumbnail) ? currentItem.thumbnail : (siteTheme.logo || "/images/default-share.jpg");
@@ -46,13 +48,29 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
 
     <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
 
-    <% if (typeof globalScripts !== 'undefined' && globalScripts.headerScripts) { %>
-        <%- globalScripts.headerScripts %>
+    <% if (typeof settings !== 'undefined' && settings.headerScripts) { %>
+        <%- settings.headerScripts %>
+    <% } %>
+
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "<%= siteSettings.schemaType || 'Organization' %>",
+        "name": "<%= siteSettings.websiteName || 'Fashion Store' %>",
+        "url": "<%= domain %>",
+        "logo": "<%= siteSettings.orgLogo || domain + siteTheme.logo %>",
+        "sameAs": <%- JSON.stringify(siteSettings.socialLinks || []) %>
+    }
+    </script>
+
+    <% if (currentItem && currentItem.customSchema) { %>
+        <script type="application/ld+json">
+            <%- currentItem.customSchema %>
+        </script>
     <% } %>
 
     <style>
@@ -72,7 +90,6 @@
             margin: 0; padding: 0;
         }
         
-        /* Hiệu ứng Animation */
         .animate-up {
             opacity: 0;
             transform: translateY(30px);
@@ -82,7 +99,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Sidebar cố định */
         .admin-sidebar-container {
             width: var(--sidebar-width);
             position: fixed;
@@ -92,7 +108,6 @@
             overflow-y: auto;
         }
 
-        /* Nội dung chính bên phải */
         .admin-content {
             flex: 1;
             margin-left: var(--sidebar-width);
@@ -100,18 +115,15 @@
             min-width: 0;
         }
 
-        /* Đồng bộ Font size Admin */
         .admin-content h2, .admin-content h4 { font-weight: 700; color: #1d2327; }
         .admin-content label { font-size: 13px; font-weight: 600; margin-bottom: 5px; display: block; }
         .admin-content .form-control, .admin-content .btn { font-size: 14px; }
         
-        /* Responsive Admin */
         @media (max-width: 992px) {
             .admin-sidebar-container { transform: translateX(-100%); transition: 0.3s; }
             .admin-content { margin-left: 0; padding: 15px; }
         }
 
-        /* Tối ưu ảnh sản phẩm */
         .product-img {
             aspect-ratio: 3/4;
             object-fit: cover;
@@ -123,34 +135,20 @@
         
         .letter-spacing-2 { letter-spacing: 2px; }
 
-        /* ========================================================= */
-        /* CSS MENU ĐA CẤP HOVER - BẢN KHÁNG BOOTSTRAP JS (FIX LỖI 100%) */
-        /* ========================================================= */
-        
-        /* 1. MÀN HÌNH MÁY TÍNH (> 992px) */
+        /* CSS MENU ĐA CẤP HOVER (FIXED) */
         @media (min-width: 992px) {
-            
-            /* Đảm bảo thẻ cha có vị trí tương đối để con bám theo */
-            .navbar-nav .nav-item {
-                position: relative !important;
-            }
+            .navbar-nav .nav-item { position: relative !important; }
 
-            /* --- CẤP 2 (DROPDOWN) --- */
             .navbar-nav .dropdown-menu {
-                /* Ép buộc hiển thị theo ý mình, bỏ qua Popper.js */
                 display: none !important; 
                 opacity: 0;
                 visibility: hidden;
-                
                 position: absolute !important;
-                top: 100% !important; /* Luôn nằm ngay dưới */
-                left: 0 !important;   /* Luôn căn trái */
-                
-                /* Reset các thuộc tính mà Bootstrap JS hay tự thêm vào */
+                top: 100% !important;
+                left: 0 !important;
                 transform: none !important; 
                 inset: auto !important; 
                 margin: 0 !important;
-                
                 background-color: #fff;
                 border: 1px solid rgba(0,0,0,.15);
                 box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15);
@@ -159,21 +157,16 @@
                 transition: opacity 0.2s ease, visibility 0.2s ease;
             }
 
-            /* --- CẤP 3 (SUBMENU) --- */
             .dropdown-submenu {
                 display: none !important;
                 opacity: 0;
                 visibility: hidden;
-                
                 position: absolute !important;
-                left: 100% !important; /* Bay sang phải 100% */
-                top: 0 !important;     /* Ngang hàng với menu mẹ */
-                
-                /* Reset JS */
+                left: 100% !important;
+                top: 0 !important;
                 transform: none !important;
                 inset: auto !important;
                 margin-top: -5px !important;
-                
                 background: #fff;
                 min-width: 220px;
                 box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15);
@@ -184,21 +177,18 @@
                 z-index: 9999;
             }
 
-            /* --- LOGIC HOVER: CẤP 1 -> HIỆN CẤP 2 --- */
             .nav-item.dropdown:hover > .dropdown-menu {
                 display: block !important;
                 opacity: 1 !important;
                 visibility: visible !important;
             }
 
-            /* --- LOGIC HOVER: CẤP 2 -> HIỆN CẤP 3 --- */
             .dropdown-item-has-child:hover > .dropdown-submenu {
                 display: block !important;
                 opacity: 1 !important;
                 visibility: visible !important;
             }
 
-            /* Mũi tên chỉ sang phải ở Cấp 2 */
             .dropdown-item-has-child > a {
                 display: flex;
                 justify-content: space-between;
@@ -206,7 +196,7 @@
                 padding-right: 20px;
             }
             .dropdown-item-has-child > a::after {
-                content: "\f054"; /* Icon mũi tên */
+                content: "\f054";
                 font-family: "Font Awesome 5 Free";
                 font-weight: 900;
                 font-size: 10px;
@@ -214,27 +204,20 @@
             }
         }
 
-        /* 2. MÀN HÌNH ĐIỆN THOẠI (< 991px) */
         @media (max-width: 991px) {
-            .dropdown-menu {
-                border: none;
-                box-shadow: none;
-                background-color: transparent;
-                padding-left: 0;
-            }
+            .dropdown-menu { border: none; box-shadow: none; background-color: transparent; padding-left: 0; }
             .dropdown-menu .dropdown-submenu {
                 margin-left: 15px;
                 border-left: 2px solid #ddd;
                 display: block !important;
                 box-shadow: none !important;
-                position: static !important; /* Trên mobile thì nằm im trong dòng chảy */
+                position: static !important;
                 padding-left: 10px;
                 background-color: transparent;
             }
             .dropdown-item-has-child > a::after { display: none; }
         }
 
-        /* Giữ lại style admin */
         .admin-wrapper { display: flex; min-height: 100vh;}
         
         <% if (siteTheme.customCss) { %>
@@ -242,4 +225,3 @@
         <% } %>
     </style>
 </head>
-</html>

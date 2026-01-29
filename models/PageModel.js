@@ -18,6 +18,14 @@ const pageSchema = new mongoose.Schema({
     thumbnail: { 
         type: String // Đường dẫn ảnh đại diện trang
     },
+    
+    // [MỚI] CUSTOM SCHEMA CHO TỪNG TRANG (Detail Level)
+    // Lưu đoạn mã JSON-LD tùy chỉnh cho trang này
+    customSchema: { 
+        type: String, 
+        default: '' 
+    },
+
     isActive: { 
         type: Boolean, 
         default: true 
@@ -26,7 +34,7 @@ const pageSchema = new mongoose.Schema({
         type: Date, 
         default: Date.now 
     }
-});
+}, { timestamps: true }); // Tự động thêm createdAt và updatedAt
 
 // Xuất Model
 module.exports = mongoose.model('Page', pageSchema);

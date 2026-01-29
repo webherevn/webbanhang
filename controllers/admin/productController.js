@@ -36,12 +36,12 @@ exports.getAddProduct = async (req, res) => {
     }
 };
 
-// 3. Hàm xử lý lưu sản phẩm (CÓ VARIANTS & SEO & SHIPPING POLICY)
+// 3. Hàm xử lý lưu sản phẩm (CÓ VARIANTS & SEO & SHIPPING POLICY & SCHEMA)
 exports.postAddProduct = async (req, res) => {
     try {
         const { 
-            name, basePrice, salePrice, category, description, shippingPolicy, // <--- CẬP NHẬT: Thêm shippingPolicy
-            seoTitle, seoDescription, focusKeyword, 
+            name, basePrice, salePrice, category, description, shippingPolicy,
+            seoTitle, seoDescription, focusKeyword, customSchema, // <--- [MỚI] Thêm customSchema
             hasVariants, variant_color, variant_size, variant_price, variant_stock, variant_sku 
         } = req.body;
         
@@ -62,10 +62,11 @@ exports.postAddProduct = async (req, res) => {
             salePrice: Number(salePrice || 0),
             category,
             description,
-            shippingPolicy, // <--- CẬP NHẬT: Lưu vào object
+            shippingPolicy,
             seoTitle,
             seoDescription,
             focusKeyword,
+            customSchema, // <--- [MỚI] Lưu schema vào DB
             hasVariants: hasVariants === 'on', // Checkbox trả về 'on'
             variants: []
         };
@@ -131,12 +132,12 @@ exports.getEditProduct = async (req, res) => {
     } catch (err) { res.redirect('/admin/products'); }
 };
 
-// 5. Hàm lưu sửa sản phẩm (CÓ VARIANTS & SEO & SHIPPING POLICY)
+// 5. Hàm lưu sửa sản phẩm (CÓ VARIANTS & SEO & SHIPPING POLICY & SCHEMA)
 exports.postEditProduct = async (req, res) => {
     try {
         const { 
-            productId, name, basePrice, salePrice, category, description, shippingPolicy, // <--- CẬP NHẬT: Thêm shippingPolicy
-            seoTitle, seoDescription, focusKeyword,
+            productId, name, basePrice, salePrice, category, description, shippingPolicy,
+            seoTitle, seoDescription, focusKeyword, customSchema, // <--- [MỚI] Thêm customSchema
             hasVariants, variant_color, variant_size, variant_price, variant_stock, variant_sku
         } = req.body;
 
@@ -147,15 +148,16 @@ exports.postEditProduct = async (req, res) => {
         product.name = name;
         product.category = category;
         product.description = description;
-        product.shippingPolicy = shippingPolicy; // <--- CẬP NHẬT: Lưu vào database
+        product.shippingPolicy = shippingPolicy;
         product.basePrice = Number(basePrice);
         product.salePrice = Number(salePrice || 0);
         product.hasVariants = hasVariants === 'on';
         
-        // Cập nhật SEO
+        // Cập nhật SEO & Schema
         product.seoTitle = seoTitle;
         product.seoDescription = seoDescription;
         product.focusKeyword = focusKeyword;
+        product.customSchema = customSchema; // <--- [MỚI] Cập nhật schema
 
         // Cập nhật Ảnh
         if (req.files['thumbnail']) product.thumbnail = req.files['thumbnail'][0].path;

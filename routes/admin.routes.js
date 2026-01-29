@@ -114,4 +114,9 @@ router.post('/seo/redirects/delete', seoController.postDeleteRedirect);
 // 2. Placeholder cũ
 router.get('/seo/sitemap', (req, res) => res.send('Sitemap - Đang phát triển...'));
 router.get('/seo/robots', (req, res) => res.send('Robots - Đang phát triển...'));
+
+
+// 3. Schema Global (Thay thế code cũ)
+router.get('/seo/schema', seoController.getGlobalSchema);
+router.post('/seo/schema', seoController.postGlobalSchema);
 module.exports = router;

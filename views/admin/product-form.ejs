@@ -25,6 +25,11 @@
     .note-editor { border: 1px solid #c3c4c7 !important; }
     .form-label { font-weight: 600; font-size: 13px; color: #1d2327; }
 
+    /* Custom Scrollbar for Code Editor */
+    textarea.font-monospace::-webkit-scrollbar { width: 8px; }
+    textarea.font-monospace::-webkit-scrollbar-track { background: #282c34; }
+    textarea.font-monospace::-webkit-scrollbar-thumb { background: #555; border-radius: 4px; }
+
     @media (max-width: 992px) { .admin-sidebar-container { display: none; } .admin-content { margin-left: 0; padding: 15px; } }
 </style>
 </head>
@@ -60,6 +65,7 @@
                                 <i class="fas fa-info-circle me-1"></i> Nhập thông tin về phí ship, thời gian giao hàng, đổi trả... (Để trống sẽ hiện mặc định).
                             </div>
                         </div>
+
                         <div class="wp-card border-top border-4 border-warning">
                             <div class="postbox-header d-flex justify-content-between align-items-center mb-2">
                                 <span><i class="fas fa-tags me-2 text-warning"></i>Phân loại hàng</span>
@@ -169,6 +175,31 @@
                                 <textarea id="seoDescription" name="seoDescription" class="form-control" rows="3"><%= editing ? product.seoDescription : '' %></textarea>
                             </div>
                         </div>
+
+                        <div class="wp-card border-top border-4 border-secondary">
+                            <div class="postbox-header text-secondary d-flex justify-content-between">
+                                <span><i class="fas fa-code me-2"></i>Schema Data (Nâng cao)</span>
+                                <span class="badge bg-secondary">JSON-LD</span>
+                            </div>
+                            <div class="mb-2">
+                                <p class="small text-muted mb-2">
+                                    Nhập mã JSON tùy chỉnh (Ví dụ: <strong>Review, FAQ, VideoObject</strong>...). <br>
+                                    Nếu để trống, hệ thống sẽ tự động tạo Schema Product mặc định.
+                                </p>
+                                <textarea name="customSchema" class="form-control font-monospace p-3" rows="8" 
+                                    placeholder='{
+  "@context": "https://schema.org/",
+  "@type": "Product",
+  "name": "Tên sản phẩm...",
+  "description": "Mô tả..."
+}'
+                                    style="background: #282c34; color: #abb2bf; font-size: 12px; border: none;"><%= (editing && product.customSchema) ? product.customSchema : '' %></textarea>
+                            </div>
+                            <div class="form-text text-muted small fst-italic text-end">
+                                Công cụ hỗ trợ: <a href="https://technicalseo.com/tools/schema-markup-generator/" target="_blank" class="text-decoration-none">Schema Generator</a>
+                            </div>
+                        </div>
+
                     </div>
 
                     <div class="col-md-3">

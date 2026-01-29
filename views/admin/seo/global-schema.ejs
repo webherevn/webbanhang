@@ -1,0 +1,36 @@
+<%- include('../../partials/head.ejs') %>
+<body>
+    <div class="admin-wrapper">
+        <div class="admin-sidebar-container"><%- include('../../partials/sidebar.ejs') %></div>
+        
+        <div class="admin-content">
+            <h2 class="fw-bold h4 mb-4">Schema Global (Tổ chức & Logo)</h2>
+            <div class="wp-card">
+                <form action="/admin/seo/schema" method="POST">
+                    
+                    <div class="mb-3">
+                        <label class="fw-bold mb-2">Loại chủ thể</label>
+                        <select name="schemaType" class="form-select">
+                            <option value="Organization" <%= settings.schemaType === 'Organization' ? 'selected' : '' %>>Tổ chức (Organization)</option>
+                            <option value="Person" <%= settings.schemaType === 'Person' ? 'selected' : '' %>>Cá nhân (Person)</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="fw-bold mb-2">Logo URL (Dành cho Google Search)</label>
+                        <input type="text" name="orgLogo" class="form-control" value="<%= settings.orgLogo %>" placeholder="https://domain.com/images/logo.png">
+                        <div class="form-text">Paste link ảnh logo của bạn vào đây (Kích thước tối thiểu 112x112px).</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="fw-bold mb-2">Mạng xã hội (Social Profiles)</label>
+                        <textarea name="socialLinksInput" class="form-control" rows="5" placeholder="https://facebook.com/yourpage&#10;https://twitter.com/yourpage"><%= settings.socialLinks ? settings.socialLinks.join('\n') : '' %></textarea>
+                        <div class="form-text">Mỗi link một dòng. Google sẽ dùng thông tin này cho Knowledge Graph.</div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Lưu cài đặt</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
