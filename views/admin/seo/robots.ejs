@@ -1,0 +1,46 @@
+<%- include('../../partials/head.ejs') %>
+
+<style>
+    body { background-color: #f0f0f1; }
+    .admin-wrapper { display: flex; min-height: 100vh; }
+    .admin-content { flex: 1; padding: 30px; margin-left: var(--sidebar-width); }
+    .wp-card { background: #fff; padding: 25px; border: 1px solid #c3c4c7; }
+    .code-editor-bg { background: #282c34; color: #abb2bf; font-family: 'Courier New', Courier, monospace; border: none; font-size: 14px; }
+</style>
+
+<body>
+    <div class="admin-wrapper">
+        <div class="admin-sidebar-container"><%- include('../partials/sidebar.ejs') %></div>
+        
+        <div class="admin-content">
+            <h2 class="fw-bold h4 mb-4">Cấu hình Robots.txt</h2>
+
+            <div class="wp-card">
+                <form action="/admin/seo/robots" method="POST">
+                    <div class="mb-3">
+                        <label class="fw-bold mb-2">Chỉnh sửa nội dung file Robots:</label>
+                        <textarea name="robotsContent" class="form-control code-editor-bg p-3" rows="12"><%= settings.robotsContent %></textarea>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between align-items-center">
+                        <button type="submit" class="btn btn-primary px-4">Lưu thay đổi</button>
+                        <a href="/robots.txt" target="_blank" class="text-decoration-none small">
+                            <i class="fas fa-external-link-alt me-1"></i> Xem file thực tế
+                        </a>
+                    </div>
+                </form>
+
+                <div class="mt-4 pt-3 border-top">
+                    <h6 class="fw-bold small text-uppercase text-muted">Gợi ý cấu hình chuẩn:</h6>
+                    <pre class="bg-light p-2 small border">
+User-agent: *
+Disallow: /admin/
+Disallow: /cart/
+Disallow: /checkout/
+
+Sitemap: https://webbanhang-es90.onrender.com/sitemap.xml</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>

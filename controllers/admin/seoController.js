@@ -213,3 +213,47 @@ exports.getSitemapPage = async (req, res) => {
         res.redirect('/admin');
     }
 };
+
+// 1. Hiển thị trang cấu hình trong Admin
+exports.getRobotsSettings = async (req, res) => {
+    try {
+        let settings = await Setting.findOne({ key: 'global_settings' });
+        if (!settings) settings = await new Setting({ key: 'global_settings' }).save();
+
+        res.render('admin/seo/robots', {
+            pageTitle: 'Cấu hình Robots.txt',
+            path: '/admin/seo/robots',
+            settings: settings
+        });
+    } catch (err) {
+        res.redirect('/admin');
+    }
+};
+
+// 2. Lưu đoạn code Robots vào Database
+exports.postRobotsSettings = async (req, res) => {
+    try {
+        const { robotsContent } = req.body;
+        await Setting.findOneAndUpdate(
+            { key: 'global_settings' },
+            { robotsContent: robotsContent },
+            { upsert: true }
+        );
+        res.redirect('/admin/seo/robots');
+    } catch (err) {
+        res.status(500).send("Lỗi cập nhật");
+    }
+};
+
+// 3. Xuất file Robots.txt ra cho Google (Public)
+exports.generateRobotsText = async (req, res) => {
+    try {
+        const settings = await Setting.findOne({ key: 'global_settings' }).lean();
+        const content = settings?.robotsContent || "User-agent: *\nDisallow: /admin/";
+        
+        res.type('text/plain'); // Ép kiểu dữ liệu trả về là văn bản thuần
+        res.send(content);
+    } catch (err) {
+        res.status(500).end();
+    }
+};

@@ -114,7 +114,8 @@ router.post('/seo/redirects/delete', seoController.postDeleteRedirect);
 // 2. Placeholder cũ
 // 4. Sitemap Admin Page
 router.get('/seo/sitemap', seoController.getSitemapPage);
-router.get('/seo/robots', (req, res) => res.send('Robots - Đang phát triển...'));
+router.get('/seo/robots', seoController.getRobotsSettings);
+router.post('/seo/robots', seoController.postRobotsSettings);
 
 
 // 3. Schema Global (Thay thế code cũ)

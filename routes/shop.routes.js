@@ -50,4 +50,6 @@ router.get('/p/:slug', shopController.getPageDetail);
 
 // Sitemap XML - Luôn nằm ở gốc website
 router.get('/sitemap.xml', seoController.generateSitemap);
+
+router.get('/robots.txt', seoController.generateRobotsText);
 module.exports = router;

@@ -152,7 +152,6 @@ app.use((req, res, next) => {
 });
 
 
-// routes/shop.routes.js
-router.get('/sitemap.xml', seoController.generateSitemap);
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
