@@ -117,44 +117,54 @@
         .letter-spacing-2 { letter-spacing: 2px; }
 
         /* ========================================================= */
-        /* CSS MENU ĐA CẤP HOVER (PHIÊN BẢN CHUẨN ĐÃ FIX XUNG ĐỘT) */
+        /* CSS MENU ĐA CẤP HOVER - BẢN KHÁNG BOOTSTRAP JS (FIX LỖI 100%) */
         /* ========================================================= */
         
         /* 1. MÀN HÌNH MÁY TÍNH (> 992px) */
         @media (min-width: 992px) {
             
+            /* Đảm bảo thẻ cha có vị trí tương đối để con bám theo */
+            .navbar-nav .nav-item {
+                position: relative !important;
+            }
+
             /* --- CẤP 2 (DROPDOWN) --- */
-            /* Mặc định ẩn tuyệt đối */
             .navbar-nav .dropdown-menu {
+                /* Ép buộc hiển thị theo ý mình, bỏ qua Popper.js */
                 display: none !important; 
                 opacity: 0;
                 visibility: hidden;
                 
-                /* Định vị trí chuẩn để không bị nhảy lung tung */
                 position: absolute !important;
-                top: 100% !important;
-                left: 0 !important;
-                margin-top: 0 !important; /* Xóa khoảng cách để chuột không bị hụt */
+                top: 100% !important; /* Luôn nằm ngay dưới */
+                left: 0 !important;   /* Luôn căn trái */
+                
+                /* Reset các thuộc tính mà Bootstrap JS hay tự thêm vào */
+                transform: none !important; 
+                inset: auto !important; 
+                margin: 0 !important;
                 
                 background-color: #fff;
                 border: 1px solid rgba(0,0,0,.15);
                 box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15);
                 border-radius: 0 0 4px 4px;
                 min-width: 220px;
-                transition: all 0.2s ease;
+                transition: opacity 0.2s ease, visibility 0.2s ease;
             }
 
             /* --- CẤP 3 (SUBMENU) --- */
-            /* Mặc định ẩn tuyệt đối */
             .dropdown-submenu {
                 display: none !important;
                 opacity: 0;
                 visibility: hidden;
                 
-                /* Bay sang phải */
                 position: absolute !important;
-                left: 100% !important;
-                top: 0 !important;
+                left: 100% !important; /* Bay sang phải 100% */
+                top: 0 !important;     /* Ngang hàng với menu mẹ */
+                
+                /* Reset JS */
+                transform: none !important;
+                inset: auto !important;
                 margin-top: -5px !important;
                 
                 background: #fff;
@@ -203,17 +213,17 @@
                 border: none;
                 box-shadow: none;
                 background-color: transparent;
+                padding-left: 0;
             }
             .dropdown-menu .dropdown-submenu {
                 margin-left: 15px;
                 border-left: 2px solid #ddd;
-                display: block !important; /* Trên mobile luôn hiện danh sách con để dễ bấm */
+                display: block !important;
                 box-shadow: none !important;
-                position: static !important;
+                position: static !important; /* Trên mobile thì nằm im trong dòng chảy */
                 padding-left: 10px;
                 background-color: transparent;
             }
-            /* Ẩn mũi tên trên mobile */
             .dropdown-item-has-child > a::after { display: none; }
         }
 
