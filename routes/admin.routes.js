@@ -98,4 +98,8 @@ router.get('/settings/menu', settingController.getMenuSettings);
 router.post('/settings/menu/add', settingController.postAddMenu);
 router.post('/settings/menu/delete', settingController.postDeleteMenu);
 
+
+// 2. Cấu hình Index Google - [ĐÂY LÀ PHẦN QUAN TRỌNG ĐỂ HẾT LỖI 404]
+router.get('/settings/index', settingController.getIndexSettings);
+router.post('/settings/index', settingController.postIndexSettings);
 module.exports = router;
