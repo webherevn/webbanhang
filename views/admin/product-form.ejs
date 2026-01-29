@@ -4,253 +4,192 @@
 <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.js"></script>
 
 <style>
-    /* 1. ĐỒNG BỘ BIẾN HỆ THỐNG */
-    :root {
-        --sidebar-width: 240px;
-        --admin-bg: #f0f0f1;
-        --sidebar-bg: #23282d;
-        --base-font: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
-    }
-
-    body { 
-        background-color: var(--admin-bg); 
-        margin: 0; padding: 0; 
-        font-family: var(--base-font);
-        font-size: 14px; 
-        color: #3c434a;
-        overflow-x: hidden;
-    }
-
-    /* 2. LAYOUT ADMIN */
-    .admin-wrapper { display: flex; min-height: 100vh; }
-    .admin-sidebar-container { 
-        width: var(--sidebar-width); position: fixed; top: 0; left: 0; bottom: 0; 
-        background-color: var(--sidebar-bg); z-index: 1000; 
-    }
-    .admin-content { 
-        flex: 1; margin-left: var(--sidebar-width); padding: 30px; min-width: 0;
-    }
-
-    /* 3. CARD & COMPONENT STYLE */
-    .wp-card { 
-        background: #fff; border: 1px solid #c3c4c7; box-shadow: 0 1px 1px rgba(0,0,0,.04); 
-        padding: 20px; margin-bottom: 20px; 
-    }
-    .postbox-header { 
-        border-bottom: 1px solid #f0f0f1; padding-bottom: 10px; margin-bottom: 15px; 
-        font-weight: 700; color: #1d2327; text-transform: uppercase; font-size: 13px; letter-spacing: 0.5px;
-    }
+    /* 1. CSS HỆ THỐNG */
+    :root { --sidebar-width: 240px; --admin-bg: #f0f0f1; --sidebar-bg: #23282d; --base-font: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
+    body { background-color: var(--admin-bg); margin: 0; padding: 0; font-family: var(--base-font); font-size: 14px; color: #3c434a; }
     
-    /* Variant Table Style */
+    .admin-wrapper { display: flex; min-height: 100vh; }
+    .admin-sidebar-container { width: var(--sidebar-width); position: fixed; top: 0; left: 0; bottom: 0; background-color: var(--sidebar-bg); z-index: 1000; }
+    .admin-content { flex: 1; margin-left: var(--sidebar-width); padding: 30px; }
+    
+    .wp-card { background: #fff; border: 1px solid #c3c4c7; box-shadow: 0 1px 1px rgba(0,0,0,.04); padding: 20px; margin-bottom: 20px; }
+    .postbox-header { border-bottom: 1px solid #f0f0f1; padding-bottom: 10px; margin-bottom: 15px; font-weight: 700; color: #1d2327; text-transform: uppercase; font-size: 13px; }
+    
+    /* Variant Table */
     .variant-box { background: #f8f9fa; border: 1px dashed #c3c4c7; padding: 15px; border-radius: 4px; }
     .table-variants th { background-color: #e9ecef; font-size: 12px; text-align: center; vertical-align: middle; }
     .table-variants td { vertical-align: middle; padding: 5px; }
     .table-variants input { text-align: center; font-size: 13px; }
-    
-    /* Nút xóa hàng */
-    .btn-delete-row {
-        color: #dc3545;
-        border: 1px solid #dc3545;
-        background: #fff;
-        padding: 2px 8px;
-        border-radius: 3px;
-        transition: 0.2s;
-    }
-    .btn-delete-row:hover { background: #dc3545; color: #fff; }
+    .btn-delete-row:hover { background: #dc3545; color: #fff; border-color: #dc3545; }
 
-    .note-editor { border: 1px solid #c3c4c7 !important; border-radius: 0 !important; }
+    .note-editor { border: 1px solid #c3c4c7 !important; }
     .form-label { font-weight: 600; font-size: 13px; color: #1d2327; }
 
-    @media (max-width: 992px) { 
-        .admin-sidebar-container { display: none; } 
-        .admin-content { margin-left: 0; padding: 15px; } 
-    }
+    @media (max-width: 992px) { .admin-sidebar-container { display: none; } .admin-content { margin-left: 0; padding: 15px; } }
 </style>
 </head>
 <body>
     <div class="admin-wrapper">
-        <div class="admin-sidebar-container">
-            <%- include('./partials/sidebar.ejs') %>
-        </div>
+        <div class="admin-sidebar-container"><%- include('./partials/sidebar.ejs') %></div>
 
         <div class="admin-content">
-            <div class="container-fluid">
-                <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h2 class="fw-bold h4 mb-0 text-dark"><%= editing ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm mới' %></h2>
-                    <a href="/admin/products" class="btn btn-outline-secondary btn-sm"><i class="fas fa-boxes me-1"></i> Kho hàng</a>
-                </div>
-                
-                <form action="/admin/<%= editing ? 'edit-product' : 'add-product' %>" method="POST" enctype="multipart/form-data">
-                    <% if (editing) { %> <input type="hidden" name="productId" value="<%= product._id %>"> <% } %>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold h4 mb-0 text-dark"><%= editing ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm mới' %></h2>
+                <a href="/admin/products" class="btn btn-outline-secondary btn-sm"><i class="fas fa-boxes me-1"></i> Kho hàng</a>
+            </div>
+            
+            <form action="/admin/<%= editing ? 'edit-product' : 'add-product' %>" method="POST" enctype="multipart/form-data">
+                <% if (editing) { %> <input type="hidden" name="productId" value="<%= product._id %>"> <% } %>
 
-                    <div class="row">
-                        <div class="col-md-9">
-                            <div class="mb-4">
-                                <label class="form-label">Tên sản phẩm</label>
-                                <input type="text" name="name" class="form-control form-control-lg fw-bold shadow-sm" style="border-radius: 2px;" value="<%= editing ? product.name : '' %>" required>
-                            </div>
+                <div class="row">
+                    <div class="col-md-9">
+                        <div class="mb-4">
+                            <label class="form-label">Tên sản phẩm</label>
+                            <input type="text" name="name" class="form-control form-control-lg fw-bold shadow-sm" value="<%= editing ? product.name : '' %>" required>
+                        </div>
 
-                            <div class="wp-card">
-                                <div class="postbox-header">Mô tả chi tiết</div>
-                                <textarea name="description" id="prodDesc"><%= editing ? product.description : '' %></textarea>
-                            </div>
+                        <div class="wp-card">
+                            <div class="postbox-header">Mô tả chi tiết</div>
+                            <textarea name="description" id="prodDesc"><%= editing ? product.description : '' %></textarea>
+                        </div>
 
-                            <div class="wp-card border-top border-4 border-warning">
-                                <div class="postbox-header d-flex justify-content-between align-items-center mb-2">
-                                    <span><i class="fas fa-tags me-2 text-warning"></i>Phân loại hàng (Màu sắc, Size)</span>
-                                    <div class="form-check form-switch m-0">
-                                        <input class="form-check-input" type="checkbox" id="toggleVariants" name="hasVariants" <%= (editing && product.hasVariants) ? 'checked' : '' %>>
-                                        <label class="form-check-label small fw-bold" for="toggleVariants">Bật phân loại</label>
-                                    </div>
+                        <div class="wp-card border-top border-4 border-warning">
+                            <div class="postbox-header d-flex justify-content-between align-items-center mb-2">
+                                <span><i class="fas fa-tags me-2 text-warning"></i>Phân loại hàng</span>
+                                <div class="form-check form-switch m-0">
+                                    <input class="form-check-input" type="checkbox" id="toggleVariants" name="hasVariants" <%= (editing && product.hasVariants) ? 'checked' : '' %>>
+                                    <label class="form-check-label small fw-bold" for="toggleVariants">Bật phân loại</label>
                                 </div>
+                            </div>
 
-                                <div id="variantSection" class="<%= (editing && product.hasVariants) ? '' : 'd-none' %>">
-                                    <div class="variant-box mb-3">
-                                        <div class="row g-3">
-                                            <div class="col-md-5">
-                                                <label class="small fw-bold text-muted">Nhóm 1: Màu sắc</label>
-                                                <input type="text" id="inputColors" class="form-control form-control-sm" placeholder="VD: Đỏ, Xanh, Vàng...">
-                                            </div>
-                                            <div class="col-md-5">
-                                                <label class="small fw-bold text-muted">Nhóm 2: Kích thước</label>
-                                                <input type="text" id="inputSizes" class="form-control form-control-sm" placeholder="VD: S, M, L...">
-                                                
-                                                <div class="mt-2 d-flex gap-2">
-                                                    <span class="small text-muted align-self-center">Gợi ý:</span>
-                                                    <button type="button" class="btn btn-outline-secondary btn-sm py-0 px-2 small" style="font-size: 11px;" onclick="$('#inputSizes').val('S, M, L, XL, XXL')">
-                                                        Áo chuẩn (S-XXL)
-                                                    </button>
-                                                    <button type="button" class="btn btn-outline-secondary btn-sm py-0 px-2 small" style="font-size: 11px;" onclick="$('#inputSizes').val('29, 30, 31, 32, 33, 34')">
-                                                        Quần (29-34)
-                                                    </button>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-2 d-flex align-items-start pt-4">
-                                                <button type="button" class="btn btn-warning btn-sm fw-bold w-100 shadow-sm" onclick="generateTable()">
-                                                    <i class="fas fa-bolt me-1"></i> Tạo bảng
-                                                </button>
+                            <div id="variantSection" class="<%= (editing && product.hasVariants) ? '' : 'd-none' %>">
+                                <div class="variant-box mb-3">
+                                    <div class="row g-3">
+                                        <div class="col-md-5">
+                                            <label class="small fw-bold text-muted">Nhóm 1: Màu sắc</label>
+                                            <input type="text" id="inputColors" class="form-control form-control-sm" placeholder="VD: Đỏ, Xanh...">
+                                        </div>
+                                        <div class="col-md-5">
+                                            <label class="small fw-bold text-muted">Nhóm 2: Kích thước</label>
+                                            <input type="text" id="inputSizes" class="form-control form-control-sm" placeholder="VD: S, M, L...">
+                                            
+                                            <div class="mt-2 d-flex gap-2">
+                                                <button type="button" class="btn btn-outline-secondary btn-sm py-0 px-2 small" style="font-size: 11px;" onclick="$('#inputSizes').val('S, M, L, XL, XXL')">Áo chuẩn (S-XXL)</button>
+                                                <button type="button" class="btn btn-outline-secondary btn-sm py-0 px-2 small" style="font-size: 11px;" onclick="$('#inputSizes').val('29, 30, 31, 32, 33, 34')">Quần (29-34)</button>
                                             </div>
                                         </div>
-                                    </div>
-
-                                    <div class="bg-light p-2 mb-2 border rounded d-flex align-items-center gap-2 small">
-                                        <span class="fw-bold text-muted"><i class="fas fa-magic me-1"></i>Áp dụng chung:</span>
-                                        <input type="number" id="bulkPrice" class="form-control form-control-sm" style="width: 120px;" placeholder="Giá bán">
-                                        <input type="number" id="bulkStock" class="form-control form-control-sm" style="width: 80px;" placeholder="Kho">
-                                        <button type="button" class="btn btn-secondary btn-sm" onclick="applyBulk()">Áp dụng</button>
-                                    </div>
-
-                                    <div class="table-responsive bg-white border rounded">
-                                        <table class="table table-bordered table-variants mb-0">
-                                            <thead>
-                                                <tr>
-                                                    <th>Màu sắc</th>
-                                                    <th>Size</th>
-                                                    <th width="140">Giá bán (₫)</th>
-                                                    <th width="100">Kho</th>
-                                                    <th width="120">SKU</th>
-                                                    <th width="50">Xóa</th> </tr>
-                                            </thead>
-                                            <tbody id="variantTableBody">
-                                                <% if (editing && product.hasVariants && product.variants.length > 0) { %>
-                                                    <% product.variants.forEach((v) => { %>
-                                                        <tr>
-                                                            <td><input type="text" name="variant_color[]" value="<%= v.color %>" class="form-control form-control-sm bg-light text-center" readonly></td>
-                                                            <td><input type="text" name="variant_size[]" value="<%= v.size %>" class="form-control form-control-sm bg-light text-center" readonly></td>
-                                                            <td><input type="number" name="variant_price[]" value="<%= v.price %>" class="form-control form-control-sm variant-price" required></td>
-                                                            <td><input type="number" name="variant_stock[]" value="<%= v.stock %>" class="form-control form-control-sm variant-stock"></td>
-                                                            <td><input type="text" name="variant_sku[]" value="<%= v.sku %>" class="form-control form-control-sm text-center"></td>
-                                                            <td class="text-center">
-                                                                <button type="button" class="btn-delete-row" onclick="this.closest('tr').remove()">
-                                                                    <i class="fas fa-trash-alt"></i>
-                                                                </button>
-                                                            </td>
-                                                        </tr>
-                                                    <% }) %>
-                                                <% } %>
-                                            </tbody>
-                                        </table>
-                                        <div id="emptyVariantMsg" class="text-center text-muted py-4 small <%= (editing && product.variants.length > 0) ? 'd-none' : '' %>">
-                                            <i class="fas fa-box-open fa-2x mb-2 opacity-25"></i><br>
-                                            Hãy nhập Màu/Size ở trên và bấm "Tạo bảng".
+                                        
+                                        <div class="col-md-2 d-flex flex-column gap-2 pt-4">
+                                            <button type="button" class="btn btn-success btn-sm fw-bold w-100 shadow-sm" onclick="generateTable(true)" title="Thêm tiếp vào bảng hiện tại">
+                                                <i class="fas fa-plus me-1"></i> Thêm
+                                            </button>
+                                            <button type="button" class="btn btn-outline-danger btn-sm fw-bold w-100" onclick="generateTable(false)" title="Xóa bảng cũ, tạo lại từ đầu">
+                                                <i class="fas fa-sync-alt me-1"></i> Làm mới
+                                            </button>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div id="simplePriceSection" class="<%= (editing && product.hasVariants) ? 'd-none' : '' %>">
-                                    <div class="row g-3 mt-1">
-                                        <div class="col-md-6">
-                                            <label class="form-label">Giá gốc (₫)</label>
-                                            <input type="number" name="basePrice" class="form-control" value="<%= editing ? product.basePrice : '' %>">
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label class="form-label">Giá khuyến mãi (₫)</label>
-                                            <input type="number" name="salePrice" class="form-control" value="<%= editing ? product.salePrice : '' %>">
-                                        </div>
+                                <div class="bg-light p-2 mb-2 border rounded d-flex align-items-center gap-2 small">
+                                    <span class="fw-bold text-muted"><i class="fas fa-magic me-1"></i>Áp dụng chung:</span>
+                                    <input type="number" id="bulkPrice" class="form-control form-control-sm" style="width: 120px;" placeholder="Giá bán">
+                                    <input type="number" id="bulkStock" class="form-control form-control-sm" style="width: 80px;" placeholder="Kho">
+                                    <button type="button" class="btn btn-secondary btn-sm" onclick="applyBulk()">Áp dụng</button>
+                                </div>
+
+                                <div class="table-responsive bg-white border rounded">
+                                    <table class="table table-bordered table-variants mb-0">
+                                        <thead>
+                                            <tr>
+                                                <th>Màu sắc</th>
+                                                <th>Size</th>
+                                                <th width="140">Giá bán (₫)</th>
+                                                <th width="100">Kho</th>
+                                                <th width="120">SKU</th>
+                                                <th width="50">Xóa</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="variantTableBody">
+                                            <% if (editing && product.hasVariants && product.variants.length > 0) { %>
+                                                <% product.variants.forEach((v) => { %>
+                                                    <tr>
+                                                        <td><input type="text" name="variant_color[]" value="<%= v.color %>" class="form-control form-control-sm bg-light text-center" readonly></td>
+                                                        <td><input type="text" name="variant_size[]" value="<%= v.size %>" class="form-control form-control-sm bg-light text-center" readonly></td>
+                                                        <td><input type="number" name="variant_price[]" value="<%= v.price %>" class="form-control form-control-sm variant-price" required></td>
+                                                        <td><input type="number" name="variant_stock[]" value="<%= v.stock %>" class="form-control form-control-sm variant-stock"></td>
+                                                        <td><input type="text" name="variant_sku[]" value="<%= v.sku %>" class="form-control form-control-sm text-center"></td>
+                                                        <td class="text-center">
+                                                            <button type="button" class="btn btn-sm text-danger btn-delete-row border" onclick="this.closest('tr').remove()"><i class="fas fa-trash-alt"></i></button>
+                                                        </td>
+                                                    </tr>
+                                                <% }) %>
+                                            <% } %>
+                                        </tbody>
+                                    </table>
+                                    <div id="emptyVariantMsg" class="text-center text-muted py-4 small <%= (editing && product.variants.length > 0) ? 'd-none' : '' %>">
+                                        Hãy nhập Màu/Size ở trên và bấm "Thêm".
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="wp-card border-top border-4 border-info">
-                                <div class="postbox-header text-info"><i class="fab fa-google me-2"></i>Xem trước kết quả tìm kiếm</div>
-                                <div class="google-preview p-3 mb-4 border rounded bg-white shadow-sm" style="max-width: 600px;">
-                                    <div id="preview-url" class="text-muted small mb-1" style="font-size: 12px;">https://yourshop.com › san-pham › ...</div>
-                                    <div id="preview-title" class="mb-1 text-primary">Tiêu đề sản phẩm hiển thị tại đây</div>
-                                    <div id="preview-desc" class="text-muted" style="font-size: 14px; line-height: 1.5;">Mô tả Meta thu hút khách hàng từ Google...</div>
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">SEO Title</label>
-                                    <input type="text" id="seoTitle" name="seoTitle" class="form-control" value="<%= editing ? product.seoTitle : '' %>">
-                                </div>
-                                <div class="mb-0">
-                                    <label class="form-label">Meta Description</label>
-                                    <textarea id="seoDescription" name="seoDescription" class="form-control" rows="3"><%= editing ? product.seoDescription : '' %></textarea>
+                            <div id="simplePriceSection" class="<%= (editing && product.hasVariants) ? 'd-none' : '' %>">
+                                <div class="row g-3 mt-1">
+                                    <div class="col-md-6">
+                                        <label class="form-label">Giá gốc (₫)</label>
+                                        <input type="number" name="basePrice" class="form-control" value="<%= editing ? product.basePrice : '' %>">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">Giá khuyến mãi (₫)</label>
+                                        <input type="number" name="salePrice" class="form-control" value="<%= editing ? product.salePrice : '' %>">
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="col-md-3">
-                            <div class="wp-card border-top border-4 border-primary">
-                                <div class="postbox-header text-primary"><i class="fas fa-rocket me-2"></i>RankMath SEO</div>
-                                <div class="mb-3">
-                                    <label class="form-label">Từ khóa chính</label>
-                                    <input type="text" id="focusKeyword" name="focusKeyword" class="form-control form-control-sm" value="<%= editing ? product.focusKeyword : '' %>">
-                                </div>
-                                <div class="p-3 bg-light rounded mb-3 border text-center">
-                                    <div class="small fw-bold">Điểm SEO: <span id="seo-score-text" class="h5 text-primary">0/100</span></div>
-                                    <div class="progress mt-1" style="height: 6px;"><div id="seo-progress-bar" class="progress-bar" style="width: 0%"></div></div>
-                                </div>
+                        <div class="wp-card border-top border-4 border-info">
+                            <div class="postbox-header text-info"><i class="fab fa-google me-2"></i>Xem trước kết quả tìm kiếm</div>
+                            <div class="google-preview p-3 mb-4 border rounded bg-white shadow-sm" style="max-width: 600px;">
+                                <div id="preview-url" class="text-muted small mb-1" style="font-size: 12px;">https://yourshop.com › san-pham › ...</div>
+                                <div id="preview-title" class="mb-1 text-primary">Tiêu đề sản phẩm hiển thị tại đây</div>
+                                <div id="preview-desc" class="text-muted" style="font-size: 14px; line-height: 1.5;">Mô tả Meta thu hút khách hàng...</div>
                             </div>
-
-                            <div class="wp-card sticky-top" style="top: 20px;">
-                                <div class="postbox-header">Đăng sản phẩm</div>
-                                <button type="submit" class="btn btn-primary w-100 fw-bold shadow-sm"><%= editing ? 'Cập nhật' : 'Đăng ngay' %></button>
-                                <a href="/admin/products" class="btn btn-link btn-sm w-100 mt-2 text-muted text-decoration-none">Hủy bỏ</a>
+                            <div class="mb-3">
+                                <label class="form-label">SEO Title</label>
+                                <input type="text" id="seoTitle" name="seoTitle" class="form-control" value="<%= editing ? product.seoTitle : '' %>">
                             </div>
-
-                            <div class="wp-card">
-                                <div class="postbox-header">Danh mục</div>
-                                <select name="category" class="form-select form-select-sm" required>
-                                    <% categories.forEach(cat => { %>
-                                        <option value="<%= cat._id %>" <%= (editing && product.category && product.category.toString() === cat._id.toString()) ? 'selected' : '' %>><%= cat.name %></option>
-                                    <% }) %>
-                                </select>
-                            </div>
-
-                            <div class="wp-card text-center">
-                                <div class="postbox-header">Ảnh đại diện</div>
-                                <% if (editing && product.thumbnail) { %> <div class="mb-2 border p-1 bg-light"><img src="<%= product.thumbnail %>" class="img-fluid" style="max-height: 150px;"></div> <% } %>
-                                <input type="file" name="thumbnail" class="form-control form-control-sm">
-                            </div>
-
-                            <div class="wp-card">
-                                <div class="postbox-header">Thư viện ảnh</div>
-                                <input type="file" name="gallery" class="form-control form-control-sm" multiple>
+                            <div class="mb-0">
+                                <label class="form-label">Meta Description</label>
+                                <textarea id="seoDescription" name="seoDescription" class="form-control" rows="3"><%= editing ? product.seoDescription : '' %></textarea>
                             </div>
                         </div>
                     </div>
-                </form>
-            </div>
+
+                    <div class="col-md-3">
+                        <div class="wp-card sticky-top" style="top: 20px;">
+                            <div class="postbox-header">Đăng sản phẩm</div>
+                            <button type="submit" class="btn btn-primary w-100 fw-bold shadow-sm"><%= editing ? 'Cập nhật' : 'Đăng ngay' %></button>
+                            <a href="/admin/products" class="btn btn-link btn-sm w-100 mt-2 text-muted text-decoration-none">Hủy bỏ</a>
+                        </div>
+                        <div class="wp-card">
+                            <div class="postbox-header">Danh mục</div>
+                            <select name="category" class="form-select form-select-sm" required>
+                                <% categories.forEach(cat => { %>
+                                    <option value="<%= cat._id %>" <%= (editing && product.category && product.category.toString() === cat._id.toString()) ? 'selected' : '' %>><%= cat.name %></option>
+                                <% }) %>
+                            </select>
+                        </div>
+                        <div class="wp-card text-center">
+                            <div class="postbox-header">Ảnh đại diện</div>
+                            <% if (editing && product.thumbnail) { %> <div class="mb-2 border p-1 bg-light"><img src="<%= product.thumbnail %>" class="img-fluid" style="max-height: 150px;"></div> <% } %>
+                            <input type="file" name="thumbnail" class="form-control form-control-sm">
+                        </div>
+                        <div class="wp-card">
+                            <div class="postbox-header">Thư viện ảnh</div>
+                            <input type="file" name="gallery" class="form-control form-control-sm" multiple>
+                        </div>
+                    </div>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -269,13 +208,16 @@
             });
         });
 
-        // Hàm sinh bảng giá
-        function generateTable() {
+        // Hàm sinh bảng giá (HỖ TRỢ THÊM MỚI VÀ LÀM MỚI)
+        function generateTable(isAppend) {
             const colors = $('#inputColors').val().split(',').map(s => s.trim()).filter(s => s);
             const sizes = $('#inputSizes').val().split(',').map(s => s.trim()).filter(s => s);
             const tbody = $('#variantTableBody');
             
-            tbody.empty(); 
+            // Nếu không phải chế độ thêm (append) thì xóa bảng cũ
+            if (!isAppend) {
+                tbody.empty();
+            }
 
             if (colors.length === 0 && sizes.length === 0) {
                 alert("Vui lòng nhập ít nhất một màu hoặc một size!");
@@ -287,6 +229,20 @@
 
             finalColors.forEach(color => {
                 finalSizes.forEach(size => {
+                    // KIỂM TRA TRÙNG LẶP NẾU ĐANG Ở CHẾ ĐỘ APPEND
+                    if (isAppend) {
+                        let isExist = false;
+                        $('#variantTableBody tr').each(function() {
+                            const existingColor = $(this).find('input[name="variant_color[]"]').val();
+                            const existingSize = $(this).find('input[name="variant_size[]"]').val();
+                            if (existingColor === color && existingSize === size) {
+                                isExist = true;
+                                return false; // break loop
+                            }
+                        });
+                        if (isExist) return; // Bỏ qua nếu đã có
+                    }
+
                     const sku = `SP-${slugify(color).toUpperCase()}-${slugify(size).toUpperCase()}-${Math.floor(Math.random()*1000)}`;
                     const row = `
                         <tr>
@@ -296,7 +252,7 @@
                             <td><input type="number" name="variant_stock[]" class="form-control form-control-sm variant-stock" value="10"></td>
                             <td><input type="text" name="variant_sku[]" value="${sku}" class="form-control form-control-sm text-center"></td>
                             <td class="text-center">
-                                <button type="button" class="btn-delete-row" onclick="this.closest('tr').remove()" title="Xóa dòng này">
+                                <button type="button" class="btn btn-sm text-danger btn-delete-row border" onclick="this.closest('tr').remove()" title="Xóa dòng này">
                                     <i class="fas fa-trash-alt"></i>
                                 </button>
                             </td>
@@ -307,14 +263,16 @@
             });
 
             $('#emptyVariantMsg').addClass('d-none');
+            
+            // Xóa input sau khi thêm để tránh nhầm lẫn
+            if(isAppend) {
+                $('#inputColors').val('');
+                $('#inputSizes').val('');
+            }
         }
 
         function slugify(text) {
-            return text.toString().toLowerCase()
-                .replace(/\s+/g, '-')
-                .replace(/[^\w\-]+/g, '')
-                .replace(/\-\-+/g, '-')
-                .substring(0, 3);
+            return text.toString().toLowerCase().replace(/\s+/g, '-').replace(/[^\w\-]+/g, '').substring(0, 3);
         }
 
         function applyBulk() {
