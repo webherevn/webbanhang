@@ -1,5 +1,14 @@
 <%- include('../partials/head.ejs') %>
-<%- include('../partials/navigation.ejs') %>
+<style>
+    .transition-img { transition: transform 0.5s ease; }
+    .card:hover .transition-img { transform: scale(1.1); }
+    .category-badge { position: absolute; top: 15px; left: 15px; z-index: 10; }
+    .blog-header { background: #f8f9fa; border-bottom: 1px solid #eee; padding: 60px 0; }
+    .category-desc { max-width: 800px; margin: 0 auto; line-height: 1.6; }
+</style>
+</head>
+<body>
+  <%- include('../partials/shop-header.ejs') %>
 
 <main class="container my-5" style="min-height: 60vh;">
     <div class="row justify-content-center">
@@ -12,5 +21,6 @@
         </div>
     </div>
 </main>
-
-<%- include('../partials/footer.ejs') %>
+   <%- include('../partials/footer.ejs') %>
+</body>
+</html>
