@@ -1,0 +1,145 @@
+<%- include('../../partials/head.ejs') %>
+
+<style>
+    /* CSS đồng bộ hệ thống Admin */
+    body { background-color: #f0f0f1; }
+    .admin-wrapper { display: flex; min-height: 100vh; }
+    .admin-content { flex: 1; padding: 30px; margin-left: var(--sidebar-width); }
+    .wp-card { background: #fff; padding: 25px; border: 1px solid #c3c4c7; box-shadow: 0 1px 1px rgba(0,0,0,.04); }
+    
+    /* Giả lập khung chia sẻ của Facebook để Preview */
+    .fb-preview-container {
+        position: sticky;
+        top: 20px;
+    }
+    .fb-preview {
+        border: 1px solid #dddfe2;
+        border-radius: 3px;
+        overflow: hidden;
+        max-width: 100%;
+        background: #f2f3f5;
+    }
+    .fb-img {
+        width: 100%;
+        height: 250px;
+        object-fit: cover;
+        background: #fff;
+        display: block;
+    }
+    .fb-text {
+        padding: 12px;
+        background: #fff;
+        border-top: 1px solid #dddfe2;
+    }
+    .fb-domain {
+        text-transform: uppercase;
+        color: #606770;
+        font-size: 12px;
+        font-family: Helvetica, Arial, sans-serif;
+    }
+    .fb-title {
+        font-weight: 600;
+        color: #1d2129;
+        font-size: 16px;
+        margin: 5px 0;
+        font-family: Georgia, serif;
+    }
+    .fb-desc {
+        color: #606770;
+        font-size: 14px;
+        line-height: 1.4;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+</style>
+
+<body>
+    <div class="admin-wrapper">
+        <div class="admin-sidebar-container"><%- include('../partials/sidebar.ejs') %></div>
+        
+        <div class="admin-content">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold h4 mb-0 text-dark"><i class="fas fa-share-alt me-2"></i>Mạng xã hội (Open Graph)</h2>
+                <span class="badge bg-primary">Global Settings</span>
+            </div>
+
+            <div class="row">
+                <div class="col-md-7">
+                    <div class="wp-card shadow-sm">
+                        <form action="/admin/seo/social" method="POST" enctype="multipart/form-data">
+                            
+                            <div class="mb-4">
+                                <label class="fw-bold mb-2">Mô tả Trang chủ (Mặc định)</label>
+                                <textarea name="websiteDescription" class="form-control" rows="4" placeholder="Nhập mô tả ngắn gọn về website của bạn..."><%= (typeof seoSettings !== 'undefined' && seoSettings.websiteDescription) ? seoSettings.websiteDescription : '' %></textarea>
+                                <div class="form-text mt-2">Đoạn mô tả này sẽ hiện ra khi bạn chia sẻ link trang chủ lên Facebook/Zalo.</div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="fw-bold mb-2">Ảnh chia sẻ mặc định (OG Image)</label>
+                                <input type="file" name="defaultOgImage" class="form-control mb-3">
+                                
+                                <% if (typeof seoSettings !== 'undefined' && seoSettings.defaultOgImage) { %>
+                                    <div class="position-relative d-inline-block">
+                                        <img src="<%= seoSettings.defaultOgImage %>" style="max-height: 150px;" class="border rounded p-1 shadow-sm">
+                                        <p class="small text-muted mt-1 text-center">Ảnh hiện tại</p>
+                                    </div>
+                                <% } else { %>
+                                    <div class="p-4 border border-dashed text-center bg-light text-muted small">
+                                        Chưa có ảnh mặc định. Hãy upload ảnh (1200x630px).
+                                    </div>
+                                <% } %>
+                            </div>
+
+                            <hr class="my-4">
+
+                            <div class="mb-4">
+                                <label class="fw-bold mb-2">Facebook App ID (Nâng cao)</label>
+                                <input type="text" name="facebookAppId" class="form-control" 
+                                       value="<%= (typeof seoSettings !== 'undefined' && seoSettings.facebookAppId) ? seoSettings.facebookAppId : '' %>"
+                                       placeholder="VD: 123456789012345">
+                                <div class="form-text small">Dùng để kết nối với Facebook Insights và quản lý bình luận.</div>
+                            </div>
+
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary fw-bold">
+                                    <i class="fas fa-save me-2"></i>Lưu cấu hình Social
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="col-md-5">
+                    <div class="fb-preview-container">
+                        <h6 class="fw-bold text-muted small text-uppercase mb-3"><i class="fab fa-facebook me-1"></i>Xem trước hiển thị</h6>
+                        
+                        <div class="fb-preview shadow-sm">
+                            <% if (typeof seoSettings !== 'undefined' && seoSettings.defaultOgImage) { %>
+                                <img src="<%= seoSettings.defaultOgImage %>" class="fb-img">
+                            <% } else { %>
+                                <img src="https://via.placeholder.com/1200x630?text=Default+Share+Image" class="fb-img">
+                            <% } %>
+
+                            <div class="fb-text">
+                                <div class="fb-domain">WEBBANHANG-ES90.ONRENDER.COM</div>
+                                <div class="fb-title">
+                                    <%= (typeof seoSettings !== 'undefined' && seoSettings.websiteName) ? seoSettings.websiteName : 'Fashion Store - Thời trang cao cấp' %>
+                                </div>
+                                <div class="fb-desc">
+                                    <%= (typeof seoSettings !== 'undefined' && seoSettings.websiteDescription) ? seoSettings.websiteDescription : 'Chào mừng bạn đến với cửa hàng thời trang của chúng tôi. Chuyên cung cấp sản phẩm cao cấp, uy tín...' %>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-warning border-0 mt-4 small">
+                            <i class="fas fa-lightbulb me-2"></i>
+                            <strong>Mẹo:</strong> Sau khi cập nhật ảnh, nếu Facebook không hiện ảnh mới ngay, bạn hãy dùng công cụ <a href="https://developers.facebook.com/tools/debug/" target="_blank">Sharing Debugger</a> để xóa cache của Facebook nhé.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
