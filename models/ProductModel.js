@@ -30,6 +30,10 @@ const productSchema = new mongoose.Schema({
     stock: { type: Number, default: 0 }, // Số lượng tồn kho riêng
     sku: { type: String }          // Mã SKU để quản lý kho
   }],
+  // [MỚI] SOCIAL SEO (OPEN GRAPH)
+    ogTitle: { type: String, default: '' },
+    ogDescription: { type: String, default: '' },
+    ogImage: { type: String, default: '' }, // Link ảnh riêng cho mạng xã hội
 
   // --- 5. SEO & MARKETING ---
   seoTitle: { type: String, trim: true },
@@ -37,7 +41,8 @@ const productSchema = new mongoose.Schema({
   focusKeyword: { type: String },
   seoScore: { type: Number, default: 0 },
   views: { type: Number, default: 0 }, // Đếm lượt xem sản phẩm
-
+// [MỚI] CUSTOM SCHEMA CHO TỪNG SẢN PHẨM
+    customSchema: { type: String, default: '' } // Lưu chuỗi JSON-LD
   // --- 6. TRẠNG THÁI ---
   isActive: { type: Boolean, default: true } // Ẩn/Hiện sản phẩm
 }, { timestamps: true });

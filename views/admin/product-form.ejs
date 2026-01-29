@@ -176,6 +176,33 @@
                             </div>
                         </div>
 
+                        <div class="mt-3">
+                            <button class="btn btn-sm btn-outline-secondary w-100" type="button" data-bs-toggle="collapse" data-bs-target="#socialSeoCollapse">
+                                <i class="fas fa-share-alt me-1"></i> Tùy chỉnh hiển thị Mạng xã hội (Facebook, Zalo...)
+                            </button>
+                            
+                            <div class="collapse mt-3" id="socialSeoCollapse">
+                                <div class="p-3 border rounded bg-light">
+                                    <div class="mb-3">
+                                        <label class="small fw-bold">Tiêu đề Mạng xã hội (OG Title)</label>
+                                        <input type="text" name="ogTitle" class="form-control form-control-sm" 
+                                            value="<%= (editing && product.ogTitle) ? product.ogTitle : '' %>"
+                                            placeholder="Để trống sẽ lấy theo SEO Title">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="small fw-bold">Mô tả Mạng xã hội (OG Description)</label>
+                                        <textarea name="ogDescription" class="form-control form-control-sm" rows="2" 
+                                                placeholder="Để trống sẽ lấy theo Meta Description"><%= (editing && product.ogDescription) ? product.ogDescription : '' %></textarea>
+                                    </div>
+                                    <div class="mb-0">
+                                        <label class="small fw-bold">Ảnh chia sẻ riêng (OG Image)</label>
+                                        <input type="file" name="ogImage" class="form-control form-control-sm">
+                                        <div class="form-text" style="font-size: 11px;">Nếu không chọn, sẽ lấy ảnh đại diện sản phẩm làm mặc định.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="wp-card border-top border-4 border-secondary">
                             <div class="postbox-header text-secondary d-flex justify-content-between">
                                 <span><i class="fas fa-code me-2"></i>Schema Data (Nâng cao)</span>
@@ -187,12 +214,12 @@
                                     Nếu để trống, hệ thống sẽ tự động tạo Schema Product mặc định.
                                 </p>
                                 <textarea name="customSchema" class="form-control font-monospace p-3" rows="8" 
-                                    placeholder='{
-  "@context": "https://schema.org/",
-  "@type": "Product",
-  "name": "Tên sản phẩm...",
-  "description": "Mô tả..."
-}'
+                                                                placeholder='{
+                            "@context": "https://schema.org/",
+                            "@type": "Product",
+                            "name": "Tên sản phẩm...",
+                            "description": "Mô tả..."
+                            }'
                                     style="background: #282c34; color: #abb2bf; font-size: 12px; border: none;"><%= (editing && product.customSchema) ? product.customSchema : '' %></textarea>
                             </div>
                             <div class="form-text text-muted small fst-italic text-end">

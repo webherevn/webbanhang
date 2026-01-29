@@ -62,7 +62,7 @@ exports.getEditBlogCategory = async (req, res) => {
 };
 
 // ==========================================
-// 2. QUẢN LÝ BÀI VIẾT (CẬP NHẬT SEO)
+// 2. QUẢN LÝ BÀI VIẾT (CẬP NHẬT SEO & SOCIAL & SCHEMA)
 // ==========================================
 
 exports.getPosts = async (req, res) => {
@@ -83,7 +83,8 @@ exports.getAddPost = async (req, res) => {
             pageTitle: 'Viết bài mới', 
             path: '/admin/add-post',
             categories: categories,
-            editing: false
+            editing: false,
+            post: {} // Đảm bảo object rỗng cho EJS
         });
     } catch (err) { res.redirect('/admin/posts'); }
 };
@@ -91,12 +92,19 @@ exports.getAddPost = async (req, res) => {
 // --- CẬP NHẬT HÀM THÊM BÀI VIẾT ---
 exports.postAddPost = async (req, res) => {
     try {
-        // Thêm các trường SEO từ req.body
-        const { title, content, summary, categoryId, seoTitle, seoDescription, focusKeyword } = req.body;
+        const { 
+            title, content, summary, categoryId, 
+            seoTitle, seoDescription, focusKeyword, customSchema,
+            ogTitle, ogDescription // [MỚI] Các trường Social
+        } = req.body;
         
         let thumbnail = 'https://via.placeholder.com/300';
-        if (req.files && req.files['thumbnail']) {
-            thumbnail = req.files['thumbnail'][0].path;
+        let ogImage = '';
+
+        // Xử lý upload ảnh
+        if (req.files) {
+            if (req.files['thumbnail']) thumbnail = req.files['thumbnail'][0].path;
+            if (req.files['ogImage']) ogImage = req.files['ogImage'][0].path;
         }
 
         let postSlug = slugify(title, { lower: true, strict: true });
@@ -113,11 +121,14 @@ exports.postAddPost = async (req, res) => {
             content, 
             summary, 
             thumbnail, 
+            ogImage, // [MỚI]
             category: categoryId,
-            // Lưu dữ liệu SEO mới
-            seoTitle: seoTitle,
-            seoDescription: seoDescription,
-            focusKeyword: focusKeyword
+            seoTitle,
+            seoDescription,
+            focusKeyword,
+            customSchema, // [MỚI]
+            ogTitle,      // [MỚI]
+            ogDescription // [MỚI]
         });
 
         res.redirect('/admin/posts');
@@ -147,10 +158,13 @@ exports.getEditPost = async (req, res) => {
 // --- CẬP NHẬT HÀM SỬA BÀI VIẾT ---
 exports.postEditPost = async (req, res) => {
     try {
-        // Thêm các trường SEO từ req.body
-        const { postId, title, content, summary, categoryId, seoTitle, seoDescription, focusKeyword } = req.body;
-        const post = await Post.findById(postId);
+        const { 
+            postId, title, content, summary, categoryId, 
+            seoTitle, seoDescription, focusKeyword, customSchema,
+            ogTitle, ogDescription // [MỚI]
+        } = req.body;
 
+        const post = await Post.findById(postId);
         if (!post) return res.redirect('/admin/posts');
 
         post.title = title;
@@ -158,15 +172,20 @@ exports.postEditPost = async (req, res) => {
         post.summary = summary;
         post.category = categoryId;
         
-        // Cập nhật các trường SEO
+        // Cập nhật các trường SEO & Social & Schema
         post.seoTitle = seoTitle;
         post.seoDescription = seoDescription;
         post.focusKeyword = focusKeyword;
+        post.customSchema = customSchema; // [MỚI]
+        post.ogTitle = ogTitle;           // [MỚI]
+        post.ogDescription = ogDescription; // [MỚI]
         
         post.slug = slugify(title, { lower: true, strict: true });
 
-        if (req.files && req.files['thumbnail']) {
-            post.thumbnail = req.files['thumbnail'][0].path;
+        // Cập nhật ảnh (nếu có upload mới)
+        if (req.files) {
+            if (req.files['thumbnail']) post.thumbnail = req.files['thumbnail'][0].path;
+            if (req.files['ogImage']) post.ogImage = req.files['ogImage'][0].path; // [MỚI]
         }
 
         await post.save();

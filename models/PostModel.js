@@ -22,6 +22,10 @@ const postSchema = new mongoose.Schema({
         ref: 'BlogCategory',
         required: true 
     },
+    // [MỚI] SOCIAL SEO (OPEN GRAPH)
+    ogTitle: { type: String, default: '' },
+    ogDescription: { type: String, default: '' },
+    ogImage: { type: String, default: '' },
     
     author: { type: String, default: 'Admin' },
     views: { type: Number, default: 0 },

@@ -25,6 +25,10 @@ const pageSchema = new mongoose.Schema({
         type: String, 
         default: '' 
     },
+    // [MỚI] SOCIAL SEO (OPEN GRAPH)
+    ogTitle: { type: String, default: '' },
+    ogDescription: { type: String, default: '' },
+    ogImage: { type: String, default: '' } ,
 
     isActive: { 
         type: Boolean, 

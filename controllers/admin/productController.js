@@ -6,7 +6,7 @@ const slugify = require('slugify');
 exports.getProducts = async (req, res) => {
     try {
         const products = await Product.find()
-            .populate('category') // Lấy tên danh mục thay vì ID
+            .populate('category')
             .sort({ createdAt: -1 });
             
         res.render('admin/product-list', { 
@@ -29,19 +29,20 @@ exports.getAddProduct = async (req, res) => {
             path: '/admin/add-product',
             categories: categories,
             editing: false,
-            product: {} // Truyền object rỗng để tránh lỗi ejs
+            product: {}
         });
     } catch (err) {
         res.redirect('/admin/products');
     }
 };
 
-// 3. Hàm xử lý lưu sản phẩm (CÓ VARIANTS & SEO & SHIPPING POLICY & SCHEMA)
+// 3. Hàm xử lý lưu sản phẩm (CÓ VARIANTS & SEO & SCHEMA & SOCIAL SEO)
 exports.postAddProduct = async (req, res) => {
     try {
         const { 
             name, basePrice, salePrice, category, description, shippingPolicy,
-            seoTitle, seoDescription, focusKeyword, customSchema, // <--- [MỚI] Thêm customSchema
+            seoTitle, seoDescription, focusKeyword, customSchema,
+            ogTitle, ogDescription, // <--- [MỚI] Social SEO fields
             hasVariants, variant_color, variant_size, variant_price, variant_stock, variant_sku 
         } = req.body;
         
@@ -66,20 +67,22 @@ exports.postAddProduct = async (req, res) => {
             seoTitle,
             seoDescription,
             focusKeyword,
-            customSchema, // <--- [MỚI] Lưu schema vào DB
-            hasVariants: hasVariants === 'on', // Checkbox trả về 'on'
+            customSchema,
+            ogTitle,        // <--- [MỚI] Lưu Social Title
+            ogDescription,  // <--- [MỚI] Lưu Social Description
+            hasVariants: hasVariants === 'on',
             variants: []
         };
 
-        // Xử lý ảnh (Thumbnail & Gallery)
+        // Xử lý ảnh (Thumbnail, Gallery & Social Image)
         if (req.files) {
             if (req.files['thumbnail']) productData.thumbnail = req.files['thumbnail'][0].path;
             if (req.files['gallery']) productData.gallery = req.files['gallery'].map(f => f.path);
+            if (req.files['ogImage']) productData.ogImage = req.files['ogImage'][0].path; // <--- [MỚI] Lưu Social Image
         }
 
         // --- LOGIC XỬ LÝ BIẾN THỂ (VARIANTS) ---
         if (productData.hasVariants && variant_color) {
-            // Ép kiểu về mảng (trường hợp chỉ có 1 dòng variant)
             const colors = Array.isArray(variant_color) ? variant_color : [variant_color];
             const sizes = Array.isArray(variant_size) ? variant_size : [variant_size];
             const prices = Array.isArray(variant_price) ? variant_price : [variant_price];
@@ -96,13 +99,11 @@ exports.postAddProduct = async (req, res) => {
                 });
             }
 
-            // Nếu có biến thể, cập nhật lại giá Base Price bằng giá thấp nhất của biến thể
             if (productData.variants.length > 0) {
                 const minPrice = Math.min(...productData.variants.map(v => v.price));
                 productData.basePrice = minPrice;
             }
         }
-        // ---------------------------------------
         
         await Product.create(productData);
         res.redirect('/admin/products');
@@ -132,12 +133,13 @@ exports.getEditProduct = async (req, res) => {
     } catch (err) { res.redirect('/admin/products'); }
 };
 
-// 5. Hàm lưu sửa sản phẩm (CÓ VARIANTS & SEO & SHIPPING POLICY & SCHEMA)
+// 5. Hàm lưu sửa sản phẩm (CÓ VARIANTS & SEO & SCHEMA & SOCIAL SEO)
 exports.postEditProduct = async (req, res) => {
     try {
         const { 
             productId, name, basePrice, salePrice, category, description, shippingPolicy,
-            seoTitle, seoDescription, focusKeyword, customSchema, // <--- [MỚI] Thêm customSchema
+            seoTitle, seoDescription, focusKeyword, customSchema,
+            ogTitle, ogDescription, // <--- [MỚI] Social SEO fields
             hasVariants, variant_color, variant_size, variant_price, variant_stock, variant_sku
         } = req.body;
 
@@ -153,23 +155,26 @@ exports.postEditProduct = async (req, res) => {
         product.salePrice = Number(salePrice || 0);
         product.hasVariants = hasVariants === 'on';
         
-        // Cập nhật SEO & Schema
+        // Cập nhật SEO & Schema & Social SEO
         product.seoTitle = seoTitle;
         product.seoDescription = seoDescription;
         product.focusKeyword = focusKeyword;
-        product.customSchema = customSchema; // <--- [MỚI] Cập nhật schema
+        product.customSchema = customSchema;
+        product.ogTitle = ogTitle;        // <--- [MỚI] Cập nhật Social Title
+        product.ogDescription = ogDescription;  // <--- [MỚI] Cập nhật Social Description
 
         // Cập nhật Ảnh
-        if (req.files['thumbnail']) product.thumbnail = req.files['thumbnail'][0].path;
-        if (req.files['gallery']) {
-            const newImgs = req.files['gallery'].map(f => f.path);
-            // Có thể chọn: ghi đè (product.gallery = newImgs) hoặc nối thêm (push)
-            // Ở đây mình chọn nối thêm để không mất ảnh cũ
-            product.gallery.push(...newImgs);
+        if (req.files) {
+            if (req.files['thumbnail']) product.thumbnail = req.files['thumbnail'][0].path;
+            if (req.files['ogImage']) product.ogImage = req.files['ogImage'][0].path; // <--- [MỚI] Cập nhật Social Image
+            if (req.files['gallery']) {
+                const newImgs = req.files['gallery'].map(f => f.path);
+                product.gallery.push(...newImgs);
+            }
         }
 
         // --- CẬP NHẬT BIẾN THỂ ---
-        product.variants = []; // Reset biến thể cũ để lưu cái mới từ form
+        product.variants = [];
         if (product.hasVariants && variant_color) {
             const colors = Array.isArray(variant_color) ? variant_color : [variant_color];
             const sizes = Array.isArray(variant_size) ? variant_size : [variant_size];
@@ -187,12 +192,10 @@ exports.postEditProduct = async (req, res) => {
                 });
             }
             
-            // Cập nhật lại giá hiển thị theo biến thể thấp nhất
             if (product.variants.length > 0) {
                 product.basePrice = Math.min(...product.variants.map(v => v.price));
             }
         }
-        // -------------------------
 
         await product.save();
         res.redirect('/admin/products');
@@ -210,20 +213,13 @@ exports.postDeleteProduct = async (req, res) => {
     } catch (err) { res.redirect('/admin/products'); }
 };
 
-// Thêm hàm này vào cuối file Controller
+// Xóa ảnh lẻ khỏi gallery
 exports.deleteProductImage = async (req, res) => {
     try {
         const { productId, imageUrl } = req.body;
-        
-        // Tìm sản phẩm và xóa đường dẫn ảnh khỏi mảng gallery
         await Product.findByIdAndUpdate(productId, {
             $pull: { gallery: imageUrl } 
         });
-
-        // (Tùy chọn) Code xóa file vật lý trên server nếu cần:
-        // const fs = require('fs');
-        // fs.unlink(path.join(__dirname, '..', imageUrl), err => {});
-
         res.json({ success: true });
     } catch (err) {
         console.error(err);
