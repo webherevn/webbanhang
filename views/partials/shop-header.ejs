@@ -28,11 +28,21 @@
 
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav mx-auto mb-2 mb-lg-0 fw-semibold">
-                <li class="nav-item"><a class="nav-link <%= path === '/' ? 'active' : '' %>" href="/">Trang chủ</a></li>
-                <li class="nav-item"><a class="nav-link <%= path === '/products' ? 'active' : '' %>" href="/products">Sản phẩm</a></li>
-                <li class="nav-item"><a class="nav-link <%= path === '/blog' ? 'active' : '' %>" href="/blog">Tin tức</a></li>
-                </ul>
-            
+                <% if (typeof mainMenu !== 'undefined' && mainMenu.length > 0) { %>
+                    <% mainMenu.forEach(item => { %>
+                        <li class="nav-item">
+                            <a class="nav-link <%= (typeof currentPath !== 'undefined' && currentPath === item.link) ? 'active text-danger' : '' %>" 
+                               href="<%= item.link %>">
+                                <%= item.name %>
+                            </a>
+                        </li>
+                    <% }) %>
+                <% } else { %>
+                    <li class="nav-item"><a class="nav-link <%= path === '/' ? 'active' : '' %>" href="/">Trang chủ</a></li>
+                    <li class="nav-item"><a class="nav-link <%= path === '/products' ? 'active' : '' %>" href="/products">Sản phẩm</a></li>
+                    <li class="nav-item"><a class="nav-link <%= path === '/blog' ? 'active' : '' %>" href="/blog">Tin tức</a></li>
+                <% } %>
+            </ul>
             <div class="d-flex align-items-center gap-3">
                 <a href="#" class="text-dark fs-5"><i class="bi bi-search"></i></a>
                 <a href="/cart" class="text-dark fs-5 position-relative">
