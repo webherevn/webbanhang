@@ -1,5 +1,5 @@
 const Redirect = require('../../models/RedirectModel');
-
+const Setting = require('../../models/SettingModel');
 // ============================================================
 // QUẢN LÝ REDIRECTS (CHUYỂN HƯỚNG)
 // ============================================================
@@ -55,44 +55,53 @@ exports.postDeleteRedirect = async (req, res) => {
     }
 };
 
-// 1. Hiển thị Global Schema Settings
+// ============================================================
+// 2. QUẢN LÝ SCHEMA GLOBAL (ORGANIZATION / PERSON)
+// ============================================================
+
 exports.getGlobalSchema = async (req, res) => {
     try {
+        // Tìm cấu hình trong bảng Setting
         let settings = await Setting.findOne({ key: 'global_settings' });
-        if (!settings) settings = await new Setting({ key: 'global_settings' }).save();
+        
+        // Nếu chưa có (lần đầu cài đặt) thì tạo mới object rỗng để tránh lỗi EJS
+        if (!settings) {
+            settings = await new Setting({ key: 'global_settings' }).save();
+        }
 
         res.render('admin/seo/global-schema', {
-            pageTitle: 'Cài đặt Schema Global',
+            pageTitle: 'Cấu hình Schema Global',
             path: '/admin/seo/schema',
             settings: settings
         });
     } catch (err) {
-        console.error(err);
-        res.redirect('/admin');
+        console.error("❌ Lỗi Get Global Schema:", err);
+        res.redirect('/admin'); // Đây là lý do bạn bị văng về trang admin khi có lỗi
     }
 };
 
-// 2. Lưu Global Schema
 exports.postGlobalSchema = async (req, res) => {
     try {
-        // socialLinks từ form có thể là mảng hoặc string, cần xử lý
-        // Giả sử ta nhập mỗi link 1 dòng trong textarea -> split xuống dòng
         let { schemaType, orgLogo, socialLinksInput } = req.body;
         
-        // Chuyển text area thành mảng
+        // Chuyển dữ liệu từ Textarea thành Mảng (mỗi dòng 1 link)
         const socialLinks = socialLinksInput 
             ? socialLinksInput.split('\n').map(link => link.trim()).filter(link => link !== '') 
             : [];
 
         await Setting.findOneAndUpdate(
             { key: 'global_settings' },
-            { schemaType, orgLogo, socialLinks },
+            { 
+                schemaType, 
+                orgLogo, 
+                socialLinks 
+            },
             { new: true, upsert: true }
         );
 
         res.redirect('/admin/seo/schema');
     } catch (err) {
-        console.error("Lỗi lưu Schema Global:", err);
-        res.status(500).send("Lỗi Server");
+        console.error("❌ Lỗi Post Global Schema:", err);
+        res.status(500).send("Lỗi cập nhật Schema");
     }
 };
