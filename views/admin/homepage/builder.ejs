@@ -1,72 +1,104 @@
 <%- include('../../partials/head.ejs') %>
 
 <style>
+    /* 🎨 MODERN DESIGN SYSTEM */
     :root {
-        --admin-blue: #2271b1;
-        --admin-bg: #f0f2f5;
-        --text-dark: #1d2327;
-        --success-green: #00a32a;
-        --card-border: #dcdcde;
+        --primary: #6366f1; /* Indigo Modern */
+        --primary-hover: #4f46e5;
+        --dark-bg: #0f172a; /* Slate 900 */
+        --light-bg: #f8fafc;
+        --card-bg: #ffffff;
+        --text-main: #1e293b;
+        --text-muted: #64748b;
+        --border-color: #e2e8f0;
+        --radius: 16px;
+        --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
     }
 
-    body { background-color: var(--admin-bg); font-family: 'Inter', -apple-system, sans-serif; color: var(--text-dark); }
+    body { background-color: var(--light-bg); font-family: 'Inter', system-ui, sans-serif; color: var(--text-main); }
     
     /* Layout */
     .admin-wrapper { display: flex; min-height: 100vh; }
-    .admin-sidebar-container { width: 260px; position: fixed; height: 100vh; z-index: 1000; box-shadow: 2px 0 5px rgba(0,0,0,0.05); }
-    .admin-content { flex: 1; padding: 40px; margin-left: 260px; }
+    .admin-sidebar-container { width: 260px; position: fixed; height: 100vh; z-index: 1000; box-shadow: 1px 0 0 var(--border-color); background: #fff; }
+    .admin-content { flex: 1; padding: 40px; margin-left: 260px; max-width: 1200px; margin-right: auto; }
 
-    /* Builder UI */
-    .section-item { 
-        background: #fff; border: 1px solid var(--card-border); border-radius: 12px;
-        margin-bottom: 16px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        display: flex; align-items: center; justify-content: space-between;
+    /* Header & Buttons */
+    .builder-header h2 { font-size: 1.875rem; letter-spacing: -0.025em; color: var(--dark-bg); }
+    
+    .btn-pro {
+        padding: 10px 24px;
+        border-radius: 10px;
+        font-weight: 600;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.875rem;
+    }
+    .btn-primary-pro { background: var(--primary); color: #fff; border: none; box-shadow: 0 4px 14px 0 rgba(99, 102, 241, 0.39); }
+    .btn-primary-pro:hover { background: var(--primary-hover); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(99, 102, 241, 0.45); }
+    
+    .btn-outline-pro { background: #fff; border: 1px solid var(--border-color); color: var(--text-main); }
+    .btn-outline-pro:hover { background: var(--light-bg); border-color: var(--text-muted); }
+
+    /* Visual Layers - Section Item */
+    .section-item {
+        background: var(--card-bg);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius);
+        margin-bottom: 20px;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        transition: all 0.3s ease;
         position: relative;
     }
-    .section-item:hover { 
-        border-color: var(--admin-blue); 
-        box-shadow: 0 10px 20px rgba(0,0,0,0.05);
-        transform: translateY(-2px);
+    .section-item:hover {
+        border-color: var(--primary);
+        box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
     }
-    
-    .drag-handle { 
-        padding: 28px 22px; 
-        color: #ccd0d4; 
-        border-right: 1px solid #f0f0f1; 
-        cursor: grab; 
-        background: #fafafa;
-        border-radius: 12px 0 0 12px;
-    }
-    .section-item:hover .drag-handle { color: var(--admin-blue); background: #f0f7ff; }
-    .sortable-ghost { opacity: 0.4; background: #e2e8f0; border: 2px dashed var(--admin-blue); }
 
-    .section-info { padding-left: 24px; flex-grow: 1; }
-    .section-type-badge { 
-        font-size: 10px; font-weight: 800; letter-spacing: 0.5px;
-        padding: 4px 12px; border-radius: 6px; background: #f0f0f1; color: #50575e;
-        text-transform: uppercase; margin-bottom: 5px; display: inline-block;
+    .drag-handle {
+        padding: 35px 25px;
+        color: var(--text-muted);
+        cursor: grab;
+        background: #fcfdfe;
+        border-radius: var(--radius) 0 0 var(--radius);
+        border-right: 1px solid var(--border-color);
     }
-    
-    .status-indicator { font-size: 11px; font-weight: 600; display: flex; align-items: center; gap: 5px; }
-    .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
-    .dot-active { background: var(--success-green); box-shadow: 0 0 5px var(--success-green); }
+    .drag-handle:active { cursor: grabbing; }
 
-    /* Library Cards */
-    .block-card {
-        border: 2px solid #f0f0f1; border-radius: 16px; padding: 30px 20px;
-        transition: 0.3s; text-align: center; cursor: pointer; height: 100%; background: #fff;
+    .section-preview-icon {
+        width: 48px; height: 48px;
+        background: var(--light-bg);
+        border-radius: 12px;
+        display: flex; align-items: center; justify-content: center;
+        margin-left: 20px; color: var(--primary); font-size: 1.25rem;
     }
-    .block-card:hover { border-color: var(--admin-blue); background: #faffff; transform: translateY(-5px); }
-    .block-icon { font-size: 2.5rem; margin-bottom: 15px; display: block; color: var(--admin-blue); }
 
-    /* Toast Notification */
-    #toast-container { position: fixed; bottom: 30px; right: 30px; z-index: 9999; }
-    .toast-custom {
-        background: #1d2327; color: #fff; padding: 12px 25px; border-radius: 50px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.2); display: flex; align-items: center; gap: 12px;
-        margin-bottom: 10px; transform: translateY(100px); opacity: 0; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    .section-body { flex: 1; padding: 0 25px; }
+    .type-label { font-size: 10px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.05em; }
+    .section-title { font-weight: 700; font-size: 1.05rem; margin-top: 2px; color: var(--dark-bg); }
+
+    /* Visibility Toggle */
+    .status-badge {
+        font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 20px;
+        display: inline-flex; align-items: center; gap: 5px;
     }
-    .toast-custom.show { transform: translateY(0); opacity: 1; }
+    .status-active { background: #ecfdf5; color: #059669; border: 1px solid #d1fae5; }
+    .status-hidden { background: #fef2f2; color: #dc2626; border: 1px solid #fee2e2; }
+
+    /* Sortable Ghost */
+    .sortable-ghost { opacity: 0.2; background: var(--primary); border: 2px dashed var(--primary); }
+
+    /* Modal Library Pro */
+    .modal-content-pro { border-radius: 24px; border: none; overflow: hidden; }
+    .lib-card {
+        border: 1px solid var(--border-color); border-radius: 18px; padding: 30px;
+        text-align: center; transition: all 0.3s; background: #fff; text-decoration: none !important;
+    }
+    .lib-card:hover { border-color: var(--primary); background: #f5f3ff; transform: translateY(-5px); }
+    .lib-icon { font-size: 2.5rem; margin-bottom: 15px; display: block; }
 </style>
 
 <div class="admin-wrapper">
@@ -75,65 +107,67 @@
     </div>
 
     <div class="admin-content">
-        <div class="d-flex justify-content-between align-items-end mb-5">
+        <div class="builder-header d-flex justify-content-between align-items-center mb-5">
             <div>
                 <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb mb-1">
-                        <li class="breadcrumb-item small"><a href="/admin" class="text-decoration-none text-muted">Bảng tin</a></li>
-                        <li class="breadcrumb-item small active fw-bold text-primary">Homepage Builder</li>
+                    <ol class="breadcrumb mb-2">
+                        <li class="breadcrumb-item small"><a href="/admin" class="text-muted">Bảng tin</a></li>
+                        <li class="breadcrumb-item small active fw-bold">Giao diện</li>
                     </ol>
                 </nav>
-                <h2 class="fw-bold text-dark m-0">Trình thiết kế Trang chủ</h2>
-                <p class="text-muted small m-0">Kéo thả để thay đổi thứ tự hiển thị các khối trên website.</p>
+                <h2 class="fw-bold m-0">UX Builder <span class="text-muted ms-2 fs-6 fw-normal">/ Trang chủ</span></h2>
             </div>
             <div class="d-flex gap-3">
-                <a href="/" target="_blank" class="btn btn-outline-dark rounded-pill px-4 fw-bold shadow-sm">
-                    <i class="fas fa-external-link-alt me-2"></i>Xem Web
+                <a href="/" target="_blank" class="btn-pro btn-outline-pro">
+                    <i class="fas fa-external-link-alt"></i> Preview Web
                 </a>
-                <button class="btn btn-primary rounded-pill px-4 shadow fw-bold" data-bs-toggle="modal" data-bs-target="#addSectionModal">
-                    <i class="fas fa-plus me-2"></i>Thêm khối mới
+                <button class="btn-pro btn-primary-pro" data-bs-toggle="modal" data-bs-target="#addSectionModal">
+                    <i class="fas fa-plus"></i> Thêm khối nội dung
                 </button>
             </div>
         </div>
 
-        <div id="builder-canvas">
+        <div id="sortable-canvas">
             <% if (sections && sections.length > 0) { %>
-                <div id="sortable-list">
-                    <% sections.forEach((section) => { %>
-                        <div class="section-item" data-id="<%= section._id %>">
-                            <div class="d-flex align-items-center flex-grow-1">
-                                <div class="drag-handle"><i class="fas fa-grip-vertical"></i></div>
-                                <div class="section-info">
-                                    <div class="d-flex align-items-center gap-3">
-                                        <span class="section-type-badge"><%= section.type %></span>
-                                        <% if(section.isActive) { %>
-                                            <span class="status-indicator text-success">
-                                                <span class="dot dot-active"></span> ĐANG HIỂN THỊ
-                                            </span>
-                                        <% } %>
-                                    </div>
-                                    <h6 class="fw-bold m-0 text-dark"><%= section.data.title || 'Mô tả ngắn cho khối này...' %></h6>
-                                </div>
-                            </div>
-                            
-                            <div class="pe-4 d-flex gap-2 align-items-center">
-                                <a href="/admin/homepage/edit-section/<%= section._id %>" class="btn btn-sm btn-light border rounded-pill px-3 shadow-sm fw-bold">
-                                    <i class="fas fa-cog me-1 text-primary"></i> Tùy chỉnh
-                                </a>
-                                
-                                <form action="/admin/homepage/delete-section" method="POST" onsubmit="return confirm('Xóa khối này sẽ không thể khôi phục. Tiếp tục?')">
-                                    <input type="hidden" name="sectionId" value="<%= section._id %>">
-                                    <button class="btn btn-sm btn-outline-danger border-0 rounded-circle"><i class="fas fa-trash-alt"></i></button>
-                                </form>
+                <% sections.forEach((section) => { %>
+                    <div class="section-item" data-id="<%= section._id %>">
+                        <div class="drag-handle"><i class="fas fa-grip-vertical"></i></div>
+                        
+                        <div class="section-preview-icon">
+                            <% if(section.type === 'hero') { %><i class="fas fa-window-maximize"></i><% } %>
+                            <% if(section.type === 'product-grid') { %><i class="fas fa-th-large"></i><% } %>
+                            <% if(section.type === 'features') { %><i class="fas fa-shield-alt"></i><% } %>
+                            <% if(section.type === 'promo') { %><i class="fas fa-tags"></i><% } %>
+                        </div>
+
+                        <div class="section-body">
+                            <span class="type-label"><%= section.type %></span>
+                            <div class="section-title"><%= section.data.title || 'Khối nội dung trống' %></div>
+                            <div class="mt-1">
+                                <% if(section.isActive) { %>
+                                    <span class="status-badge status-active"><i class="fas fa-circle fs-small" style="font-size: 6px;"></i> Đang hiển thị</span>
+                                <% } else { %>
+                                    <span class="status-badge status-hidden">Đang ẩn</span>
+                                <% } %>
                             </div>
                         </div>
-                    <% }) %>
-                </div>
+
+                        <div class="pe-4 d-flex gap-3">
+                            <a href="/admin/homepage/edit-section/<%= section._id %>" class="btn-pro btn-outline-pro py-2">
+                                <i class="fas fa-sliders-h text-primary"></i> Cấu hình
+                            </a>
+                            <form action="/admin/homepage/delete-section" method="POST" onsubmit="return confirm('Gỡ bỏ khối này khỏi trang chủ?')">
+                                <input type="hidden" name="sectionId" value="<%= section._id %>">
+                                <button class="btn btn-sm btn-link text-danger p-0 border-0"><i class="fas fa-trash-alt"></i></button>
+                            </form>
+                        </div>
+                    </div>
+                <% }) %>
             <% } else { %>
-                <div class="text-center py-5 border-2 border-dashed rounded-4 bg-white opacity-75 shadow-sm">
-                    <i class="fas fa-layer-group fa-4x text-muted mb-3"></i>
-                    <h5 class="fw-bold">Bắt đầu xây dựng trang chủ</h5>
-                    <p class="text-muted">Chưa có khối nội dung nào. Hãy chọn "Thêm khối mới" để bắt đầu.</p>
+                <div class="text-center py-5 bg-white rounded-4 border-2 border-dashed">
+                    <div class="mb-3 text-muted opacity-50"><i class="fas fa-layer-group fa-4x"></i></div>
+                    <h5 class="fw-bold">Giao diện chưa có nội dung</h5>
+                    <button class="btn-pro btn-primary-pro mt-3" data-bs-toggle="modal" data-bs-target="#addSectionModal">Xây dựng ngay</button>
                 </div>
             <% } %>
         </div>
@@ -142,38 +176,32 @@
 
 <div class="modal fade" id="addSectionModal" tabindex="-1">
     <div class="modal-dialog modal-xl modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg" style="border-radius: 24px;">
+        <div class="modal-content modal-content-pro shadow-lg">
             <div class="modal-header border-0 p-4 pb-0">
-                <h4 class="fw-bold">Thư viện khối chuyên nghiệp</h4>
+                <h4 class="fw-bold m-0 text-dark">Thư viện khối Pro</h4>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body p-4">
-                <div class="row g-4">
+                <div class="row g-4 text-center">
                     <div class="col-md-4">
-                        <a href="/admin/homepage/add-section/hero" class="text-decoration-none d-block h-100">
-                            <div class="block-card">
-                                <span class="block-icon text-primary"><i class="fas fa-window-maximize"></i></span>
-                                <h6 class="fw-bold text-dark">Main Signature Hero</h6>
-                                <p class="text-muted small">Banner lớn, hình ảnh nền và nút kêu gọi hành động.</p>
-                            </div>
+                        <a href="/admin/homepage/add-section/hero" class="lib-card d-block h-100">
+                            <i class="fas fa-image lib-icon text-primary"></i>
+                            <h6 class="fw-bold text-dark">Main Visual Hero</h6>
+                            <p class="text-muted small m-0">Banner kích thước lớn kèm nút kêu gọi hành động.</p>
                         </a>
                     </div>
                     <div class="col-md-4">
-                        <a href="/admin/homepage/add-section/product-grid" class="text-decoration-none d-block h-100">
-                            <div class="block-card">
-                                <span class="block-icon text-success"><i class="fas fa-shopping-bag"></i></span>
-                                <h6 class="fw-bold text-dark">Product Showcase</h6>
-                                <p class="text-muted small">Lưới sản phẩm thông minh theo danh mục sản phẩm.</p>
-                            </div>
+                        <a href="/admin/homepage/add-section/product-grid" class="lib-card d-block h-100">
+                            <i class="fas fa-box-open lib-icon text-success"></i>
+                            <h6 class="fw-bold text-dark">Product Showcase</h6>
+                            <p class="text-muted small m-0">Lưới sản phẩm tự động lấy theo danh mục.</p>
                         </a>
                     </div>
                     <div class="col-md-4">
-                        <a href="/admin/homepage/add-section/features" class="text-decoration-none d-block h-100">
-                            <div class="block-card">
-                                <span class="block-icon text-warning"><i class="fas fa-certificate"></i></span>
-                                <h6 class="fw-bold text-dark">Brand Trust Cards</h6>
-                                <p class="text-muted small">Cam kết dịch vụ, miễn phí vận chuyển, đổi trả.</p>
-                            </div>
+                        <a href="/admin/homepage/add-section/features" class="lib-card d-block h-100">
+                            <i class="fas fa-star lib-icon text-warning"></i>
+                            <h6 class="fw-bold text-dark">Trust Badges</h6>
+                            <p class="text-muted small m-0">Giới thiệu dịch vụ, vận chuyển và cam kết.</p>
                         </a>
                     </div>
                 </div>
@@ -182,57 +210,38 @@
     </div>
 </div>
 
-<div id="toast-container"></div>
+<div id="toast-container" style="position: fixed; bottom: 30px; right: 30px; z-index: 9999;"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 <script>
-    // Hàm hiển thị Toast thông báo
-    function showToast(message, isError = false) {
+    function showToast(message) {
         const container = document.getElementById('toast-container');
         const toast = document.createElement('div');
-        toast.className = 'toast-custom';
-        toast.innerHTML = `
-            <div style="background: ${isError ? '#d63638' : '#00a32a'}; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px;">
-                <i class="fas ${isError ? 'fa-times' : 'fa-check'} text-white"></i>
-            </div>
-            <span class="small fw-bold">${message}</span>
-        `;
+        toast.className = 'bg-dark text-white px-4 py-3 rounded-pill shadow-lg fw-bold d-flex align-items-center gap-3 animate__animated animate__fadeInUp';
+        toast.innerHTML = `<i class="fas fa-check-circle text-success"></i> ${message}`;
         container.appendChild(toast);
-        setTimeout(() => toast.classList.add('show'), 100);
         setTimeout(() => {
-            toast.classList.remove('show');
-            setTimeout(() => toast.remove(), 400);
+            toast.classList.replace('animate__fadeInUp', 'animate__fadeOutDown');
+            setTimeout(() => toast.remove(), 500);
         }, 3000);
     }
 
-    const el = document.getElementById('sortable-list');
-    if (el) {
-        Sortable.create(el, {
+    const canvas = document.getElementById('sortable-canvas');
+    if (canvas) {
+        Sortable.create(canvas, {
             handle: '.drag-handle',
-            animation: 250,
+            animation: 300,
             ghostClass: 'sortable-ghost',
             onEnd: function() {
-    // Chỉ lấy mảng ID đơn giản: ["65ba...", "65bb..."]
-    const sectionIds = Array.from(el.querySelectorAll('.section-item'))
-                            .map(item => item.dataset.id);
-    
-    // Gửi AJAX
-    fetch('/admin/homepage/update-order', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ order: sectionIds }) // Gửi 'order' khớp với Backend
-    })
-    .then(res => res.json())
-    .then(data => {
-        if(data.success) {
-            showToast('Đã lưu thứ tự hiển thị mới');
-        } else {
-            showToast('Lỗi: ' + (data.message || 'Không thể lưu'), true);
-        }
-    })
-    .catch(err => {
-        console.error(err);
-        showToast('Lỗi kết nối máy chủ', true);
-    });
-}
+                const order = Array.from(canvas.querySelectorAll('.section-item')).map(item => item.dataset.id);
+                fetch('/admin/homepage/update-order', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ order: order })
+                }).then(res => res.json()).then(data => {
+                    if(data.success) showToast('Cập nhật thứ tự hiển thị thành công!');
+                });
+            }
+        });
+    }
 </script>
