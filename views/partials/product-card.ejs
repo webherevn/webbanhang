@@ -1,0 +1,19 @@
+<div class="product-card h-100 shadow-sm-hover border-0">
+    <div class="product-img-container position-relative overflow-hidden">
+        <% if (product.isNew) { %>
+            <span class="badge bg-danger position-absolute top-0 start-0 m-2 z-3">NEW</span>
+        <% } %>
+        <a href="/products/<%= product.slug %>">
+            <img src="<%= product.thumbnail %>" class="img-fluid w-100 product-img" 
+                 alt="<%= product.name %>" 
+                 style="aspect-ratio: 3/4; object-fit: cover;">
+        </a>
+        <button class="btn btn-dark btn-buy rounded-0 py-2 small fw-bold w-100">THÊM VÀO GIỎ</button>
+    </div>
+    <div class="p-3 text-center">
+        <h6 class="fw-bold my-1">
+            <a href="/products/<%= product.slug %>" class="text-decoration-none text-dark"><%= product.name %></a>
+        </h6>
+        <div class="text-danger fw-bold"><%= product.basePrice.toLocaleString('vi-VN') %> đ</div>
+    </div>
+</div>

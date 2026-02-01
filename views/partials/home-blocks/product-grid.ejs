@@ -1,9 +1,6 @@
 <% 
     /**
-     * LOGIC XỬ LÝ DỮ LIỆU ĐẦU VÀO:
-     * 1. Ưu tiên lấy sản phẩm riêng của khối (section.products) đã được Controller nhặt riêng.
-     * 2. Nếu không có, mới dùng đến biến products (toàn cục) truyền từ Controller.
-     * 3. Cuối cùng, nếu không có cái nào thì để mảng rỗng [] để tránh lỗi crash trang.
+     * LOGIC KIỂM TRA DỮ LIỆU AN TOÀN
      */
     let displayProducts = [];
     if (typeof section !== 'undefined' && section.products) {
@@ -17,29 +14,29 @@
     <div class="container">
         <div class="d-flex justify-content-between align-items-end mb-4">
             <div>
-                <h2 class="fw-bold text-uppercase">
-                    <%= data.title || 'Sản phẩm mới' %>
+                <h2 class="fw-bold text-uppercase mb-0">
+                    <%= (typeof data !== 'undefined' && data.title) ? data.title : 'Sản phẩm mới' %>
                 </h2>
                 <div class="bg-danger mt-2" style="width: 60px; height: 3px;"></div>
             </div>
             
-            <% if (data.buttonLink) { %>
+            <% if (typeof data !== 'undefined' && data.buttonLink) { %>
                 <a href="<%= data.buttonLink %>" class="text-decoration-none text-dark fw-bold border-bottom border-dark pb-1">
-                    <%= data.buttonText || 'Xem tất cả' %> <i class="bi bi-arrow-right"></i>
+                    <%= data.buttonText || 'Xem tất cả' %> <i class="bi bi-arrow-right ms-1"></i>
                 </a>
             <% } %>
         </div>
 
         <div class="row g-4">
-            <% if (displayProducts.length > 0) { %>
+            <% if (displayProducts && displayProducts.length > 0) { %>
                 <% displayProducts.forEach(product => { %>
-                    <div class="col-6 col-md-3">
+                    <div class="col-6 col-md-4 col-lg-3">
                         <%- include('../product-card.ejs', { product: product }) %>
                     </div>
                 <% }) %>
             <% } else { %>
                 <div class="col-12 text-center py-5">
-                    <p class="text-muted italic">Đang cập nhật sản phẩm cho mục này...</p>
+                    <p class="text-muted italic">Hiện chưa có sản phẩm nào trong mục này.</p>
                 </div>
             <% } %>
         </div>
