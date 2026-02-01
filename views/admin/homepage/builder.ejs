@@ -233,25 +233,28 @@
             animation: 300,
             ghostClass: 'sortable-ghost',
            onEnd: function() {
-    // Phải đảm bảo .section-item có thuộc tính data-id="<%= section._id %>"
-    const sectionIds = Array.from(canvas.querySelectorAll('.section-item'))
-                            .map(item => item.getAttribute('data-id'));
+    // 1. Lấy tất cả các phần tử có class .section-item bên trong canvas
+    const items = Array.from(canvas.querySelectorAll('.section-item'));
     
-    console.log("Gửi ID:", sectionIds); // F12 để kiểm tra xem ID có bị null/undefined không
+    // 2. Trích xuất mảng ID từ thuộc tính data-id đã có sẵn trên HTML
+    const sectionIds = items.map(item => item.getAttribute('data-id'));
+    
+    console.log("Danh sách ID mới:", sectionIds);
 
+    // 3. Gửi AJAX lên server
     fetch('/admin/homepage/update-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ order: sectionIds }) 
+        body: JSON.stringify({ order: sectionIds })
     })
     .then(res => res.json())
     .then(data => {
         if(data.success) {
-            showToast('Đã cập nhật thứ tự!');
+            showToast('Đã cập nhật thứ tự thành công!');
         } else {
-            // Nếu có lỗi, hiện nguyên nhân lỗi ra để debug
             showToast('Lỗi: ' + data.message, true);
         }
-    });
+    })
+    .catch(err => showToast('Lỗi kết nối máy chủ', true));
 }
 </script>
