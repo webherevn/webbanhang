@@ -9,46 +9,36 @@ const Homepage = require('../../models/HomepageModel'); // [QUAN TRỌNG] Phải
 // ============================================================
 exports.getHomepage = async (req, res) => {
     try {
-        // 1. Lấy cấu trúc trang chủ và Theme cùng lúc
-        const [homepageData, theme] = await Promise.all([
+        const [homepageData, theme, allProducts] = await Promise.all([
             Homepage.findOne().lean(),
-            Theme.findOne().lean()
+            Theme.findOne().lean(),
+            Product.find({ isActive: true }).sort({ createdAt: -1 }).limit(12).lean() // Lấy sp mặc định
         ]);
 
-        // 2. Kiểm tra nếu chưa có dữ liệu homepage trong DB
         let homepage = homepageData || { sections: [] };
 
-        // 3. Phép màu: Duyệt qua các khối để lấy sản phẩm tương ứng cho từng khối Product Grid
+        // Xử lý lấy sản phẩm riêng cho từng khối Product Grid (nếu có)
         if (homepage.sections && homepage.sections.length > 0) {
             for (let section of homepage.sections) {
                 if (section.type === 'product-grid' && section.isActive) {
                     const query = section.data.categoryId ? { category: section.data.categoryId } : {};
                     const limit = parseInt(section.data.limit) || 8;
-                    
-                    // Lấy sản phẩm riêng cho từng khối dựa trên cài đặt trong Admin
-                    section.products = await Product.find(query)
-                        .sort({ createdAt: -1 })
-                        .limit(limit)
-                        .lean();
+                    section.products = await Product.find(query).sort({ createdAt: -1 }).limit(limit).lean();
                 }
             }
         }
 
-        // 4. Render với đầy đủ biến để tránh lỗi "not defined"
         res.render('shop/home', { 
             pageTitle: 'Trang chủ - Fashion Shop',
             path: '/',
-            homepage: homepage, // Truyền biến này để View không bị lỗi
-            theme: theme || {}   // Truyền theme để header/footer không lỗi
+            homepage: homepage,
+            theme: theme || {},
+            products: allProducts || [] // <--- ĐÂY LÀ DÒNG QUAN TRỌNG NHẤT ĐỂ SỬA LỖI
         });
 
     } catch (err) {
-        console.error("❌ Lỗi trang chủ builder:", err);
-        res.status(500).render('404', { 
-            pageTitle: 'Lỗi hệ thống', 
-            path: '/404',
-            theme: {} 
-        });
+        console.error("❌ Lỗi trang chủ:", err);
+        res.status(500).render('404', { pageTitle: 'Lỗi', path: '/404', theme: {} });
     }
 };
 

@@ -11,7 +11,11 @@
         %>
 
         <% activeSections.forEach(section => { %>
-            <%- include('../partials/home-blocks/' + section.type + '.ejs', { data: section.data, products: products }) %>
+            <%- include('../partials/home-blocks/' + section.type + '.ejs', { 
+    data: section.data, 
+    section: section, // Truyền thêm object section để dùng dữ liệu riêng của khối
+    products: (typeof products !== 'undefined') ? products : [] 
+}) %>
         <% }) %>
     <% } %>
 </main>
