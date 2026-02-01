@@ -2,45 +2,68 @@ const Product = require('../../models/ProductModel');
 const Category = require('../../models/CategoryModel');
 const Page = require('../../models/PageModel');
 const Theme = require('../../models/ThemeModel'); 
+const Homepage = require('../../models/HomepageModel'); // [QUAN TRỌNG] Phải import Model này
 
 // ============================================================
-// 1. TRANG CHỦ
+// 1. TRANG CHỦ (Hệ thống Builder Xếp gạch)
 // ============================================================
 exports.getHomepage = async (req, res) => {
-  try {
-    const [theme, products] = await Promise.all([
-      Theme.findOne(),
-      Product.find().sort({ createdAt: -1 }).limit(12) // Nên limit số lượng sp trang chủ
-    ]);
+    try {
+        // 1. Lấy cấu trúc trang chủ và Theme cùng lúc
+        const [homepageData, theme] = await Promise.all([
+            Homepage.findOne().lean(),
+            Theme.findOne().lean()
+        ]);
 
-    res.render('shop/home', { 
-      pageTitle: 'Trang chủ - Fashion Shop',
-      path: '/',
-      products: products,
-      theme: theme
-    });
-  } catch (err) {
-    console.log("❌ Lỗi trang chủ:", err);
-    res.status(500).render('404', { pageTitle: 'Lỗi', path: '/404' });
-  }
+        // 2. Kiểm tra nếu chưa có dữ liệu homepage trong DB
+        let homepage = homepageData || { sections: [] };
+
+        // 3. Phép màu: Duyệt qua các khối để lấy sản phẩm tương ứng cho từng khối Product Grid
+        if (homepage.sections && homepage.sections.length > 0) {
+            for (let section of homepage.sections) {
+                if (section.type === 'product-grid' && section.isActive) {
+                    const query = section.data.categoryId ? { category: section.data.categoryId } : {};
+                    const limit = parseInt(section.data.limit) || 8;
+                    
+                    // Lấy sản phẩm riêng cho từng khối dựa trên cài đặt trong Admin
+                    section.products = await Product.find(query)
+                        .sort({ createdAt: -1 })
+                        .limit(limit)
+                        .lean();
+                }
+            }
+        }
+
+        // 4. Render với đầy đủ biến để tránh lỗi "not defined"
+        res.render('shop/home', { 
+            pageTitle: 'Trang chủ - Fashion Shop',
+            path: '/',
+            homepage: homepage, // Truyền biến này để View không bị lỗi
+            theme: theme || {}   // Truyền theme để header/footer không lỗi
+        });
+
+    } catch (err) {
+        console.error("❌ Lỗi trang chủ builder:", err);
+        res.status(500).render('404', { 
+            pageTitle: 'Lỗi hệ thống', 
+            path: '/404',
+            theme: {} 
+        });
+    }
 };
 
 // ============================================================
-// 2. XEM SẢN PHẨM THEO DANH MỤC (ĐÃ SỬA LỖI)
+// 2. XEM SẢN PHẨM THEO DANH MỤC
 // ============================================================
 exports.getCategoryProducts = async (req, res) => {
     try {
         const slug = req.params.slug;
-        
-        // 1. Tìm Danh mục và Theme
         const [category, theme] = await Promise.all([
-            Category.findOne({ slug: slug }), // Bỏ .trim() nếu không chắc chắn, slug thường không có space
+            Category.findOne({ slug: slug }),
             Theme.findOne()
         ]);
         
-        // 2. Nếu không thấy danh mục -> 404
         if (!category) {
-            console.log("❌ Không tìm thấy danh mục:", slug);
             return res.status(404).render('404', { 
                 pageTitle: 'Không tìm thấy danh mục', 
                 path: '/404',
@@ -48,17 +71,15 @@ exports.getCategoryProducts = async (req, res) => {
             });
         }
 
-        // 3. Tìm sản phẩm dựa trên ID của danh mục (QUAN TRỌNG: SỬA category._id)
         const products = await Product.find({ category: category._id }).sort({ createdAt: -1 });
 
-        res.render('shop/category-products', { // Đảm bảo tên file view này đúng với file bạn tạo
+        res.render('shop/category-products', {
             pageTitle: category.name,
-            path: '/category', // Có thể để active menu
+            path: '/category',
             category: category,
             products: products,
             theme: theme 
         });
-
     } catch (err) {
         console.log("❌ Lỗi xem danh mục:", err);
         res.status(500).render('404', { pageTitle: 'Lỗi hệ thống', path: '/404' });
@@ -71,9 +92,10 @@ exports.getCategoryProducts = async (req, res) => {
 exports.getProductDetail = async (req, res) => {
     try {
         const slug = req.params.slug;
-        const theme = await Theme.findOne(); 
-
-        const product = await Product.findOne({ slug: slug });
+        const [product, theme] = await Promise.all([
+            Product.findOne({ slug: slug }),
+            Theme.findOne()
+        ]);
 
         if (!product) {
             return res.status(404).render('404', { 
@@ -95,7 +117,6 @@ exports.getProductDetail = async (req, res) => {
             relatedProducts: relatedProducts,
             theme: theme 
         });
-
     } catch (err) {
         console.error("❌ Lỗi chi tiết sản phẩm:", err);
         res.status(500).render('404', { pageTitle: 'Lỗi', path: '/404' });
@@ -119,7 +140,6 @@ exports.getProducts = async (req, res) => {
             theme: theme 
         });
     } catch (err) {
-        console.log("❌ Lỗi lấy danh sách sản phẩm:", err);
         res.redirect('/');
     }
 };
@@ -150,36 +170,6 @@ exports.getPageDetail = async (req, res) => {
             theme: theme 
         });
     } catch (err) {
-        console.error("Lỗi hiển thị trang tĩnh:", err);
         res.redirect('/');
-    }
-};
-
-exports.getIndex = async (req, res) => {
-    try {
-        const homepage = await Homepage.findOne().lean();
-        if (!homepage) return res.render('home', { homepage: null });
-
-        // Phép màu ở đây: Duyệt qua các khối để lấy sản phẩm tương ứng
-        for (let section of homepage.sections) {
-            if (section.type === 'product-grid' && section.isActive) {
-                const query = section.data.categoryId ? { category: section.data.categoryId } : {};
-                const limit = parseInt(section.data.limit) || 8;
-                
-                // Gắn thẳng mảng sản phẩm vào object section
-                section.products = await Product.find(query)
-                    .sort({ createdAt: -1 })
-                    .limit(limit)
-                    .lean();
-            }
-        }
-
-        res.render('home', {
-            pageTitle: 'Trang chủ',
-            homepage: homepage // Bây giờ mỗi section đã có mảng 'products' riêng bên trong
-        });
-    } catch (err) {
-        console.error(err);
-        res.status(500).send("Lỗi tải trang chủ");
     }
 };
