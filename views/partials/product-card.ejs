@@ -1,19 +1,47 @@
-<div class="product-card h-100 shadow-sm-hover border-0">
-    <div class="product-img-container position-relative overflow-hidden">
-        <% if (product.isNew) { %>
-            <span class="badge bg-danger position-absolute top-0 start-0 m-2 z-3">NEW</span>
-        <% } %>
-        <a href="/products/<%= product.slug %>">
-            <img src="<%= product.thumbnail %>" class="img-fluid w-100 product-img" 
-                 alt="<%= product.name %>" 
-                 style="aspect-ratio: 3/4; object-fit: cover;">
+<div class="product-card-pro animate__animated animate__fadeIn">
+    <div class="pc-image-container">
+        <div class="pc-badges">
+            <% if (product.isNew) { %>
+                <span class="badge-custom badge-new">NEW</span>
+            <% } %>
+            <% if (product.discount && product.discount < product.basePrice) { %>
+                <span class="badge-custom badge-sale">
+                    -<%= Math.round((1 - product.discount/product.basePrice) * 100) %>%
+                </span>
+            <% } %>
+        </div>
+
+        <a href="/products/<%= product.slug %>" class="pc-img-link">
+            <img src="<%= product.thumbnail %>" class="pc-img pc-img-primary" alt="<%= product.name %>">
+            <% if (product.gallery && product.gallery.length > 0) { %>
+                <img src="<%= product.gallery[0] %>" class="pc-img pc-img-secondary" alt="<%= product.name %>">
+            <% } %>
         </a>
-        <button class="btn btn-dark btn-buy rounded-0 py-2 small fw-bold w-100">THÊM VÀO GIỎ</button>
+
+        <div class="pc-overlay-actions">
+            <button class="pc-action-btn btn-wishlist" title="Yêu thích">
+                <i class="far fa-heart"></i>
+            </button>
+            <button class="pc-action-btn btn-add-cart" onclick="event.preventDefault(); addToCart('<%= product._id %>')">
+                <i class="fas fa-shopping-bag me-2"></i> THÊM VÀO GIỎ
+            </button>
+            <button class="pc-action-btn btn-quickview" title="Xem nhanh">
+                <i class="fas fa-search-plus"></i>
+            </button>
+        </div>
     </div>
-    <div class="p-3 text-center">
-        <h6 class="fw-bold my-1">
-            <a href="/products/<%= product.slug %>" class="text-decoration-none text-dark"><%= product.name %></a>
-        </h6>
-        <div class="text-danger fw-bold"><%= product.basePrice.toLocaleString('vi-VN') %> đ</div>
+
+    <div class="pc-details">
+        <h3 class="pc-title">
+            <a href="/products/<%= product.slug %>"><%= product.name %></a>
+        </h3>
+        <div class="pc-price-box">
+            <% if (product.discount && product.discount < product.basePrice) { %>
+                <span class="price-current text-danger"><%= product.discount.toLocaleString('vi-VN') %> đ</span>
+                <span class="price-old"><%= product.basePrice.toLocaleString('vi-VN') %> đ</span>
+            <% } else { %>
+                <span class="price-current"><%= product.basePrice.toLocaleString('vi-VN') %> đ</span>
+            <% } %>
+        </div>
     </div>
 </div>
