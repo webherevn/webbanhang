@@ -11,9 +11,9 @@
         %>
 
         <% activeSections.forEach(section => { %>
-            <%- include('./partials/home-blocks/' + section.type + '.ejs', { data: section.data, products: products }) %>
+            <%- include('../partials/home-blocks/' + section.type + '.ejs', { data: section.data, products: products }) %>
         <% }) %>
     <% } %>
 </main>
 
-<%- include('./partials/footer.ejs') %>
+<%- include('../partials/footer.ejs') %>
