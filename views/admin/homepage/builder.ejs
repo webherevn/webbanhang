@@ -214,11 +214,12 @@
 
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 <script>
-    function showToast(message) {
+    function showToast(message, isError = false) {
         const container = document.getElementById('toast-container');
         const toast = document.createElement('div');
         toast.className = 'bg-dark text-white px-4 py-3 rounded-pill shadow-lg fw-bold d-flex align-items-center gap-3 animate__animated animate__fadeInUp';
-        toast.innerHTML = `<i class="fas fa-check-circle text-success"></i> ${message}`;
+        if(isError) toast.classList.add('border', 'border-danger');
+        toast.innerHTML = `<i class="fas ${isError ? 'fa-exclamation-circle text-danger' : 'fa-check-circle text-success'}"></i> ${message}`;
         container.appendChild(toast);
         setTimeout(() => {
             toast.classList.replace('animate__fadeInUp', 'animate__fadeOutDown');
@@ -232,29 +233,31 @@
             handle: '.drag-handle',
             animation: 300,
             ghostClass: 'sortable-ghost',
-           onEnd: function() {
-    // 1. Lấy tất cả các phần tử có class .section-item bên trong canvas
-    const items = Array.from(canvas.querySelectorAll('.section-item'));
-    
-    // 2. Trích xuất mảng ID từ thuộc tính data-id đã có sẵn trên HTML
-    const sectionIds = items.map(item => item.getAttribute('data-id'));
-    
-    console.log("Danh sách ID mới:", sectionIds);
+            onEnd: function() {
+                // 1. Lấy tất cả các phần tử có class .section-item bên trong canvas
+                const items = Array.from(canvas.querySelectorAll('.section-item'));
+                
+                // 2. Trích xuất mảng ID từ thuộc tính data-id đã có sẵn trên HTML
+                const sectionIds = items.map(item => item.getAttribute('data-id'));
+                
+                console.log("Danh sách ID mới:", sectionIds);
 
-    // 3. Gửi AJAX lên server
-    fetch('/admin/homepage/update-order', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ order: sectionIds })
-    })
-    .then(res => res.json())
-    .then(data => {
-        if(data.success) {
-            showToast('Đã cập nhật thứ tự thành công!');
-        } else {
-            showToast('Lỗi: ' + data.message, true);
-        }
-    })
-    .catch(err => showToast('Lỗi kết nối máy chủ', true));
-}
+                // 3. Gửi AJAX lên server
+                fetch('/admin/homepage/update-order', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ order: sectionIds })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if(data.success) {
+                        showToast('Đã cập nhật thứ tự thành công!');
+                    } else {
+                        showToast('Lỗi: ' + data.message, true);
+                    }
+                })
+                .catch(err => showToast('Lỗi kết nối máy chủ', true));
+            } // <--- Thêm dấu đóng hàm onEnd
+        }); // <--- Thêm dấu đóng Sortable.create
+    } // <--- Thêm dấu đóng if (canvas)
 </script>
