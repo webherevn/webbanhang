@@ -9,55 +9,33 @@ const Homepage = require('../../models/HomepageModel');
 // ============================================================
 exports.getHomepage = async (req, res) => {
     try {
-        // 1. Lấy cấu trúc trang chủ và Theme (Sử dụng lean để chạy nhanh hơn)
-        const [homepageData, theme] = await Promise.all([
-            Homepage.findOne().lean(),
-            Theme.findOne().lean()
-        ]);
+        // Lấy bản ghi duy nhất. KHÔNG dùng .sort() ở đây vì ta muốn lấy thứ tự vật lý của mảng
+        const homepage = await Homepage.findOne().lean();
+        const theme = await Theme.findOne().lean();
 
-        let homepage = homepageData || { sections: [] };
-
-        // 2. XỬ LÝ LOGIC ĐỔ DỮ LIỆU VÀO TỪNG KHỐI
-        // Thứ tự các khối sẽ tự động được giữ nguyên như lúc bạn lưu trong Admin
-        if (homepage.sections && homepage.sections.length > 0) {
-            // Sử dụng Promise.all bên trong map để lấy sản phẩm cho tất cả các khối cùng lúc
-            await Promise.all(homepage.sections.map(async (section) => {
-                // Chỉ xử lý nếu khối là product-grid và đang ở trạng thái ACTIVE
+        if (homepage && homepage.sections) {
+            for (let section of homepage.sections) {
                 if (section.type === 'product-grid' && section.isActive) {
-                    const categoryId = section.data.categoryId;
-                    const limit = parseInt(section.data.limit) || 8;
-
-                    // Query linh hoạt: Lọc theo danh mục nếu có, không thì lấy sp mới nhất
-                    const query = categoryId ? { category: categoryId, isActive: true } : { isActive: true };
-
-                    section.products = await Product.find(query)
-                        .sort({ createdAt: -1 })
-                        .limit(limit)
-                        .select('name slug thumbnail basePrice discount isNew') // Chỉ lấy các trường cần thiết để nhẹ trang
-                        .lean();
+                    // Đổ dữ liệu sản phẩm vào từng khối
+                    section.products = await Product.find({ 
+                        category: section.data.categoryId || { $exists: true }, 
+                        isActive: true 
+                    })
+                    .sort({ createdAt: -1 })
+                    .limit(parseInt(section.data.limit) || 8)
+                    .lean();
                 }
-            }));
+            }
         }
 
-        // 3. Render trang chủ
-        res.render('shop/home', {
-            pageTitle: theme && theme.siteName ? theme.siteName : 'Trang chủ - Fashion Shop',
-            path: '/',
-            homepage: homepage,
+        res.render('shop/home', { 
+            homepage: homepage || { sections: [] },
             theme: theme || {}
         });
-
     } catch (err) {
-        console.error("🔥 Lỗi tải trang chủ builder:", err);
-        const theme = await Theme.findOne().lean();
-        res.status(500).render('404', { 
-            pageTitle: 'Lỗi hệ thống', 
-            path: '/404', 
-            theme: theme || {} 
-        });
+        res.status(500).send("Lỗi tải trang chủ");
     }
 };
-
 // ============================================================
 // 2. XEM SẢN PHẨM THEO DANH MỤC
 // ============================================================

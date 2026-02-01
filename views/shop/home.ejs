@@ -1,23 +1,47 @@
-<%- include('../partials/head.ejs') %>
-<%- include('../partials/shop-header.ejs') %>
+<%- include('../partials/head') %>
+<%- include('../partials/header') %>
 
-<main>
-    <% if (homepage && homepage.sections) { %>
-        <% 
-            // Sắp xếp các khối theo thứ tự 'order'
-            const activeSections = homepage.sections
-                .filter(s => s.isActive)
-                .sort((a, b) => a.order - b.order); 
-        %>
+<main class="main-builder">
+    <% if (homepage.sections && homepage.sections.length > 0) { %>
+        <% homepage.sections.forEach(section => { %>
+            
+            <% if (section.isActive) { %>
+                
+                <% if (section.type === 'hero') { %>
+                    <section class="hero-section" style="background-image: url('<%= section.data.bgImage %>')">
+                        <div class="container text-center py-5">
+                            <h1 class="display-3 fw-bold"><%= section.data.title %></h1>
+                            <p class="lead"><%= section.data.subtitle %></p>
+                            <a href="<%= section.data.buttonLink %>" class="btn btn-primary btn-lg rounded-pill">
+                                <%= section.data.buttonText %>
+                            </a>
+                        </div>
+                    </section>
+                <% } %>
 
-        <% activeSections.forEach(section => { %>
-            <%- include('../partials/home-blocks/' + section.type + '.ejs', { 
-    data: section.data, 
-    section: section, // Truyền thêm object section để dùng dữ liệu riêng của khối
-    products: (typeof products !== 'undefined') ? products : [] 
-}) %>
-        <% }) %>
+                <% if (section.type === 'product-grid') { %>
+                    <section class="product-grid-section py-5">
+                        <div class="container">
+                            <h2 class="text-center mb-4 fw-bold"><%= section.data.title %></h2>
+                            <div class="row g-4">
+                                <% if (section.products && section.products.length > 0) { %>
+                                    <% section.products.forEach(product => { %>
+                                        <div class="col-6 col-md-3">
+                                            <%- include('../partials/product-card', { product: product }) %>
+                                        </div>
+                                    <% }) %>
+                                <% } %>
+                            </div>
+                        </div>
+                    </section>
+                <% } %>
+
+                <% if (section.type === 'features') { %>
+                    <%- include('../partials/features-block', { data: section.data }) %>
+                <% } %>
+
+            <% } %> <% }) %>
     <% } %>
 </main>
 
-<%- include('../partials/footer.ejs') %>
+<%- include('../partials/footer') %>
