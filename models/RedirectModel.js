@@ -17,6 +17,6 @@ const redirectSchema = new mongoose.Schema({
 }, { timestamps: true });
 
 // Tạo index để tìm kiếm cực nhanh (Vì middleware sẽ chạy mỗi khi khách load trang)
-redirectSchema.index({ fromPath: 1 });
+// redirectSchema.index({ fromPath: 1 });
 
 module.exports = mongoose.model('Redirect', redirectSchema);
