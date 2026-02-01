@@ -1,0 +1,80 @@
+<%- include('../../partials/head.ejs') %>
+<div class="admin-wrapper">
+    <div class="admin-sidebar-container"><%- include('../partials/sidebar.ejs') %></div>
+    
+    <div class="admin-content">
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="/admin/homepage/builder">Builder</a></li>
+                <li class="breadcrumb-item active">Chỉnh sửa <%= section.type %></li>
+            </ol>
+        </nav>
+
+        <form action="/admin/homepage/edit-section" method="POST" enctype="multipart/form-data">
+            <input type="hidden" name="sectionId" value="<%= section._id %>">
+            
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="wp-card shadow-sm">
+                        <div class="postbox-header">Nội dung văn bản</div>
+                        
+                        <div class="mb-3">
+                            <label class="small fw-bold">Tiêu đề (Title)</label>
+                            <input type="text" name="title" class="form-control" value="<%= section.data.title %>">
+                        </div>
+
+                        <% if (section.type === 'hero' || section.type === 'promo') { %>
+                            <div class="mb-3">
+                                <label class="small fw-bold">Phụ đề (Subtitle)</label>
+                                <input type="text" name="subtitle" class="form-control" value="<%= section.data.subtitle %>">
+                            </div>
+                            <div class="row">
+                                <div class="col-6">
+                                    <label class="small fw-bold">Chữ trên nút</label>
+                                    <input type="text" name="buttonText" class="form-control" value="<%= section.data.buttonText %>">
+                                </div>
+                                <div class="col-6">
+                                    <label class="small fw-bold">Link của nút</label>
+                                    <input type="text" name="buttonLink" class="form-control" value="<%= section.data.buttonLink %>">
+                                </div>
+                            </div>
+                        <% } %>
+
+                        <% if (section.type === 'features') { %>
+                            <hr>
+                            <h6 class="fw-bold">Danh sách Icon & Nội dung</h6>
+                            <div id="features-list">
+                                <% (section.data.items || []).forEach((item, index) => { %>
+                                    <div class="p-3 border rounded mb-3 bg-light">
+                                        <input type="text" name="items[<%= index %>][icon]" class="form-control mb-2" placeholder="Icon (bi-truck)" value="<%= item.icon %>">
+                                        <input type="text" name="items[<%= index %>][title]" class="form-control mb-2" placeholder="Tiêu đề" value="<%= item.title %>">
+                                        <input type="text" name="items[<%= index %>][desc]" class="form-control" placeholder="Mô tả ngắn" value="<%= item.desc %>">
+                                    </div>
+                                <% }) %>
+                            </div>
+                        <% } %>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="wp-card shadow-sm">
+                        <div class="postbox-header">Hình ảnh & Trạng thái</div>
+                        
+                        <% if (section.data.bgImage || section.data.image) { %>
+                            <img src="<%= section.data.bgImage || section.data.image %>" class="img-fluid rounded mb-3 border">
+                        <% } %>
+                        
+                        <div class="mb-3">
+                            <label class="small fw-bold">Thay đổi ảnh</label>
+                            <input type="file" name="bgImage" class="form-control form-control-sm">
+                        </div>
+
+                        <hr>
+                        <button type="submit" class="btn btn-primary w-100 fw-bold">Lưu thay đổi</button>
+                        <a href="/admin/homepage/builder" class="btn btn-link w-100 text-muted small mt-2">Quay lại</a>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

@@ -2,6 +2,8 @@ const Post = require('../../models/PostModel');
 const Product = require('../../models/ProductModel');
 const Setting = require('../../models/SettingModel');
 const Theme = require('../../models/ThemeModel');
+// controllers/admin/homepageController.js
+const Homepage = require('../../models/HomepageModel');
 
 // ==========================================
 // 1. TRANG BẢNG TIN (DASHBOARD)
@@ -139,4 +141,29 @@ exports.postSettings = async (req, res) => {
         console.error(err);
         res.redirect('/admin/settings?status=error'); 
     }
+};
+
+exports.getHomepageBuilder = async (req, res) => {
+    let homepage = await Homepage.findOne();
+    if (!homepage) homepage = await Homepage.create({ sections: [] });
+    
+    res.render('admin/homepage/builder', {
+        pageTitle: 'Trang chủ Builder',
+        path: '/admin/homepage',
+        sections: homepage.sections.sort((a,b) => a.order - b.order)
+    });
+};
+
+// Hàm cập nhật thứ tự (Sẽ gọi qua AJAX khi kéo thả)
+exports.updateSectionOrder = async (req, res) => {
+    const { orders } = req.body; // Mảng chứa ID và vị trí mới
+    const homepage = await Homepage.findOne();
+    
+    orders.forEach(item => {
+        const section = homepage.sections.id(item.id);
+        if (section) section.order = item.newOrder;
+    });
+    
+    await homepage.save();
+    res.json({ success: true });
 };

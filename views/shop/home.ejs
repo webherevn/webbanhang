@@ -1,81 +1,19 @@
-<%- include('../partials/head.ejs') %>
-<%- include('../partials/shop-header.ejs') %>
+<%- include('./partials/head.ejs') %>
+<%- include('./partials/shop-header.ejs') %>
 
-<header class="hero-section d-flex align-items-center text-center text-white" 
-        style="background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('https://images.unsplash.com/photo-1483985988355-763728e1935b?q=80&w=2070&auto=format&fit=crop'); 
-        background-size: cover; background-position: center; height: 80vh;">
-    <div class="container">
-        <h5 class="text-uppercase letter-spacing-2 mb-3 animate-up">Bộ sưu tập Xuân Hè 2026</h5>
-        <h1 class="display-3 fw-bold mb-4 animate-up" style="animation-delay: 0.2s;">PHONG CÁCH CỦA BẠN</h1>
-        <a href="#new-arrivals" class="btn btn-light btn-lg rounded-0 px-5 py-3 fw-bold animate-up" style="animation-delay: 0.4s;">MUA NGAY</a>
-    </div>
-</header>
+<main>
+    <% if (homepage && homepage.sections) { %>
+        <% 
+            // Sắp xếp các khối theo thứ tự 'order'
+            const activeSections = homepage.sections
+                .filter(s => s.isActive)
+                .sort((a, b) => a.order - b.order); 
+        %>
 
-<section class="py-5 bg-light">
-    <div class="container">
-        <div class="row text-center g-4">
-            <div class="col-md-4">
-                <div class="p-3">
-                    <i class="bi bi-truck fs-1 text-dark mb-3"></i>
-                    <h5 class="fw-bold">Miễn Phí Giao Hàng</h5>
-                    <p class="text-muted small">Cho đơn hàng trên 500k</p>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="p-3">
-                    <i class="bi bi-arrow-repeat fs-1 text-dark mb-3"></i>
-                    <h5 class="fw-bold">Đổi Trả Dễ Dàng</h5>
-                    <p class="text-muted small">Trong vòng 30 ngày</p>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="p-3">
-                    <i class="bi bi-headset fs-1 text-dark mb-3"></i>
-                    <h5 class="fw-bold">Hỗ Trợ 24/7</h5>
-                    <p class="text-muted small">Hotline: 1900 xxxx</p>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
+        <% activeSections.forEach(section => { %>
+            <%- include('./partials/home-blocks/' + section.type + '.ejs', { data: section.data, products: products }) %>
+        <% }) %>
+    <% } %>
+</main>
 
-<section id="new-arrivals" class="py-5">
-    <div class="container">
-        <div class="d-flex justify-content-between align-items-end mb-5">
-            <div>
-                <h2 class="fw-bold text-uppercase">Sản Phẩm Mới</h2>
-                <div class="bg-danger mt-2" style="width: 60px; height: 3px;"></div>
-            </div>
-            <a href="/products" class="text-decoration-none text-dark fw-semibold border-bottom border-dark pb-1">Xem tất cả <i class="bi bi-arrow-right"></i></a>
-        </div>
-
-        <div class="row g-4">
-            <% if (typeof products !== 'undefined' && products && products.length > 0) { %>
-                <% products.forEach(product => { %>
-                    <div class="col-6 col-md-3">
-                        <div class="product-card h-100 position-relative">
-                            <span class="badge bg-danger position-absolute top-0 start-0 m-3 rounded-0 px-3">New</span>
-                            <div class="overflow-hidden">
-                                <a href="/products/<%= product.slug %>">
-                                    <img src="<%= product.thumbnail %>" class="img-fluid w-100 product-img" alt="<%= product.name %>" loading="lazy">
-                                </a>
-                            </div>
-                            <div class="card-body pt-3 text-center">
-                                <h5 class="card-title fs-6 fw-bold">
-                                    <a href="/products/<%= product.slug %>" class="text-decoration-none text-dark stretched-link">
-                                        <%= product.name %>
-                                    </a>
-                                </h5>
-                                <p class="card-text text-danger fw-bold"><%= product.basePrice.toLocaleString('vi-VN') %> đ</p>
-                            </div>
-                        </div>
-                    </div>
-                <% }) %>
-            <% } else { %>
-                <div class="col-12 text-center py-5"><p class="text-muted">Chưa có sản phẩm nào.</p></div>
-            <% } %>
-        </div>
-    </div>
-</section>
-
-<%- include('../partials/footer.ejs') %>
+<%- include('./partials/footer.ejs') %>

@@ -154,3 +154,21 @@ exports.getPageDetail = async (req, res) => {
         res.redirect('/');
     }
 };
+
+exports.getIndex = async (req, res) => {
+    try {
+        // Lấy dữ liệu trang chủ và sản phẩm mới nhất
+        const [homepage, products] = await Promise.all([
+            Homepage.findOne().lean(),
+            Product.find({ isActive: true }).sort({ createdAt: -1 }).limit(8).lean()
+        ]);
+
+        res.render('home', {
+            pageTitle: 'Trang chủ',
+            homepage: homepage,
+            products: products // Vẫn truyền products cho khối Product Grid dùng
+        });
+    } catch (err) {
+        res.status(500).send("Lỗi hệ thống");
+    }
+};
