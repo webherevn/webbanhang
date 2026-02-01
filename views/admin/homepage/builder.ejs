@@ -80,9 +80,7 @@
                             </div>
                         </div>
                         <div class="pe-4 d-flex gap-2">
-                            <a href="/admin/homepage/edit-section/<%= section._id %>" class="btn btn-sm btn-light border px-3 rounded-pill">
-                                <i class="fas fa-sliders-h me-1"></i> Tùy chỉnh
-                            </a>
+                            <a href="/admin/homepage/edit-section/<%= section._id %>" class="btn ...">Tùy chỉnh</a>
                             <form action="/admin/homepage/delete-section" method="POST" onsubmit="return confirm('Xóa khối này sẽ không thể khôi phục. Tiếp tục?')">
                                 <input type="hidden" name="sectionId" value="<%= section._id %>">
                                 <button class="btn btn-sm btn-outline-danger border-0"><i class="fas fa-trash-alt"></i></button>

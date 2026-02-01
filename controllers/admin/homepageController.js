@@ -18,77 +18,81 @@ exports.getHomepageBuilder = async (req, res) => {
     }
 };
 
-// 2. Thêm một khối mới (Mở rộng thêm loại product-grid và promo)
+// --- 1. SỬA LỖI: Bấm Tùy chỉnh bị load lại trang ---
+exports.getEditSection = async (req, res) => {
+    try {
+        const sectionId = req.params.id;
+        
+        // Lấy dữ liệu đồng thời
+        const [homepage, categories] = await Promise.all([
+            Homepage.findOne(),
+            Category.find().lean()
+        ]);
+
+        if (!homepage) {
+            console.error("❌ Không tìm thấy Homepage trong DB");
+            return res.status(404).send("Chưa khởi tạo dữ liệu trang chủ");
+        }
+
+        // Tìm section trong mảng
+        const section = homepage.sections.id(sectionId);
+
+        if (!section) {
+            console.error("❌ Không tìm thấy Section với ID:", sectionId);
+            // Thay vì redirect gây lặp trang, hãy báo lỗi để debug
+            return res.status(404).send("Khối nội dung không tồn tại hoặc đã bị xóa");
+        }
+
+        res.render('admin/homepage/edit-section', {
+            pageTitle: 'Chỉnh sửa ' + section.type,
+            path: '/admin/homepage/builder',
+            section: section,
+            categories: categories
+        });
+
+    } catch (err) {
+        console.error("🔥 Lỗi GetEditSection:", err);
+        res.status(500).send("Lỗi hệ thống: " + err.message);
+    }
+};
+
+// --- 2. SỬA LỖI: Thêm 1 khối ra 2 khối ---
 exports.getAddSection = async (req, res) => {
     try {
         const type = req.params.type;
         const homepage = await Homepage.findOne();
         
-        let defaultData = { title: 'Tiêu đề khối mới' };
+        if (!homepage) return res.redirect('/admin/homepage/builder');
 
-        // Thiết lập dữ liệu mẫu cho từng loại để Builder không bị trống
-        if(type === 'hero') {
-            defaultData = { title: 'Mùa Hè Rực Rỡ', subtitle: 'Bộ sưu tập 2026', buttonText: 'Khám phá ngay', buttonLink: '/products', bgImage: '' };
-        } else if(type === 'features') {
-            defaultData = { items: [
-                { icon: 'bi-truck', title: 'Miễn phí vận chuyển', desc: 'Cho đơn hàng trên 500k' },
-                { icon: 'bi-patch-check', title: 'Bảo hành 12 tháng', desc: 'Đổi trả trong 30 ngày' }
-            ]};
-        } else if(type === 'product-grid') {
-            defaultData = { title: 'Sản phẩm nổi bật', buttonText: 'Xem tất cả', buttonLink: '/products' };
-        } else if(type === 'promo') {
-            defaultData = { title: 'Flash Sale', subtitle: 'Giảm đến 50%', buttonText: 'Săn Deal ngay', buttonLink: '/products', bgImage: '' };
-        }
+        // Định nghĩa dữ liệu mẫu cho từng loại khối
+        const defaultData = {
+            title: 'Tiêu đề mới',
+            subtitle: 'Phụ đề mẫu',
+            buttonText: 'Xem ngay',
+            buttonLink: '#',
+            bgImage: ''
+        };
 
-        homepage.sections.push({ 
-            type, 
-            data: defaultData, 
-            order: homepage.sections.length, // Đặt xuống cuối cùng
-            isActive: true 
+        // Quan trọng: Chỉ đẩy vào mảng MỘT LẦN duy nhất
+        homepage.sections.push({
+            type: type,
+            data: defaultData,
+            isActive: true,
+            order: homepage.sections.length
         });
 
+        // Sử dụng await để đảm bảo lưu xong mới chuyển trang
         await homepage.save();
-        res.redirect('/admin/homepage/builder');
-    } catch (err) {
-        res.redirect('/admin/homepage/builder');
-    }
-};
-
-// 3. Trang chỉnh sửa nội dung chi tiết
-exports.getEditSection = async (req, res) => {
-    try {
-        const sectionId = req.params.id;
         
-        // 1. Lấy đồng thời cả Homepage và danh sách Danh mục
-        const [homepage, categories] = await Promise.all([
-            Homepage.findOne(),
-            Category.find().lean() // Lấy tất cả danh mục để hiện trong dropdown
-        ]);
-
-        if (!homepage) {
-            return res.redirect('/admin/homepage/builder');
-        }
-
-        // 2. Tìm đúng section cần sửa trong mảng sections
-        const section = homepage.sections.id(sectionId);
-
-        if (!section) {
-            return res.redirect('/admin/homepage/builder');
-        }
-
-        // 3. TRUYỀN BIẾN categories VÀO ĐÂY
-        res.render('admin/homepage/edit-section', {
-            pageTitle: 'Chỉnh sửa khối nội dung',
-            path: '/admin/homepage/builder',
-            section: section,
-            categories: categories // <--- Dòng này sẽ xóa tan lỗi "not defined"
-        });
+        // Sau khi lưu xong, quay lại trang builder
+        return res.redirect('/admin/homepage/builder');
 
     } catch (err) {
-        console.error("❌ Lỗi getEditSection:", err);
-        res.status(500).send("Lỗi server");
+        console.error("🔥 Lỗi AddSection:", err);
+        res.status(500).send("Không thể thêm khối mới");
     }
 };
+
 
 // 4. Xử lý lưu dữ liệu (Tối ưu để xử lý mảng items)
 exports.postEditSection = async (req, res) => {

@@ -64,6 +64,7 @@ router.post('/settings/menu/update', settingController.postUpdateMenu);
 router.get('/blog-categories', postController.getBlogCategories);
 router.post('/add-blog-category', upload.single('image'), postController.postAddBlogCategory);
 router.get('/edit-blog-category/:categoryId', postController.getEditBlogCategory);
+reference
 router.post('/edit-blog-category', upload.single('image'), postController.postEditBlogCategory);
 router.post('/delete-blog-category', postController.postDeleteBlogCategory);
 
@@ -127,22 +128,24 @@ router.get('/seo/social', seoController.getSocialSettings);
 router.post('/seo/social', upload.single('defaultOgImage'), seoController.postSocialSettings);
 
 // ============================================================
-// I. [MỚI] HOMEPAGE BUILDER (UX BUILDER)
+// I. [CẬP NHẬT] HOMEPAGE BUILDER (UX BUILDER)
 // ============================================================
-// 1. Quản lý danh sách các khối (Kéo thả)
+// 1. Quản lý danh sách các khối
 router.get('/homepage/builder', homepageController.getHomepageBuilder);
 
-// 2. Route AJAX cập nhật thứ tự
+// 2. Cập nhật thứ tự
 router.post('/homepage/update-order', homepageController.updateSectionOrder);
 
-// 3. Thêm mới một Section theo loại (hero, features, product-grid, promo)
+// 3. [SỬA] Thêm mới: Dùng GET để tránh lặp request tạo 2 khối
 router.get('/homepage/add-section/:type', homepageController.getAddSection);
 
-// 4. Chỉnh sửa nội dung chi tiết của một khối
-router.get('/homepage/edit-section/:sectionId', homepageController.getEditSection);
+// 4. [SỬA] Chỉnh sửa: Đổi :sectionId thành :id để khớp với req.params.id trong Controller
+router.get('/homepage/edit-section/:id', homepageController.getEditSection);
+
+// 5. Lưu chỉnh sửa (giữ nguyên upload)
 router.post('/homepage/edit-section', upload.single('bgImage'), homepageController.postEditSection);
 
-// 5. Xóa khối
+// 6. Xóa khối
 router.post('/homepage/delete-section', homepageController.postDeleteSection);
 
 module.exports = router;
