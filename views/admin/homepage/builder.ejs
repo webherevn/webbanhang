@@ -2,84 +2,71 @@
 
 <style>
     :root {
-        --wp-blue: #2271b1;
-        --bg-admin: #f0f2f5;
-        --card-border: #dcdcde;
+        --admin-blue: #2271b1;
+        --admin-bg: #f0f2f5;
         --text-dark: #1d2327;
         --success-green: #00a32a;
+        --card-border: #dcdcde;
     }
 
-    body { background-color: var(--bg-admin); font-family: 'Inter', -apple-system, sans-serif; color: var(--text-dark); }
+    body { background-color: var(--admin-bg); font-family: 'Inter', -apple-system, sans-serif; color: var(--text-dark); }
     
     /* Layout */
     .admin-wrapper { display: flex; min-height: 100vh; }
     .admin-sidebar-container { width: 260px; position: fixed; height: 100vh; z-index: 1000; box-shadow: 2px 0 5px rgba(0,0,0,0.05); }
     .admin-content { flex: 1; padding: 40px; margin-left: 260px; }
 
-    /* Builder UI - Canvas */
-    #builder-canvas { max-width: 1000px; margin: 0 auto; }
-    
+    /* Builder UI */
     .section-item { 
-        background: #fff; 
-        border: 1px solid var(--card-border); 
-        border-radius: 12px;
-        margin-bottom: 15px; 
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        display: flex; 
-        align-items: center; 
-        justify-content: space-between;
+        background: #fff; border: 1px solid var(--card-border); border-radius: 12px;
+        margin-bottom: 16px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex; align-items: center; justify-content: space-between;
         position: relative;
     }
-
     .section-item:hover { 
-        border-color: var(--wp-blue); 
-        box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+        border-color: var(--admin-blue); 
+        box-shadow: 0 10px 20px rgba(0,0,0,0.05);
         transform: translateY(-2px);
     }
-
-    /* Sortable Placeholder (Vị trí khối sẽ rơi vào khi kéo) */
-    .sortable-ghost { opacity: 0.3; border: 2px dashed var(--wp-blue); background: #f0f7ff; }
-
+    
     .drag-handle { 
-        padding: 28px 20px; 
+        padding: 28px 22px; 
         color: #ccd0d4; 
         border-right: 1px solid #f0f0f1; 
         cursor: grab; 
-        transition: 0.2s;
         background: #fafafa;
         border-radius: 12px 0 0 12px;
     }
-    .section-item:hover .drag-handle { color: var(--wp-blue); background: #f0f7ff; }
+    .section-item:hover .drag-handle { color: var(--admin-blue); background: #f0f7ff; }
+    .sortable-ghost { opacity: 0.4; background: #e2e8f0; border: 2px dashed var(--admin-blue); }
 
-    .section-info { padding-left: 25px; flex-grow: 1; }
-    
+    .section-info { padding-left: 24px; flex-grow: 1; }
     .section-type-badge { 
-        font-size: 10px; font-weight: 800; letter-spacing: 0.8px;
-        padding: 3px 10px; border-radius: 5px; 
-        background: #f0f0f1; color: #50575e;
-        text-transform: uppercase;
-        display: inline-block;
-        margin-bottom: 5px;
+        font-size: 10px; font-weight: 800; letter-spacing: 0.5px;
+        padding: 4px 12px; border-radius: 6px; background: #f0f0f1; color: #50575e;
+        text-transform: uppercase; margin-bottom: 5px; display: inline-block;
     }
-
-    /* Status Indicator */
+    
     .status-indicator { font-size: 11px; font-weight: 600; display: flex; align-items: center; gap: 5px; }
     .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
     .dot-active { background: var(--success-green); box-shadow: 0 0 5px var(--success-green); }
 
-    /* Library Modal */
+    /* Library Cards */
     .block-card {
-        border: 2px solid #f0f0f1; border-radius: 20px; padding: 35px 20px;
-        transition: all 0.3s; text-align: center; cursor: pointer; height: 100%;
-        background: #fff;
+        border: 2px solid #f0f0f1; border-radius: 16px; padding: 30px 20px;
+        transition: 0.3s; text-align: center; cursor: pointer; height: 100%; background: #fff;
     }
-    .block-card:hover { 
-        border-color: var(--wp-blue); 
-        background: #faffff; 
-        transform: translateY(-5px);
-        box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+    .block-card:hover { border-color: var(--admin-blue); background: #faffff; transform: translateY(-5px); }
+    .block-icon { font-size: 2.5rem; margin-bottom: 15px; display: block; color: var(--admin-blue); }
+
+    /* Toast Notification */
+    #toast-container { position: fixed; bottom: 30px; right: 30px; z-index: 9999; }
+    .toast-custom {
+        background: #1d2327; color: #fff; padding: 12px 25px; border-radius: 50px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.2); display: flex; align-items: center; gap: 12px;
+        margin-bottom: 10px; transform: translateY(100px); opacity: 0; transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
-    .block-icon { font-size: 2.8rem; margin-bottom: 15px; display: block; color: var(--wp-blue); }
+    .toast-custom.show { transform: translateY(0); opacity: 1; }
 </style>
 
 <div class="admin-wrapper">
@@ -92,19 +79,19 @@
             <div>
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb mb-1">
-                        <li class="breadcrumb-item small"><a href="/admin" class="text-decoration-none">Bảng tin</a></li>
-                        <li class="breadcrumb-item small active">Homepage Builder</li>
+                        <li class="breadcrumb-item small"><a href="/admin" class="text-decoration-none text-muted">Bảng tin</a></li>
+                        <li class="breadcrumb-item small active fw-bold text-primary">Homepage Builder</li>
                     </ol>
                 </nav>
                 <h2 class="fw-bold text-dark m-0">Trình thiết kế Trang chủ</h2>
-                <p class="text-muted small m-0">Kéo thả các khối để sắp xếp thứ tự hiển thị.</p>
+                <p class="text-muted small m-0">Kéo thả để thay đổi thứ tự hiển thị các khối trên website.</p>
             </div>
             <div class="d-flex gap-3">
                 <a href="/" target="_blank" class="btn btn-outline-dark rounded-pill px-4 fw-bold shadow-sm">
                     <i class="fas fa-external-link-alt me-2"></i>Xem Web
                 </a>
                 <button class="btn btn-primary rounded-pill px-4 shadow fw-bold" data-bs-toggle="modal" data-bs-target="#addSectionModal">
-                    <i class="fas fa-plus-circle me-2"></i>Thêm khối mới
+                    <i class="fas fa-plus me-2"></i>Thêm khối mới
                 </button>
             </div>
         </div>
@@ -121,37 +108,32 @@
                                         <span class="section-type-badge"><%= section.type %></span>
                                         <% if(section.isActive) { %>
                                             <span class="status-indicator text-success">
-                                                <span class="dot dot-active"></span> HIỂN THỊ
+                                                <span class="dot dot-active"></span> ĐANG HIỂN THỊ
                                             </span>
                                         <% } %>
                                     </div>
-                                    <h6 class="fw-bold m-0 text-dark"><%= section.data.title || 'Khối này chưa có tiêu đề' %></h6>
+                                    <h6 class="fw-bold m-0 text-dark"><%= section.data.title || 'Mô tả ngắn cho khối này...' %></h6>
                                 </div>
                             </div>
                             
-                            <div class="pe-4 d-flex gap-2">
+                            <div class="pe-4 d-flex gap-2 align-items-center">
                                 <a href="/admin/homepage/edit-section/<%= section._id %>" class="btn btn-sm btn-light border rounded-pill px-3 shadow-sm fw-bold">
                                     <i class="fas fa-cog me-1 text-primary"></i> Tùy chỉnh
                                 </a>
                                 
-                                <form action="/admin/homepage/delete-section" method="POST" onsubmit="return confirm('Bạn có chắc chắn muốn xóa khối này không?')">
+                                <form action="/admin/homepage/delete-section" method="POST" onsubmit="return confirm('Xóa khối này sẽ không thể khôi phục. Tiếp tục?')">
                                     <input type="hidden" name="sectionId" value="<%= section._id %>">
-                                    <button class="btn btn-sm btn-outline-danger border-0 rounded-circle p-2">
-                                        <i class="fas fa-trash-alt"></i>
-                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger border-0 rounded-circle"><i class="fas fa-trash-alt"></i></button>
                                 </form>
                             </div>
                         </div>
                     <% }) %>
                 </div>
             <% } else { %>
-                <div class="text-center py-5 border-2 border-dashed rounded-4 bg-white shadow-sm">
-                    <div class="mb-3 text-muted opacity-25">
-                        <i class="fas fa-layer-group fa-4x"></i>
-                    </div>
-                    <h5 class="fw-bold">Giao diện của bạn đang trống</h5>
-                    <p class="text-muted">Hãy bắt đầu bằng cách thêm khối nội dung đầu tiên từ thư viện.</p>
-                    <button class="btn btn-primary rounded-pill mt-2" data-bs-toggle="modal" data-bs-target="#addSectionModal">Bắt đầu ngay</button>
+                <div class="text-center py-5 border-2 border-dashed rounded-4 bg-white opacity-75 shadow-sm">
+                    <i class="fas fa-layer-group fa-4x text-muted mb-3"></i>
+                    <h5 class="fw-bold">Bắt đầu xây dựng trang chủ</h5>
+                    <p class="text-muted">Chưa có khối nội dung nào. Hãy chọn "Thêm khối mới" để bắt đầu.</p>
                 </div>
             <% } %>
         </div>
@@ -160,9 +142,9 @@
 
 <div class="modal fade" id="addSectionModal" tabindex="-1">
     <div class="modal-dialog modal-xl modal-dialog-centered">
-        <div class="modal-content border-0 shadow-lg">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 24px;">
             <div class="modal-header border-0 p-4 pb-0">
-                <h4 class="fw-bold">Thư viện khối nội dung</h4>
+                <h4 class="fw-bold">Thư viện khối chuyên nghiệp</h4>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body p-4">
@@ -170,27 +152,27 @@
                     <div class="col-md-4">
                         <a href="/admin/homepage/add-section/hero" class="text-decoration-none d-block h-100">
                             <div class="block-card">
-                                <span class="block-icon"><i class="fas fa-images"></i></span>
-                                <h6 class="fw-bold text-dark mb-2">Main Signature Hero</h6>
-                                <p class="text-muted small mb-0">Banner rộng kèm tiêu đề và nút bấm chuyển đổi cao.</p>
+                                <span class="block-icon text-primary"><i class="fas fa-window-maximize"></i></span>
+                                <h6 class="fw-bold text-dark">Main Signature Hero</h6>
+                                <p class="text-muted small">Banner lớn, hình ảnh nền và nút kêu gọi hành động.</p>
                             </div>
                         </a>
                     </div>
                     <div class="col-md-4">
                         <a href="/admin/homepage/add-section/product-grid" class="text-decoration-none d-block h-100">
                             <div class="block-card">
-                                <span class="block-icon text-success"><i class="fas fa-th"></i></span>
-                                <h6 class="fw-bold text-dark mb-2">Product Showcase</h6>
-                                <p class="text-muted small mb-0">Hiển thị danh sách sản phẩm theo danh mục bạn chọn.</p>
+                                <span class="block-icon text-success"><i class="fas fa-shopping-bag"></i></span>
+                                <h6 class="fw-bold text-dark">Product Showcase</h6>
+                                <p class="text-muted small">Lưới sản phẩm thông minh theo danh mục sản phẩm.</p>
                             </div>
                         </a>
                     </div>
                     <div class="col-md-4">
                         <a href="/admin/homepage/add-section/features" class="text-decoration-none d-block h-100">
                             <div class="block-card">
-                                <span class="block-icon text-warning"><i class="fas fa-shield-alt"></i></span>
-                                <h6 class="fw-bold text-dark mb-2">Brand Trust Cards</h6>
-                                <p class="text-muted small mb-0">Tăng độ tin cậy với các cam kết dịch vụ & bảo hành.</p>
+                                <span class="block-icon text-warning"><i class="fas fa-certificate"></i></span>
+                                <h6 class="fw-bold text-dark">Brand Trust Cards</h6>
+                                <p class="text-muted small">Cam kết dịch vụ, miễn phí vận chuyển, đổi trả.</p>
                             </div>
                         </a>
                     </div>
@@ -200,31 +182,60 @@
     </div>
 </div>
 
+<div id="toast-container"></div>
+
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 <script>
+    // Hàm hiển thị Toast thông báo
+    function showToast(message, isError = false) {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = 'toast-custom';
+        toast.innerHTML = `
+            <div style="background: ${isError ? '#d63638' : '#00a32a'}; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px;">
+                <i class="fas ${isError ? 'fa-times' : 'fa-check'} text-white"></i>
+            </div>
+            <span class="small fw-bold">${message}</span>
+        `;
+        container.appendChild(toast);
+        setTimeout(() => toast.classList.add('show'), 100);
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 400);
+        }, 3000);
+    }
+
     const el = document.getElementById('sortable-list');
     if (el) {
         Sortable.create(el, {
-            handle: '.drag-handle', // Chỉ được kéo ở tay nắm
-            animation: 150,
+            handle: '.drag-handle',
+            animation: 250,
             ghostClass: 'sortable-ghost',
             onEnd: function() {
-                // Lấy mảng ID theo thứ tự mới
-                const sectionIds = Array.from(el.querySelectorAll('.section-item')).map(item => item.dataset.id);
+                // QUAN TRỌNG: Chuyển đổi sang định dạng Object mà Controller của bạn cần
+                const items = Array.from(el.querySelectorAll('.section-item'));
+                const orders = items.map((item, index) => {
+                    return {
+                        id: item.dataset.id,
+                        newOrder: index
+                    };
+                });
                 
-                // Gửi AJAX cập nhật lên Server
+                // Gửi AJAX: Lưu ý biến gửi đi là 'orders' khớp với Controller
                 fetch('/admin/homepage/update-order', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ order: sectionIds })
+                    body: JSON.stringify({ orders: orders })
                 })
                 .then(res => res.json())
                 .then(data => {
                     if(data.success) {
-                        // Hiện thông báo nhẹ (toast) nếu cần
-                        console.log('Đã cập nhật thứ tự');
+                        showToast('Đã lưu thứ tự hiển thị mới');
+                    } else {
+                        showToast('Lỗi khi lưu thứ tự', true);
                     }
-                });
+                })
+                .catch(err => showToast('Lỗi kết nối máy chủ', true));
             }
         });
     }
