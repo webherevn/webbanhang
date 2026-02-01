@@ -78,33 +78,49 @@ exports.postEditSection = async (req, res) => {
     try {
         const { sectionId, ...formData } = req.body;
         const homepage = await Homepage.findOne();
+        
+        if (!homepage) {
+            console.error("❌ Không tìm thấy dữ liệu Homepage");
+            return res.status(404).send("Không tìm thấy dữ liệu trang chủ");
+        }
+
         const section = homepage.sections.id(sectionId);
-
-        if (!section) return res.redirect('/admin/homepage/builder');
-
-        // Xử lý dữ liệu text: Cập nhật đè formData vào data hiện tại
-        // Lưu ý: Nếu formData có dạng items[0][title], ta cần xử lý logic mảng
-        if (formData.items && typeof formData.items === 'object') {
-            // Chuyển đổi object index sang array nếu cần
-            section.data.items = Object.values(formData.items);
-            delete formData.items; // Xóa để không bị đè ở bước dưới
+        if (!section) {
+            console.error("❌ Không tìm thấy Section ID:", sectionId);
+            return res.status(404).send("Không tìm thấy khối cần sửa");
         }
 
-        section.data = { ...section.data, ...formData };
+        // --- XỬ LÝ DỮ LIỆU ĐẶC BIỆT CHO MẢNG (Khối Features) ---
+        if (formData.items) {
+            // Nếu formData.items là Object (do body-parser gửi dạng index), chuyển nó về Array
+            let cleanItems = Array.isArray(formData.items) 
+                ? formData.items 
+                : Object.values(formData.items);
+            
+            section.data.items = cleanItems;
+            delete formData.items; // Xóa để không bị ghi đè lung tung bên dưới
+        }
 
-        // Xử lý ảnh nếu có upload mới (Multer)
+        // --- XỬ LÝ ẢNH ---
         if (req.file) {
-            section.data.bgImage = req.file.path; 
+            section.data.bgImage = req.file.path;
         }
 
-        // Đánh dấu field data có thay đổi để Mongoose lưu lại (vì là Mixed type)
+        // --- CẬP NHẬT CÁC TRƯỜNG TEXT CÒN LẠI ---
+        // Sử dụng Object.assign để merge dữ liệu cũ và mới tránh mất data
+        section.data = Object.assign(section.data, formData);
+
+        // Báo cho Mongoose biết trường Mixed 'sections' đã thay đổi để nó lưu
         homepage.markModified('sections');
         
         await homepage.save();
+        console.log("✅ Lưu thay đổi thành công cho khối:", section.type);
         res.redirect('/admin/homepage/builder');
+
     } catch (err) {
-        console.error("❌ Lỗi cập nhật khối:", err);
-        res.redirect('/admin/homepage/builder');
+        // In lỗi chi tiết ra console để bạn debug trên Render
+        console.error("🔥 LỖI NGHIÊM TRỌNG TRONG POST-EDIT-SECTION:", err.message);
+        res.status(500).send("Lỗi server: " + err.message);
     }
 };
 

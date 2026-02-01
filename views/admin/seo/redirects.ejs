@@ -3,77 +3,97 @@
 <style>
     body { background-color: #f0f0f1; }
     .admin-wrapper { display: flex; min-height: 100vh; }
+    /* Fix sidebar width consistency */
+    .admin-sidebar-container { width: 240px; position: fixed; height: 100vh; }
     .admin-content { flex: 1; padding: 30px; margin-left: 240px; }
-    .wp-card { background: #fff; padding: 20px; border: 1px solid #c3c4c7; box-shadow: 0 1px 3px rgba(0,0,0,.1); }
+    .wp-card { background: #fff; padding: 20px; border: 1px solid #c3c4c7; box-shadow: 0 1px 3px rgba(0,0,0,.1); border-radius: 4px; }
+    .table thead { background-color: #f8f9fa; }
+    .badge-301 { background-color: #e7f5ec; color: #0d9488; padding: 2px 8px; border-radius: 4px; font-size: 10px; }
 </style>
 
 <body>
     <div class="admin-wrapper">
-        <div class="admin-sidebar-container"><%- include('../partials/sidebar.ejs') %></div>
+        <div class="admin-sidebar-container"><%- include('../../partials/sidebar.ejs') %></div>
         
         <div class="admin-content">
-            <h2 class="fw-bold h4 mb-4">Quản lý Chuyển hướng (Redirects 301)</h2>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold h4 mb-0">Quản lý Chuyển hướng (Redirects 301)</h2>
+                <span class="badge-301 fw-bold">Trạng thái: Permanent Redirect</span>
+            </div>
 
             <div class="row">
                 <div class="col-md-4">
                     <div class="wp-card mb-4">
-                        <h6 class="fw-bold border-bottom pb-2 mb-3">Thêm chuyển hướng</h6>
+                        <h6 class="fw-bold border-bottom pb-2 mb-3"><i class="fas fa-plus-circle me-1"></i> Thêm chuyển hướng</h6>
                         <form action="/admin/seo/redirects/add" method="POST">
                             <div class="mb-3">
                                 <label class="small fw-bold">Link cũ (Nguồn)</label>
-                                <input type="text" name="fromPath" class="form-control" placeholder="/san-pham-cu" required>
-                                <div class="form-text text-muted" style="font-size: 11px;">Link khách truy cập bị lỗi 404.</div>
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text bg-light">/</span>
+                                    <input type="text" name="fromPath" class="form-control" placeholder="san-pham-cu" required>
+                                </div>
+                                <div class="form-text text-muted" style="font-size: 11px;">Đường dẫn khách truy cập bị lỗi 404.</div>
                             </div>
                             
                             <div class="mb-3 text-center">
-                                <i class="fas fa-arrow-down text-secondary"></i>
+                                <i class="fas fa-long-arrow-alt-down text-primary"></i>
                             </div>
 
                             <div class="mb-3">
                                 <label class="small fw-bold">Link mới (Đích)</label>
-                                <input type="text" name="toPath" class="form-control" placeholder="/san-pham-moi" required>
-                                <div class="form-text text-muted" style="font-size: 11px;">Link khách sẽ được chuyển tới.</div>
+                                <div class="input-group input-group-sm">
+                                    <span class="input-group-text bg-light">/</span>
+                                    <input type="text" name="toPath" class="form-control" placeholder="san-pham-moi" required>
+                                </div>
+                                <div class="form-text text-muted" style="font-size: 11px;">Đường dẫn đích mà khách sẽ được chuyển tới.</div>
                             </div>
 
-                            <button type="submit" class="btn btn-primary w-100">Thêm Redirect 301</button>
+                            <button type="submit" class="btn btn-primary btn-sm w-100 fw-bold">Kích hoạt Redirect 301</button>
                         </form>
                     </div>
                     
-                    <div class="alert alert-info small">
-                        <i class="fas fa-info-circle me-1"></i>
-                        <strong>Lưu ý:</strong> Chỉ nhập phần đuôi đường dẫn. <br>
-                        Ví dụ: <code>/quan-jean-cu</code> chứ không nhập cả <code>https://domain...</code>
+                    <div class="alert alert-warning small border-0 shadow-sm">
+                        <i class="fas fa-exclamation-triangle me-1"></i>
+                        <strong>Quan trọng:</strong> Tránh tạo chuyển hướng vòng lặp (A -> B và B -> A) vì sẽ làm sập trình duyệt của khách hàng.
                     </div>
                 </div>
 
                 <div class="col-md-8">
-                    <div class="wp-card">
-                        <table class="table table-bordered table-hover small align-middle">
-                            <thead class="table-light">
+                    <div class="wp-card p-0 overflow-hidden">
+                        <div class="p-3 bg-light border-bottom fw-bold small text-secondary">
+                            Danh sách các quy tắc chuyển hướng hiện có
+                        </div>
+                        <table class="table table-hover mb-0 small align-middle">
+                            <thead>
                                 <tr>
-                                    <th>Link Cũ (Nguồn)</th>
-                                    <th width="40" class="text-center"><i class="fas fa-arrow-right text-muted"></i></th>
-                                    <th>Link Mới (Đích)</th>
-                                    <th width="80" class="text-center">Xóa</th>
+                                    <th class="ps-3">Nguồn (404)</th>
+                                    <th width="40" class="text-center"></th>
+                                    <th>Đích (Mới)</th>
+                                    <th width="80" class="text-center">Thao tác</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <% if (redirects.length > 0) { %>
+                                <% if (redirects && redirects.length > 0) { %>
                                     <% redirects.forEach(item => { %>
                                         <tr>
-                                            <td class="text-danger fw-bold"><%= item.fromPath %></td>
-                                            <td class="text-center"><i class="fas fa-share text-secondary"></i></td>
-                                            <td class="text-success fw-bold"><%= item.toPath %></td>
+                                            <td class="ps-3"><code class="text-danger"><%= item.fromPath %></code></td>
+                                            <td class="text-center"><i class="fas fa-chevron-right text-muted opacity-50"></i></td>
+                                            <td><code class="text-success fw-bold"><%= item.toPath %></code></td>
                                             <td class="text-center">
-                                                <form action="/admin/seo/redirects/delete" method="POST" onsubmit="return confirm('Xóa chuyển hướng này?')">
+                                                <form action="/admin/seo/redirects/delete" method="POST" onsubmit="return confirm('Bạn có chắc chắn muốn xóa quy tắc này?')">
                                                     <input type="hidden" name="id" value="<%= item._id %>">
-                                                    <button class="btn btn-sm btn-outline-danger border-0"><i class="fas fa-trash-alt"></i></button>
+                                                    <button type="submit" class="btn btn-sm text-danger"><i class="fas fa-trash-alt"></i></button>
                                                 </form>
                                             </td>
                                         </tr>
                                     <% }) %>
                                 <% } else { %>
-                                    <tr><td colspan="4" class="text-center py-4 text-muted">Chưa có chuyển hướng nào.</td></tr>
+                                    <tr>
+                                        <td colspan="4" class="text-center py-5">
+                                            <i class="fas fa-random fa-2x text-light mb-2 d-block"></i>
+                                            <span class="text-muted">Chưa có thiết lập chuyển hướng nào.</span>
+                                        </td>
+                                    </tr>
                                 <% } %>
                             </tbody>
                         </table>
