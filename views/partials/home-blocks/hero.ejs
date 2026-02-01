@@ -1,9 +1,21 @@
-<header class="hero-section d-flex align-items-center text-center text-white" 
-        style="background: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('<%= data.bgImage %>'); 
-        background-size: cover; background-position: center; height: 80vh;">
-    <div class="container">
-        <h5 class="text-uppercase letter-spacing-2 mb-3"><%= data.subtitle %></h5>
-        <h1 class="display-3 fw-bold mb-4"><%= data.title %></h1>
-        <a href="<%= data.buttonLink %>" class="btn btn-light btn-lg rounded-0 px-5 py-3 fw-bold"><%= data.buttonText %></a>
+<header class="hero-block position-relative d-flex align-items-center justify-content-center text-white" 
+        style="height: 85vh; min-height: 500px;">
+    <div class="position-absolute w-100 h-100" 
+         style="background: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.4)), url('<%= data.bgImage %>'); 
+         background-size: cover; background-position: center; z-index: 1;">
+    </div>
+
+    <div class="container position-relative text-center" style="z-index: 2;">
+        <h5 class="text-uppercase mb-3 fw-bold opacity-75 letter-spacing-2" style="letter-spacing: 5px;">
+            <%= data.subtitle %>
+        </h5>
+        <h1 class="display-2 fw-bold mb-4" style="line-height: 1.1;">
+            <%= data.title %>
+        </h1>
+        <div class="mt-5">
+            <a href="<%= data.buttonLink %>" class="btn btn-light btn-modern shadow-lg">
+                <%= data.buttonText %> <i class="bi bi-arrow-right ms-2"></i>
+            </a>
+        </div>
     </div>
 </header>
