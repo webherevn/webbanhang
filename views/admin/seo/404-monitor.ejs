@@ -3,54 +3,87 @@
 <style>
     body { background-color: #f0f0f1; }
     .admin-wrapper { display: flex; min-height: 100vh; }
-    .admin-content { flex: 1; padding: 30px; margin-left: var(--sidebar-width); }
-    .wp-card { background: #fff; padding: 20px; border: 1px solid #c3c4c7; }
+    /* Đảm bảo Sidebar có độ rộng cố định nếu biến var chưa chạy */
+    .admin-sidebar-container { width: 240px; position: fixed; height: 100vh; z-index: 1000; }
+    .admin-content { flex: 1; padding: 30px; margin-left: 240px; background: #f0f0f1; }
+    .wp-card { background: #fff; padding: 20px; border: 1px solid #c3c4c7; border-radius: 4px; box-shadow: 0 1px 1px rgba(0,0,0,.05); }
+    .table thead th { background-color: #f8f9fa; border-bottom: 2px solid #dee2e6; color: #50575e; font-weight: 600; }
+    .url-path { word-break: break-all; max-width: 400px; display: inline-block; }
+    .hit-count { min-width: 45px; display: inline-block; }
 </style>
 
 <body>
     <div class="admin-wrapper">
-        <div class="admin-sidebar-container"><%- include('../partials/sidebar.ejs') %></div>
+        <div class="admin-sidebar-container"><%- include('../../partials/sidebar.ejs') %></div>
         
         <div class="admin-content">
-            <h2 class="fw-bold h4 mb-4">Theo dõi lỗi 404</h2>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="fw-bold h4 mb-0"><i class="fas fa-exclamation-circle text-danger me-2"></i>Theo dõi lỗi 404</h2>
+                <span class="badge bg-white text-dark border shadow-sm px-3 py-2">
+                    Tổng số lỗi ghi nhận: <%= logs.length %>
+                </span>
+            </div>
 
             <div class="wp-card">
-                <p class="text-muted small">Danh sách các đường dẫn khách hàng đã truy cập nhưng không tồn tại.</p>
+                <div class="mb-3 d-flex align-items-center">
+                    <i class="fas fa-info-circle text-primary me-2"></i>
+                    <p class="text-muted small mb-0">Hệ thống ghi lại các URL mà khách hàng hoặc Bot truy cập nhưng không tìm thấy nội dung. Bạn nên tạo chuyển hướng 301 cho các URL có số lượng truy cập (Hits) cao.</p>
+                </div>
                 
-                <table class="table table-hover align-middle small">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Đường dẫn lỗi (URL)</th>
-                            <th class="text-center">Số lần gặp</th>
-                            <th>Lần cuối</th>
-                            <th class="text-center">Hành động</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <% if (logs.length > 0) { %>
-                            <% logs.forEach(log => { %>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle small">
+                        <thead>
+                            <tr>
+                                <th>Đường dẫn lỗi (URL)</th>
+                                <th class="text-center">Số lần gặp</th>
+                                <th>Lần cuối cùng</th>
+                                <th class="text-center" width="120">Hành động</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if (logs && logs.length > 0) { %>
+                                <% logs.forEach(log => { %>
+                                    <tr>
+                                        <td>
+                                            <code class="url-path text-danger font-monospace"><%= log.path %></code>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge rounded-pill bg-warning text-dark hit-count">
+                                                <%= log.hits %>
+                                            </span>
+                                        </td>
+                                        <td class="text-muted">
+                                            <%= new Date(log.lastAccessed).toLocaleString('vi-VN') %>
+                                        </td>
+                                        <td class="text-center">
+                                            <div class="d-flex justify-content-center gap-2">
+                                                <a href="/admin/seo/redirects?from=<%= encodeURIComponent(log.path) %>" 
+                                                   class="btn btn-sm btn-outline-primary" 
+                                                   title="Thiết lập chuyển hướng 301 ngay">
+                                                    <i class="fas fa-external-link-alt"></i>
+                                                </a>
+                                                
+                                                <form action="/admin/seo/404-monitor/delete" method="POST" onsubmit="return confirm('Bạn chắc chắn muốn xóa lịch sử lỗi này?')">
+                                                    <input type="hidden" name="id" value="<%= log._id %>">
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Xóa log">
+                                                        <i class="fas fa-trash-alt"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <% }) %>
+                            <% } else { %>
                                 <tr>
-                                    <td class="fw-bold text-danger"><%= log.path %></td>
-                                    <td class="text-center"><span class="badge bg-warning text-dark"><%= log.hits %></span></td>
-                                    <td><%= log.lastAccessed.toLocaleString('vi-VN') %></td>
-                                    <td class="text-center">
-                                        <div class="d-flex justify-content-center gap-2">
-                                            <a href="/admin/seo/redirects?from=<%= log.path %>" class="btn btn-sm btn-outline-primary" title="Tạo chuyển hướng 301">
-                                                <i class="fas fa-random"></i>
-                                            </a>
-                                            <form action="/admin/seo/404-monitor/delete" method="POST" onsubmit="return confirm('Xóa log này?')">
-                                                <input type="hidden" name="id" value="<%= log._id %>">
-                                                <button class="btn btn-sm btn-outline-danger"><i class="fas fa-trash-alt"></i></button>
-                                            </form>
-                                        </div>
+                                    <td colspan="4" class="text-center py-5">
+                                        <div class="mb-2"><i class="fas fa-check-circle fa-3x text-success opacity-25"></i></div>
+                                        <span class="text-muted fw-bold">Tuyệt vời! Hiện tại không ghi nhận bất kỳ lỗi 404 nào từ người dùng.</span>
                                     </td>
                                 </tr>
-                            <% }) %>
-                        <% } else { %>
-                            <tr><td colspan="4" class="text-center py-4">Tuyệt vời! Hiện chưa ghi nhận lỗi 404 nào.</td></tr>
-                        <% } %>
-                    </tbody>
-                </table>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
