@@ -15,7 +15,7 @@ const settingController = require('../controllers/admin/settingController');
 const seoController = require('../controllers/admin/seoController');
 const homepageController = require('../controllers/admin/homepageController');
 
-// 3. CẤU HÌNH UPLOAD NÂNG CAO (Hỗ trợ Social SEO & Gallery)
+// 3. CẤU HÌNH UPLOAD NÂNG CAO
 const productUpload = upload.fields([
     { name: 'thumbnail', maxCount: 1 }, 
     { name: 'gallery', maxCount: 10 },
@@ -64,7 +64,6 @@ router.post('/settings/menu/update', settingController.postUpdateMenu);
 router.get('/blog-categories', postController.getBlogCategories);
 router.post('/add-blog-category', upload.single('image'), postController.postAddBlogCategory);
 router.get('/edit-blog-category/:categoryId', postController.getEditBlogCategory);
-reference
 router.post('/edit-blog-category', upload.single('image'), postController.postEditBlogCategory);
 router.post('/delete-blog-category', postController.postDeleteBlogCategory);
 
@@ -128,24 +127,16 @@ router.get('/seo/social', seoController.getSocialSettings);
 router.post('/seo/social', upload.single('defaultOgImage'), seoController.postSocialSettings);
 
 // ============================================================
-// I. [CẬP NHẬT] HOMEPAGE BUILDER (UX BUILDER)
+// I. HOMEPAGE BUILDER
 // ============================================================
-// 1. Quản lý danh sách các khối
 router.get('/homepage/builder', homepageController.getHomepageBuilder);
-
-// 2. Cập nhật thứ tự
 router.post('/homepage/update-order', homepageController.updateSectionOrder);
-
-// 3. [SỬA] Thêm mới: Dùng GET để tránh lặp request tạo 2 khối
 router.get('/homepage/add-section/:type', homepageController.getAddSection);
 
-// 4. [SỬA] Chỉnh sửa: Đổi :sectionId thành :id để khớp với req.params.id trong Controller
+// Chỗ này quan trọng: Dùng :id để khớp với req.params.id trong Controller
 router.get('/homepage/edit-section/:id', homepageController.getEditSection);
-
-// 5. Lưu chỉnh sửa (giữ nguyên upload)
 router.post('/homepage/edit-section', upload.single('bgImage'), homepageController.postEditSection);
 
-// 6. Xóa khối
 router.post('/homepage/delete-section', homepageController.postDeleteSection);
 
 module.exports = router;
