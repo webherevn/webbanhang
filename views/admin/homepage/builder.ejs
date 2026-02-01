@@ -232,16 +232,26 @@
             handle: '.drag-handle',
             animation: 300,
             ghostClass: 'sortable-ghost',
-            onEnd: function() {
-                const order = Array.from(canvas.querySelectorAll('.section-item')).map(item => item.dataset.id);
-                fetch('/admin/homepage/update-order', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ order: order })
-                }).then(res => res.json()).then(data => {
-                    if(data.success) showToast('Cập nhật thứ tự hiển thị thành công!');
-                });
-            }
-        });
-    }
+           onEnd: function() {
+    // Phải đảm bảo .section-item có thuộc tính data-id="<%= section._id %>"
+    const sectionIds = Array.from(canvas.querySelectorAll('.section-item'))
+                            .map(item => item.getAttribute('data-id'));
+    
+    console.log("Gửi ID:", sectionIds); // F12 để kiểm tra xem ID có bị null/undefined không
+
+    fetch('/admin/homepage/update-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ order: sectionIds }) 
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.success) {
+            showToast('Đã cập nhật thứ tự!');
+        } else {
+            // Nếu có lỗi, hiện nguyên nhân lỗi ra để debug
+            showToast('Lỗi: ' + data.message, true);
+        }
+    });
+}
 </script>

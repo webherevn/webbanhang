@@ -148,37 +148,49 @@ exports.postEditSection = async (req, res) => {
 // [MỚI] 5. Cập nhật thứ tự qua AJAX (Chuẩn SortableJS)
     exports.updateSectionOrder = async (req, res) => {
     try {
-        const { order } = req.body; // Mảng ID gửi từ Frontend
-        
+        const { order } = req.body; 
+
+        // 1. Kiểm tra đầu vào
         if (!order || !Array.isArray(order)) {
             return res.status(400).json({ success: false, message: 'Dữ liệu không hợp lệ' });
         }
 
-        // Tìm tài liệu Homepage duy nhất
         const homepage = await Homepage.findOne();
-        if (!homepage) return res.status(404).json({ success: false, message: 'Không tìm thấy dữ liệu' });
+        if (!homepage) {
+            return res.status(404).json({ success: false, message: 'Không tìm thấy bản ghi trang chủ' });
+        }
 
-        // Tạo mảng mới theo thứ tự ID nhận được
-        const reorderedSections = order.map(id => {
-            return homepage.sections.id(id);
-        }).filter(section => section !== null);
+        // 2. Lọc và sắp xếp lại mảng
+        // Dùng .map kết hợp với kiểm tra tồn tại để tránh crash
+        const reorderedSections = [];
+        for (const id of order) {
+            const section = homepage.sections.id(id);
+            if (section) {
+                reorderedSections.push(section);
+            }
+        }
 
-        // PHƯƠNG PHÁP LƯU TRIỆT ĐỂ:
-        // 1. Gán mảng mới
+        // 3. Kiểm tra nếu mảng mới bị rỗng (do ID sai sạch)
+        if (reorderedSections.length === 0 && homepage.sections.length > 0) {
+            throw new Error("Không thể khớp ID gửi lên với dữ liệu trong Database");
+        }
+
+        // 4. Gán và đánh dấu thay đổi
         homepage.sections = reorderedSections;
-        
-        // 2. BẮT BUỘC: Đánh dấu mảng này đã bị sửa đổi để Mongoose lưu lại
-        homepage.markModified('sections');
+        homepage.markModified('sections'); 
 
-        // 3. Lưu lại
         await homepage.save();
-
-        console.log("✅ Đã cập nhật thứ tự mới vào Database");
-        res.json({ success: true, message: 'Đã lưu thứ tự thành công!' });
+        
+        console.log("✅ Đã lưu thứ tự mới thành công");
+        return res.json({ success: true, message: 'Thứ tự đã được lưu!' });
 
     } catch (err) {
-        console.error("🔥 Lỗi Update Order:", err);
-        res.status(500).json({ success: false, message: 'Lỗi server: ' + err.message });
+        console.error("🔥 Lỗi nghiêm trọng tại Update Order:", err.message);
+        // Trả về lỗi JSON thay vì để sập Server
+        return res.status(500).json({ 
+            success: false, 
+            message: 'Lỗi hệ thống: ' + err.message 
+        });
     }
 };
 // 6. Xóa khối
