@@ -148,9 +148,9 @@ exports.postEditSection = async (req, res) => {
 // [MỚI] 5. Cập nhật thứ tự qua AJAX (Chuẩn SortableJS)
 exports.updateSectionOrder = async (req, res) => {
     try {
-        // Lấy mảng ID đã được sắp xếp từ Frontend gửi về
+        // Frontend sẽ gửi lên mảng ID: ["id1", "id2", "id3"]
         const { order } = req.body; 
-        
+
         if (!order || !Array.isArray(order)) {
             return res.status(400).json({ success: false, message: 'Dữ liệu không hợp lệ' });
         }
@@ -158,31 +158,25 @@ exports.updateSectionOrder = async (req, res) => {
         const homepage = await Homepage.findOne();
         if (!homepage) return res.status(404).json({ success: false, message: 'Không tìm thấy trang chủ' });
 
-        // Tạo một mảng mới dựa trên thứ tự ID gửi về
-        const newSectionsOrder = [];
-        
-        order.forEach(id => {
-            const section = homepage.sections.id(id);
-            if (section) {
-                newSectionsOrder.push(section);
-            }
-        });
+        // Tạo mảng mới dựa trên thứ tự ID nhận được
+        // Chúng ta lọc qua danh sách ID và nhặt đúng khối đó từ Database ra
+        const newSectionsOrder = order
+            .map(id => homepage.sections.id(id))
+            .filter(section => section !== null);
 
-        // Thay thế mảng cũ bằng mảng đã sắp xếp mới
+        // Gán mảng đã sắp xếp lại cho homepage
         homepage.sections = newSectionsOrder;
 
+        // Lưu lại (Mongoose sẽ tự hiểu đây là một hành động sắp xếp lại vị trí)
         await homepage.save();
         
-        res.json({ 
-            success: true, 
-            message: 'Đã lưu thứ tự hiển thị mới!' 
-        });
+        res.json({ success: true, message: 'Đã lưu thứ tự thành công!' });
+
     } catch (err) {
         console.error("🔥 Lỗi Update Order:", err);
-        res.status(500).json({ success: false, message: 'Lỗi máy chủ khi lưu thứ tự' });
+        res.status(500).json({ success: false, message: 'Lỗi server khi lưu' });
     }
 };
-
 // 6. Xóa khối
 exports.postDeleteSection = async (req, res) => {
     try {

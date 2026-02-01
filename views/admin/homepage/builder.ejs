@@ -212,31 +212,27 @@
             animation: 250,
             ghostClass: 'sortable-ghost',
             onEnd: function() {
-                // QUAN TRỌNG: Chuyển đổi sang định dạng Object mà Controller của bạn cần
-                const items = Array.from(el.querySelectorAll('.section-item'));
-                const orders = items.map((item, index) => {
-                    return {
-                        id: item.dataset.id,
-                        newOrder: index
-                    };
-                });
-                
-                // Gửi AJAX: Lưu ý biến gửi đi là 'orders' khớp với Controller
-                fetch('/admin/homepage/update-order', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ orders: orders })
-                })
-                .then(res => res.json())
-                .then(data => {
-                    if(data.success) {
-                        showToast('Đã lưu thứ tự hiển thị mới');
-                    } else {
-                        showToast('Lỗi khi lưu thứ tự', true);
-                    }
-                })
-                .catch(err => showToast('Lỗi kết nối máy chủ', true));
-            }
-        });
-    }
+    // Chỉ lấy mảng ID đơn giản: ["65ba...", "65bb..."]
+    const sectionIds = Array.from(el.querySelectorAll('.section-item'))
+                            .map(item => item.dataset.id);
+    
+    // Gửi AJAX
+    fetch('/admin/homepage/update-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ order: sectionIds }) // Gửi 'order' khớp với Backend
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.success) {
+            showToast('Đã lưu thứ tự hiển thị mới');
+        } else {
+            showToast('Lỗi: ' + (data.message || 'Không thể lưu'), true);
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        showToast('Lỗi kết nối máy chủ', true);
+    });
+}
 </script>
