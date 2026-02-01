@@ -157,18 +157,29 @@ exports.getPageDetail = async (req, res) => {
 
 exports.getIndex = async (req, res) => {
     try {
-        // Lấy dữ liệu trang chủ và sản phẩm mới nhất
-        const [homepage, products] = await Promise.all([
-            Homepage.findOne().lean(),
-            Product.find({ isActive: true }).sort({ createdAt: -1 }).limit(8).lean()
-        ]);
+        const homepage = await Homepage.findOne().lean();
+        if (!homepage) return res.render('home', { homepage: null });
+
+        // Phép màu ở đây: Duyệt qua các khối để lấy sản phẩm tương ứng
+        for (let section of homepage.sections) {
+            if (section.type === 'product-grid' && section.isActive) {
+                const query = section.data.categoryId ? { category: section.data.categoryId } : {};
+                const limit = parseInt(section.data.limit) || 8;
+                
+                // Gắn thẳng mảng sản phẩm vào object section
+                section.products = await Product.find(query)
+                    .sort({ createdAt: -1 })
+                    .limit(limit)
+                    .lean();
+            }
+        }
 
         res.render('home', {
             pageTitle: 'Trang chủ',
-            homepage: homepage,
-            products: products // Vẫn truyền products cho khối Product Grid dùng
+            homepage: homepage // Bây giờ mỗi section đã có mảng 'products' riêng bên trong
         });
     } catch (err) {
-        res.status(500).send("Lỗi hệ thống");
+        console.error(err);
+        res.status(500).send("Lỗi tải trang chủ");
     }
 };
