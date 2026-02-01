@@ -4,7 +4,7 @@ const redirectSchema = new mongoose.Schema({
     fromPath: { 
         type: String, 
         required: true, 
-        unique: true, // Link cũ không được trùng nhau
+        unique: true, // Vừa đảm bảo không trùng, vừa tự động tạo Index
         trim: true 
     },
     toPath: { 
@@ -12,11 +12,10 @@ const redirectSchema = new mongoose.Schema({
         required: true, 
         trim: true 
     },
-    type: { type: Number, default: 301 }, // Mặc định là chuyển hướng vĩnh viễn (301)
+    type: { type: Number, default: 301 }, 
     isActive: { type: Boolean, default: true }
 }, { timestamps: true });
 
-// Tạo index để tìm kiếm cực nhanh (Vì middleware sẽ chạy mỗi khi khách load trang)
-// redirectSchema.index({ fromPath: 1 });
+
 
 module.exports = mongoose.model('Redirect', redirectSchema);
