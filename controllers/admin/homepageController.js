@@ -1,5 +1,5 @@
 const Homepage = require('../../models/HomepageModel');
-
+const Category = require('../../models/CategoryModel');
 // 1. Hiển thị danh sách các khối đang có
 exports.getHomepageBuilder = async (req, res) => {
     try {
@@ -57,19 +57,36 @@ exports.getAddSection = async (req, res) => {
 // 3. Trang chỉnh sửa nội dung chi tiết
 exports.getEditSection = async (req, res) => {
     try {
-        const sectionId = req.params.sectionId;
-        const homepage = await Homepage.findOne();
-        const section = homepage.sections.id(sectionId);
+        const sectionId = req.params.id;
         
-        if (!section) return res.redirect('/admin/homepage/builder');
+        // 1. Lấy đồng thời cả Homepage và danh sách Danh mục
+        const [homepage, categories] = await Promise.all([
+            Homepage.findOne(),
+            Category.find().lean() // Lấy tất cả danh mục để hiện trong dropdown
+        ]);
 
+        if (!homepage) {
+            return res.redirect('/admin/homepage/builder');
+        }
+
+        // 2. Tìm đúng section cần sửa trong mảng sections
+        const section = homepage.sections.id(sectionId);
+
+        if (!section) {
+            return res.redirect('/admin/homepage/builder');
+        }
+
+        // 3. TRUYỀN BIẾN categories VÀO ĐÂY
         res.render('admin/homepage/edit-section', {
-            pageTitle: 'Chỉnh sửa khối ' + section.type.toUpperCase(),
-            path: '/admin/homepage',
-            section: section
+            pageTitle: 'Chỉnh sửa khối nội dung',
+            path: '/admin/homepage/builder',
+            section: section,
+            categories: categories // <--- Dòng này sẽ xóa tan lỗi "not defined"
         });
+
     } catch (err) {
-        res.redirect('/admin/homepage/builder');
+        console.error("❌ Lỗi getEditSection:", err);
+        res.status(500).send("Lỗi server");
     }
 };
 
