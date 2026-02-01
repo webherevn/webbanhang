@@ -3,6 +3,7 @@ const Category = require('../../models/CategoryModel');
 const Page = require('../../models/PageModel');
 const Theme = require('../../models/ThemeModel'); 
 
+const Homepage = require('../../models/HomepageModel');
 // ============================================================
 // 1. TRANG CHỦ
 // ============================================================

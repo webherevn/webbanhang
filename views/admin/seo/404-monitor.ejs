@@ -3,13 +3,12 @@
 <style>
     body { background-color: #f0f0f1; }
     .admin-wrapper { display: flex; min-height: 100vh; }
-    /* Đảm bảo Sidebar có độ rộng cố định nếu biến var chưa chạy */
+    /* Sidebar rộng 240px, nên content cần margin-left tương ứng */
     .admin-sidebar-container { width: 240px; position: fixed; height: 100vh; z-index: 1000; }
     .admin-content { flex: 1; padding: 30px; margin-left: 240px; background: #f0f0f1; }
     .wp-card { background: #fff; padding: 20px; border: 1px solid #c3c4c7; border-radius: 4px; box-shadow: 0 1px 1px rgba(0,0,0,.05); }
     .table thead th { background-color: #f8f9fa; border-bottom: 2px solid #dee2e6; color: #50575e; font-weight: 600; }
-    .url-path { word-break: break-all; max-width: 400px; display: inline-block; }
-    .hit-count { min-width: 45px; display: inline-block; }
+    .url-path { word-break: break-all; max-width: 450px; display: inline-block; }
 </style>
 
 <body>
@@ -18,16 +17,19 @@
         
         <div class="admin-content">
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2 class="fw-bold h4 mb-0"><i class="fas fa-exclamation-circle text-danger me-2"></i>Theo dõi lỗi 404</h2>
+                <h2 class="fw-bold h4 mb-0"><i class="fas fa-exclamation-triangle text-danger me-2"></i>Theo dõi lỗi 404</h2>
                 <span class="badge bg-white text-dark border shadow-sm px-3 py-2">
-                    Tổng số lỗi ghi nhận: <%= logs.length %>
+                    Ghi nhận: <%= logs.length %> URL lỗi
                 </span>
             </div>
 
             <div class="wp-card">
-                <div class="mb-3 d-flex align-items-center">
-                    <i class="fas fa-info-circle text-primary me-2"></i>
-                    <p class="text-muted small mb-0">Hệ thống ghi lại các URL mà khách hàng hoặc Bot truy cập nhưng không tìm thấy nội dung. Bạn nên tạo chuyển hướng 301 cho các URL có số lượng truy cập (Hits) cao.</p>
+                <div class="mb-3 d-flex align-items-center p-3 bg-light border-start border-primary border-4">
+                    <i class="fas fa-info-circle text-primary me-3 fa-lg"></i>
+                    <p class="text-muted small mb-0">
+                        <strong>Mẹo SEO:</strong> Những URL có số lần gặp (Hits) cao là những link khách hàng thường xuyên bấm vào. 
+                        Bạn hãy bấm vào biểu tượng <i class="fas fa-external-link-alt text-primary"></i> để tạo chuyển hướng 301 về trang mới, giúp giữ chân khách hàng và bảo vệ thứ hạng SEO.
+                    </p>
                 </div>
                 
                 <div class="table-responsive">
@@ -35,8 +37,8 @@
                         <thead>
                             <tr>
                                 <th>Đường dẫn lỗi (URL)</th>
-                                <th class="text-center">Số lần gặp</th>
-                                <th>Lần cuối cùng</th>
+                                <th class="text-center">Hits</th>
+                                <th>Truy cập cuối</th>
                                 <th class="text-center" width="120">Hành động</th>
                             </tr>
                         </thead>
@@ -45,10 +47,10 @@
                                 <% logs.forEach(log => { %>
                                     <tr>
                                         <td>
-                                            <code class="url-path text-danger font-monospace"><%= log.path %></code>
+                                            <code class="url-path text-danger font-monospace bg-light p-1 rounded"><%= log.path %></code>
                                         </td>
                                         <td class="text-center">
-                                            <span class="badge rounded-pill bg-warning text-dark hit-count">
+                                            <span class="badge rounded-pill bg-warning text-dark px-3">
                                                 <%= log.hits %>
                                             </span>
                                         </td>
@@ -59,13 +61,13 @@
                                             <div class="d-flex justify-content-center gap-2">
                                                 <a href="/admin/seo/redirects?from=<%= encodeURIComponent(log.path) %>" 
                                                    class="btn btn-sm btn-outline-primary" 
-                                                   title="Thiết lập chuyển hướng 301 ngay">
+                                                   title="Tạo Redirect 301">
                                                     <i class="fas fa-external-link-alt"></i>
                                                 </a>
                                                 
                                                 <form action="/admin/seo/404-monitor/delete" method="POST" onsubmit="return confirm('Bạn chắc chắn muốn xóa lịch sử lỗi này?')">
                                                     <input type="hidden" name="id" value="<%= log._id %>">
-                                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Xóa log">
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Xóa">
                                                         <i class="fas fa-trash-alt"></i>
                                                     </button>
                                                 </form>
@@ -76,8 +78,8 @@
                             <% } else { %>
                                 <tr>
                                     <td colspan="4" class="text-center py-5">
-                                        <div class="mb-2"><i class="fas fa-check-circle fa-3x text-success opacity-25"></i></div>
-                                        <span class="text-muted fw-bold">Tuyệt vời! Hiện tại không ghi nhận bất kỳ lỗi 404 nào từ người dùng.</span>
+                                        <div class="mb-2"><i class="fas fa-check-double fa-3x text-success opacity-25"></i></div>
+                                        <span class="text-muted fw-bold">Hiện tại website của bạn rất "sạch", không có lỗi 404 nào!</span>
                                     </td>
                                 </tr>
                             <% } %>
