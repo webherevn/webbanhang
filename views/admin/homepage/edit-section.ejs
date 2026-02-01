@@ -1,106 +1,126 @@
 <%- include('../../partials/head.ejs') %>
-<div class="admin-wrapper">
-    <div class="admin-sidebar-container"><%- include('../../partials/sidebar.ejs') %></div>
-    
-    <div class="admin-content">
-        <form action="/admin/homepage/edit-section" method="POST" enctype="multipart/form-data">
-            <input type="hidden" name="sectionId" value="<%= section._id %>">
-            
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb mb-0">
-                        <li class="breadcrumb-item"><a href="/admin/homepage/builder">Thiết kế</a></li>
-                        <li class="breadcrumb-item active">Chỉnh sửa khối <%= section.type %></li>
-                    </ol>
-                </nav>
-                <div class="d-flex gap-2">
-                    <a href="/admin/homepage/builder" class="btn btn-light rounded-pill px-4">Hủy bỏ</a>
-                    <button type="submit" class="btn btn-primary rounded-pill px-4 shadow">
-                        <i class="fas fa-save me-2"></i>Lưu cấu hình
-                    </button>
-                </div>
-            </div>
 
-            <div class="row">
-                <div class="col-lg-7">
-                    <div class="wp-card mb-4 border-top border-primary border-4">
-                        <h5 class="fw-bold mb-4 border-bottom pb-3">Nội dung văn bản</h5>
-                        
-                        <div class="mb-4">
-                            <label class="form-label fw-bold small text-uppercase">Tiêu đề chính (Heading)</label>
-                            <input type="text" name="title" class="form-control form-control-lg border-2" value="<%= section.data.title %>">
-                        </div>
+<style>
+    :root { --admin-blue: #2271b1; --admin-bg: #f0f2f5; }
+    body { background-color: var(--admin-bg); font-family: 'Inter', sans-serif; }
+    .admin-wrapper { display: flex; min-height: 100vh; }
+    .admin-sidebar-container { width: 260px; position: fixed; height: 100vh; z-index: 1000; }
+    .admin-content { flex: 1; padding: 40px; margin-left: 260px; }
+    .wp-card { background: #fff; padding: 25px; border: 1px solid #dcdcde; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+    .form-label { font-weight: 700; color: #1d2327; font-size: 13px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .preview-box { border: 2px dashed #dcdcde; border-radius: 12px; padding: 20px; text-align: center; background: #f8f9fa; }
+</style>
 
-                        <div class="mb-4">
-                            <label class="form-label fw-bold small text-uppercase">Tiêu đề phụ (Subtitle)</label>
-                            <input type="text" name="subtitle" class="form-control border-2" value="<%= section.data.subtitle %>">
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6 mb-4">
-                                <label class="form-label fw-bold small text-uppercase">Tên nút bấm</label>
-                                <input type="text" name="buttonText" class="form-control" value="<%= section.data.buttonText %>">
-                            </div>
-                            <div class="col-md-6 mb-4">
-                                <label class="form-label fw-bold small text-uppercase">Đường dẫn nút (Link)</label>
-                                <input type="text" name="buttonLink" class="form-control" value="<%= section.data.buttonLink %>" placeholder="/shop">
-                            </div>
-                        </div>
+<body>
+    <div class="admin-wrapper">
+        <div class="admin-sidebar-container">
+            <%- include('../partials/sidebar.ejs') %>
+        </div>
+        
+        <div class="admin-content">
+            <form action="/admin/homepage/edit-section" method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="sectionId" value="<%= section._id %>">
+                
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h2 class="fw-bold h4 mb-1">Cấu hình khối: <span class="text-primary"><%= section.type.toUpperCase() %></span></h2>
+                        <p class="text-muted small mb-0">Tùy chỉnh nội dung và hình ảnh hiển thị trên Storefront.</p>
                     </div>
+                    <div class="d-flex gap-2">
+                        <a href="/admin/homepage/builder" class="btn btn-light rounded-pill px-4 border fw-bold">Hủy bỏ</a>
+                        <button type="submit" class="btn btn-primary rounded-pill px-4 shadow fw-bold">
+                            <i class="fas fa-save me-2"></i>Lưu thay đổi
+                        </button>
+                    </div>
+                </div>
 
-                    <% if (section.type === 'features') { %>
-                        <div class="wp-card">
-                            <h5 class="fw-bold mb-4 border-bottom pb-3">Cấu hình các Items</h5>
-                            <div id="items-wrapper">
-                                <% (section.data.items || []).forEach((item, index) => { %>
-                                    <div class="item-entry p-3 bg-light border rounded mb-3">
-                                        <div class="d-flex justify-content-between align-items-center mb-2">
-                                            <span class="badge bg-secondary">Item #<%= index + 1 %></span>
-                                        </div>
-                                        <div class="row g-2">
-                                            <div class="col-md-4">
-                                                <input type="text" name="items[<%= index %>][icon]" class="form-control form-control-sm" placeholder="Icon (bi-truck)" value="<%= item.icon %>">
-                                            </div>
-                                            <div class="col-md-8">
-                                                <input type="text" name="items[<%= index %>][title]" class="form-control form-control-sm" placeholder="Tên dịch vụ" value="<%= item.title %>">
-                                            </div>
-                                            <div class="col-12 mt-2">
-                                                <textarea name="items[<%= index %>][desc]" class="form-control form-control-sm" placeholder="Mô tả ngắn"><%= item.desc %></textarea>
-                                            </div>
-                                        </div>
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div class="wp-card mb-4 border-top border-primary border-4">
+                            <h5 class="fw-bold mb-4">Thông tin cơ bản</h5>
+                            
+                            <div class="mb-4">
+                                <label class="form-label">Tiêu đề (Title)</label>
+                                <input type="text" name="title" class="form-control form-control-lg border-2" value="<%= section.data.title %>" placeholder="Nhập tiêu đề khối...">
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label">Tiêu đề phụ (Subtitle)</label>
+                                <input type="text" name="subtitle" class="form-control" value="<%= section.data.subtitle %>" placeholder="Ví dụ: Ưu đãi mùa hè 2026">
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-4">
+                                    <label class="form-label">Tên nút bấm</label>
+                                    <input type="text" name="buttonText" class="form-control" value="<%= section.data.buttonText %>" placeholder="Xem ngay">
+                                </div>
+                                <div class="col-md-6 mb-4">
+                                    <label class="form-label">Đường dẫn nút (Link)</label>
+                                    <input type="text" name="buttonLink" class="form-control" value="<%= section.data.buttonLink %>" placeholder="/danh-muc/san-pham">
+                                </div>
+                            </div>
+
+                            <% if (section.type === 'product-grid') { %>
+                                <hr class="my-4">
+                                <h5 class="fw-bold mb-4">Cài đặt sản phẩm</h5>
+                                <div class="row">
+                                    <div class="col-md-8 mb-4">
+                                        <label class="form-label">Chọn danh mục hiển thị</label>
+                                        <select name="categoryId" class="form-select border-2">
+                                            <option value="">-- Tất cả sản phẩm mới --</option>
+                                            <% categories.forEach(cat => { %>
+                                                <option value="<%= cat._id %>" <%= section.data.categoryId == cat._id ? 'selected' : '' %>><%= cat.name %></option>
+                                            <% }) %>
+                                        </select>
                                     </div>
-                                <% }) %>
-                            </div>
+                                    <div class="col-md-4 mb-4">
+                                        <label class="form-label">Số lượng</label>
+                                        <input type="number" name="limit" class="form-control" value="<%= section.data.limit || 8 %>">
+                                    </div>
+                                </div>
+                            <% } %>
                         </div>
-                    <% } %>
-                </div>
-
-                <div class="col-lg-5">
-                    <div class="wp-card mb-4 bg-dark text-white">
-                        <h5 class="fw-bold mb-4 border-bottom border-secondary pb-3">Hình ảnh đại diện</h5>
-                        <% if(section.data.bgImage) { %>
-                            <div class="position-relative mb-3 rounded overflow-hidden shadow-lg">
-                                <img src="<%= section.data.bgImage %>" class="w-100" style="max-height: 250px; object-fit: cover;">
-                            </div>
-                        <% } %>
-                        <div class="mb-2">
-                            <label class="form-label small fw-bold">Tải ảnh mới</label>
-                            <input type="file" name="bgImage" class="form-control form-control-sm bg-secondary text-white border-0">
-                        </div>
-                        <p class="text-secondary small mt-2">Định dạng hỗ trợ: JPG, PNG, WEBP. Dung lượng tối đa: 2MB.</p>
                     </div>
 
-                    <div class="wp-card">
-                        <h5 class="fw-bold mb-3">Hiển thị</h5>
-                        <div class="form-check form-switch mb-3">
-                            <input class="form-check-input" type="checkbox" id="activeToggle" checked>
-                            <label class="form-check-label fw-bold" for="activeToggle">Kích hoạt khối này</label>
+                    <div class="col-lg-4">
+                        <div class="wp-card mb-4 bg-dark text-white shadow-lg">
+                            <h5 class="fw-bold mb-4 border-bottom border-secondary pb-3">Hình ảnh</h5>
+                            <div class="preview-box mb-3 overflow-hidden p-0 border-0 shadow-sm" style="min-height: 150px; background: #2c3338;">
+                                <% if(section.data.bgImage) { %>
+                                    <img src="<%= section.data.bgImage %>" id="imgPreview" class="w-100 h-100" style="object-fit: cover;">
+                                <% } else { %>
+                                    <div class="py-5 text-secondary"><i class="fas fa-image fa-3x"></i></div>
+                                <% } %>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label text-white-50">Tải lên ảnh mới</label>
+                                <input type="file" name="bgImage" class="form-control form-control-sm bg-secondary text-white border-0" onchange="previewImage(this)">
+                            </div>
                         </div>
-                        <hr>
-                        <p class="text-muted small"><i class="fas fa-info-circle me-1"></i> Khối này sẽ xuất hiện trên trang chủ ngay sau khi bạn nhấn Lưu thay đổi.</p>
+
+                        <div class="wp-card">
+                            <h5 class="fw-bold mb-3">Trạng thái</h5>
+                            <div class="form-check form-switch p-0 d-flex justify-content-between align-items-center">
+                                <label class="fw-bold small text-muted" for="isActive">KÍCH HOẠT KHỐI</label>
+                                <input class="form-check-input ms-0" type="checkbox" name="isActive" id="isActive" style="width: 3em; height: 1.5em;" <%= section.isActive ? 'checked' : '' %>>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
-</div>
+
+    <script>
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('imgPreview').src = e.target.result;
+                    document.getElementById('imgPreview').style.display = 'block';
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
+</body>
