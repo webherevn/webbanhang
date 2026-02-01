@@ -145,21 +145,41 @@ exports.postEditSection = async (req, res) => {
     }
 };
 
-// [MỚI] 5. Cập nhật thứ tự qua AJAX (Dành cho SortableJS)
+// [MỚI] 5. Cập nhật thứ tự qua AJAX (Chuẩn SortableJS)
 exports.updateSectionOrder = async (req, res) => {
     try {
-        const { orders } = req.body; // Dạng: [{id: '...', newOrder: 0}, ...]
-        const homepage = await Homepage.findOne();
+        // Lấy mảng ID đã được sắp xếp từ Frontend gửi về
+        const { order } = req.body; 
+        
+        if (!order || !Array.isArray(order)) {
+            return res.status(400).json({ success: false, message: 'Dữ liệu không hợp lệ' });
+        }
 
-        orders.forEach(item => {
-            const section = homepage.sections.id(item.id);
-            if (section) section.order = item.newOrder;
+        const homepage = await Homepage.findOne();
+        if (!homepage) return res.status(404).json({ success: false, message: 'Không tìm thấy trang chủ' });
+
+        // Tạo một mảng mới dựa trên thứ tự ID gửi về
+        const newSectionsOrder = [];
+        
+        order.forEach(id => {
+            const section = homepage.sections.id(id);
+            if (section) {
+                newSectionsOrder.push(section);
+            }
         });
 
+        // Thay thế mảng cũ bằng mảng đã sắp xếp mới
+        homepage.sections = newSectionsOrder;
+
         await homepage.save();
-        res.json({ success: true, message: 'Đã cập nhật thứ tự thành công!' });
+        
+        res.json({ 
+            success: true, 
+            message: 'Đã lưu thứ tự hiển thị mới!' 
+        });
     } catch (err) {
-        res.status(500).json({ success: false, message: 'Lỗi cập nhật thứ tự' });
+        console.error("🔥 Lỗi Update Order:", err);
+        res.status(500).json({ success: false, message: 'Lỗi máy chủ khi lưu thứ tự' });
     }
 };
 
