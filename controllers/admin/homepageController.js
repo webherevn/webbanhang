@@ -146,22 +146,39 @@ exports.postEditSection = async (req, res) => {
 };
 
 // [MỚI] 5. Cập nhật thứ tự qua AJAX (Chuẩn SortableJS)
-exports.updateSectionOrder = async (req, res) => {
+    exports.updateSectionOrder = async (req, res) => {
     try {
-        const { order } = req.body; // Mảng ID: ["id1", "id2"...]
-        const homepage = await Homepage.findOne();
+        const { order } = req.body; // Mảng ID gửi từ Frontend
         
-        // Sắp xếp lại mảng sections dựa trên thứ tự ID nhận được
+        if (!order || !Array.isArray(order)) {
+            return res.status(400).json({ success: false, message: 'Dữ liệu không hợp lệ' });
+        }
+
+        // Tìm tài liệu Homepage duy nhất
+        const homepage = await Homepage.findOne();
+        if (!homepage) return res.status(404).json({ success: false, message: 'Không tìm thấy dữ liệu' });
+
+        // Tạo mảng mới theo thứ tự ID nhận được
         const reorderedSections = order.map(id => {
             return homepage.sections.id(id);
         }).filter(section => section !== null);
 
+        // PHƯƠNG PHÁP LƯU TRIỆT ĐỂ:
+        // 1. Gán mảng mới
         homepage.sections = reorderedSections;
+        
+        // 2. BẮT BUỘC: Đánh dấu mảng này đã bị sửa đổi để Mongoose lưu lại
+        homepage.markModified('sections');
+
+        // 3. Lưu lại
         await homepage.save();
 
-        res.json({ success: true });
+        console.log("✅ Đã cập nhật thứ tự mới vào Database");
+        res.json({ success: true, message: 'Đã lưu thứ tự thành công!' });
+
     } catch (err) {
-        res.status(500).json({ success: false });
+        console.error("🔥 Lỗi Update Order:", err);
+        res.status(500).json({ success: false, message: 'Lỗi server: ' + err.message });
     }
 };
 // 6. Xóa khối
